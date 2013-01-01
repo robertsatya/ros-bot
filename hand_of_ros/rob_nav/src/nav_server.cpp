@@ -700,7 +700,7 @@ public:
 		//Coordinate in mm
 
 		int j=0;
-		double lim_del = 0,vel_turn = 25;
+		double lim_del = 0.05,vel_turn = 25;
 		
 		for(; !((angle_diff_final<(angle_diff_est+lim_del)) && ((angle_diff_final) > (angle_diff_est-lim_del))); j++)
 		{
