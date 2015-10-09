@@ -84,11 +84,13 @@ while(i<2)
 	{
 		if(req.turn==1)
 		{
+			i++;		
 			curr_cmd = 10;// left
 		}
 		else
 		if(req.turn==2)
 		{
+			i++;
 			curr_cmd = 11; // right
 		}
 		else
