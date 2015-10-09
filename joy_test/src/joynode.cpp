@@ -94,12 +94,12 @@ void TeleopTurtle::joyCallback(const sensor_msgs::Joy::ConstPtr& joy)
 	}
 	if(ax[1]>0)
 	{
-		srv.request.vel = 1;
+		srv.request.vel = ax[1];
 	}
 	else
 	if(ax[1]<0)
 	{
-		srv.request.vel = -1;
+		srv.request.vel = -ax[1];
 	}
 	else
 	{
