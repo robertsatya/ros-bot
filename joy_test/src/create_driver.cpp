@@ -124,6 +124,7 @@ while(i<2)
 	char beep[7];
 	char h=65,l=65;
 	long int vel = 0;
+	int max_vel = 10000;
 	switch(curr_cmd) {
 		case 1:
 			cout << "Power on\n";
@@ -152,7 +153,7 @@ while(i<2)
 			flag = 1;	
 			break;
 		case 8:
-			vel = (long int)(req.vel*32767);
+			vel = (long int)(req.vel*max_vel);
 			cout << "Moving forward at " << vel << " mm/s\n";
 			l = (vel&0x00ff);
 			h = ((vel>>8)&0x00ff);
@@ -163,7 +164,7 @@ while(i<2)
 			byte[4] = l;
 			break;
 		case 9:
-			vel = (long int)(-req.vel*32767);
+			vel = (long int)(-req.vel*max_vel);
 			l = (vel&0x00ff);
 			h = ((vel>>8)&0x00ff);
 			cout << "Moving backward at " << vel << " mm/s\n";
