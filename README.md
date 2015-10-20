@@ -1,5 +1,6 @@
 ros-bot: An autonomous robot based on ROS
 =========================================
+---
 
 Contributors
 ------------
