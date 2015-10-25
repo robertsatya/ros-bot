@@ -4,7 +4,12 @@ project(kuchbhi_assignment_4)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED)
+find_package(catkin REQUIRED COMPONENTS
+  roscpp
+  rospy
+  std_msgs
+  message_generation
+)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -47,11 +52,10 @@ find_package(catkin REQUIRED)
 # )
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
+add_service_files(
+   FILES
+   modeselector.srv
+ )
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -61,10 +65,10 @@ find_package(catkin REQUIRED)
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs  # Or other packages containing msgs
-# )
+ generate_messages(
+   DEPENDENCIES
+   std_msgs
+ )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -98,7 +102,7 @@ find_package(catkin REQUIRED)
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES kuchbhi_assignment_4
-#  CATKIN_DEPENDS other_catkin_pkg
+   CATKIN_DEPENDS roscpp rospy std_msgs message_runtime
 #  DEPENDS system_lib
 )
 
@@ -109,6 +113,9 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 # include_directories(include)
+include_directories(
+  ${catkin_INCLUDE_DIRS}
+)
 
 ## Declare a C++ library
 # add_library(kuchbhi_assignment_4
@@ -121,7 +128,14 @@ catkin_package(
 # add_dependencies(kuchbhi_assignment_4 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
-# add_executable(kuchbhi_assignment_4_node src/kuchbhi_assignment_4_node.cpp)
+
+add_executable(modeselector_server src/modeselectorservice.cpp)
+target_link_libraries(modeselector_server ${catkin_LIBRARIES})
+add_dependencies(modeselector_server kuchbhi_assignment_4_gencpp)
+
+add_executable(motion_mode_keyboard src/modeselectornode.cpp)
+target_link_libraries(motion_mode_keyboard ${catkin_LIBRARIES})
+add_dependencies(motion_mode_keyboard kuchbhi_assignment_4_gencpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
