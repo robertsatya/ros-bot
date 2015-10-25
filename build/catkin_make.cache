@@ -1,2 +1,0 @@
-
--DCATKIN_DEVEL_PREFIX=/home/ubuntu/ros_wksp/devel -DCMAKE_INSTALL_PREFIX=/home/ubuntu/ros_wksp/install -G Unix Makefiles
