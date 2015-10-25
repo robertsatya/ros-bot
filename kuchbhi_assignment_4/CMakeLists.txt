@@ -54,7 +54,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate services in the 'srv' folder
 add_service_files(
    FILES
-   modeselector.srv
+   motion_node.srv
  )
 
 ## Generate actions in the 'action' folder
@@ -129,9 +129,9 @@ include_directories(
 
 ## Declare a C++ executable
 
-add_executable(modeselector_server src/modeselectorservice.cpp)
-target_link_libraries(modeselector_server ${catkin_LIBRARIES})
-add_dependencies(modeselector_server kuchbhi_assignment_4_gencpp)
+add_executable(motion_node src/motion_node_service.cpp)
+target_link_libraries(motion_node ${catkin_LIBRARIES})
+add_dependencies(motion_node kuchbhi_assignment_4_gencpp)
 
 add_executable(motion_mode_keyboard src/modeselectornode.cpp)
 target_link_libraries(motion_mode_keyboard ${catkin_LIBRARIES})
