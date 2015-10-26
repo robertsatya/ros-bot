@@ -9,6 +9,9 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   message_generation
+  cv_bridge
+  sensor_msgs
+  image_transport
 )
 
 ## System dependencies are found with CMake's conventions
@@ -102,7 +105,7 @@ add_service_files(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES kuchbhi_assignment_4
-   CATKIN_DEPENDS roscpp rospy std_msgs message_runtime
+   CATKIN_DEPENDS roscpp rospy std_msgs message_runtime cv_bridge sensor_msgs image_transport
 #  DEPENDS system_lib
 )
 
@@ -136,6 +139,10 @@ add_dependencies(motion_node kuchbhi_assignment_4_gencpp)
 add_executable(motion_mode_keyboard src/modeselectornode.cpp)
 target_link_libraries(motion_mode_keyboard ${catkin_LIBRARIES})
 add_dependencies(motion_mode_keyboard kuchbhi_assignment_4_gencpp)
+
+add_executable(boundaryMaker src/boundaryMaker.cpp)
+target_link_libraries(boundaryMaker ${catkin_LIBRARIES})
+add_dependencies(boundaryMaker kuchbhi_assignment_4_gencpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
