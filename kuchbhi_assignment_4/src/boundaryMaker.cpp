@@ -13,6 +13,7 @@ using namespace cv;
 using namespace std;
 
 void thresh_callback(int, void* );
+void gaussian_callback(int, void* );
 
 static const std::string SOURCE_WINDOW = "Source Window";
 static const std::string BOUNDS_WINDOW = "Boundary Window";
@@ -20,6 +21,7 @@ Mat src; Mat src_gray;
 int thresh = 100;
 int max_thresh = 255;
 RNG rng(12345);
+static int kernel_size;
 
 class BoundaryMaker
 {
@@ -32,10 +34,11 @@ class BoundaryMaker
   public:
     BoundaryMaker(int color_mode_) : it_(nh_)
     {
-      image_sub_ = it_.subscribe("/camera/image_raw", 1, &BoundaryMaker::imageCb, this);
-      image_pub_ = it_.advertise("/image_converter/output_video", 1);
+      image_sub_ = it_.subscribe("/image_converter/output_video", 1, &BoundaryMaker::imageCb, this);
+      //image_pub_ = it_.advertise("/image_converter/output_video", 1);
       this->color_mode_ = color_mode_;
       cv::namedWindow(SOURCE_WINDOW, WINDOW_AUTOSIZE);
+      kernel_size = 51;
     }
 
     ~BoundaryMaker()
@@ -48,7 +51,7 @@ class BoundaryMaker
       cv_bridge::CvImagePtr cv_ptr;
       try
       {
-        cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+        cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::MONO8);
       }
       catch (cv_bridge::Exception& e)
       {
@@ -56,9 +59,9 @@ class BoundaryMaker
         return;
       }
 
-      src = cv_ptr->image;
-      cvtColor( src, src_gray, CV_BGR2GRAY );
-      GaussianBlur( src_gray, src_gray, Size(51,51), 0, 0 );
+      src_gray = cv_ptr->image;
+      //createTrackbar( " Kernel Size : ", BOUNDS_WINDOW, &kernel_size, msg->height, gaussian_callback);
+      //GaussianBlur( src_gray, src_gray, Size(kernel_size,kernel_size), 0, 0 );
 
       createTrackbar( " Threshold:", BOUNDS_WINDOW, &thresh, max_thresh, thresh_callback );
       thresh_callback(0, 0);
@@ -74,6 +77,13 @@ int main(int argc, char** argv)
   BoundaryMaker ic1(0);
   ros::spin();
   return 0;
+}
+
+void gaussian_callback(int, void* )
+{
+  if (kernel_size%2 == 0)
+    kernel_size+=1;
+  GaussianBlur( src_gray, src_gray, Size(kernel_size,kernel_size), 0, 0 );
 }
 
 void thresh_callback(int, void* )
@@ -92,9 +102,9 @@ void thresh_callback(int, void* )
 
   for( size_t i = 0; i < contours.size(); i++ )
   {
-    approxPolyDP( Mat(contours[i]), contours_poly[i], 3, false );
-    boundRect[i] = boundingRect( Mat(contours_poly[i]) );
-    minEnclosingCircle( contours_poly[i], center[i], radius[i] );
+    //approxPolyDP( Mat(contours[i]), contours_poly[i], 3, false );
+    boundRect[i] = boundingRect( Mat(contours[i]) );
+    minEnclosingCircle( contours[i], center[i], radius[i] );
   }
 
   Mat drawing = Mat::zeros( threshold_output.size(), CV_8UC3 );
