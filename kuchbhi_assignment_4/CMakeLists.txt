@@ -140,14 +140,6 @@ add_executable(motion_mode_keyboard src/modeselectornode.cpp)
 target_link_libraries(motion_mode_keyboard ${catkin_LIBRARIES})
 add_dependencies(motion_mode_keyboard kuchbhi_assignment_4_gencpp)
 
-add_executable(image_converter src/image_converter.cpp)
-target_link_libraries(image_converter ${catkin_LIBRARIES})
-add_dependencies(image_converter kuchbhi_assignment_4_gencpp)
-
-add_executable(boundaryMaker src/boundaryMaker.cpp)
-target_link_libraries(boundaryMaker ${catkin_LIBRARIES})
-add_dependencies(boundaryMaker kuchbhi_assignment_4_gencpp)
-
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 # add_dependencies(kuchbhi_assignment_4_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

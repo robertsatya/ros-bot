@@ -12,8 +12,8 @@ int main(int argc, char **argv){
 	kuchbhi_assignment_4::motion_node srv;
 
 	while(flag != 1) {
-		ROS_INFO("Please enter the mode to be selected:\n");
-		ROS_INFO("\n 1: Farneback\n 2: MOG2\n 3: Raw Video\n 4: Exit\n");
+		ROS_INFO("Please enter the mode to be selected: \n");
+		ROS_INFO("\n 1: Raw Video\n 2: Farneback\n 3: MOG2\n 4: Exit\n");
 		scanf("%ld", &srv.request.mode);
 
 
