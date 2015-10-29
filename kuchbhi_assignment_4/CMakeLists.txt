@@ -144,7 +144,6 @@ add_executable(image_converter src/image_converter.cpp)
 target_link_libraries(image_converter ${catkin_LIBRARIES})
 add_dependencies(image_converter kuchbhi_assignment_4_gencpp)
 
-
 add_executable(boundaryMaker src/boundaryMaker.cpp)
 target_link_libraries(boundaryMaker ${catkin_LIBRARIES})
 add_dependencies(boundaryMaker kuchbhi_assignment_4_gencpp)

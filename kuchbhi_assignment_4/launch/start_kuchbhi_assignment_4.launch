@@ -1,1 +1,17 @@
-<!-- -->
+<launch>
+  <!-- Start the GSCAM node -->
+<arg name="cam_name" value="creative_cam" />
+
+  <env name="GSCAM_CONFIG" value="v4l2src device=/dev/video1 ! video/x-raw-yuv,framerate=30/1,width=640,height=480 ! ffmpegcolorspace " />
+  <node pkg="gscam" type="gscam" name="$(arg cam_name)">
+    <param name="camera_name" value="$(arg cam_name)" />
+    <param name="camera_info_url" value="package://localcam/calibrations/${NAME}.yaml" />
+  </node>
+
+  <node pkg="kuchbhi_assignment_4" type="motion_node" name="motion_node" output="screen">
+  </node>
+
+   <node pkg="kuchbhi_assignment_4" type="motion_mode_keyboard" name="motion_mode_keyboard" output="screen">
+  </node>
+
+</launch>

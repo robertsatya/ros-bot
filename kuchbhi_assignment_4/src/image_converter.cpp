@@ -71,15 +71,15 @@ public:
     }
 
     next_ = cv_ptr->image;
+    src = next_;
     if(color_mode_)
       cv::cvtColor(next_, next_, CV_RGB2GRAY);
-
 
     bg(next_, bgimage, -1);
     cv::imshow(MOG2_WINDOW, bgimage);
     cv::waitKey(30);
 
-    medianBlur(bgimage, bgimage, 3);
+    medianBlur(bgimage, bgimage, 5);
     cv::imshow("MEdianBlur", bgimage);
 
     int erosion_type = MORPH_RECT;
@@ -160,15 +160,38 @@ void thresh_callback(int, void* )
   for( size_t i = 0; i < contours.size(); i++ )
   {
     approxPolyDP( Mat(contours[i]), contours_poly[i], 7, false );
+    minEnclosingCircle( contours_poly[i], center[i], radius[i] );
+  }
+
+  // Point diff;
+  // for (int i = 0; i < center.size(); ++i)
+  // {
+  //   for (int j = 0; j < center.size(); ++j)
+  //   {
+  //     diff = center[i] - center[j];
+  //     if(i != j && i > j && cv::sqrt(diff.x*diff.x + diff.y*diff.y) < 50)
+  //     {
+  //       contours_poly[i].insert(contours_poly[i].end(), contours_poly[j].begin(), contours_poly[j].end());
+  //       contours_poly[j].clear();
+  //     }
+  //   }
+  // }
+
+  for( size_t i = 0; i < contours.size(); i++ )
+  {
+    approxPolyDP( Mat(contours[i]), contours_poly[i], 7, false );
+    if(contourArea(contours_poly[i]) < 3600)
+      continue;
     boundRect[i] = boundingRect( Mat(contours_poly[i]) );
     minEnclosingCircle( contours_poly[i], center[i], radius[i] );
   }
 
   Mat drawing = Mat::zeros( threshold_output.size(), CV_8UC3 );
+  src.copyTo(drawing);
   for( size_t i = 0; i< contours_poly.size(); i++ )
   {
     Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
-    drawContours( drawing, contours_poly, (int)i, color, 1, 8, vector<Vec4i>(), 0, Point() );
+    //drawContours( drawing, contours_poly, (int)i, color, 1, 8, vector<Vec4i>(), 0, Point() );
     rectangle( drawing, boundRect[i].tl(), boundRect[i].br(), color, 2, 8, 0 );
     //circle( drawing, center[i], (int)radius[i], color, 2, 8, 0 );
   }
