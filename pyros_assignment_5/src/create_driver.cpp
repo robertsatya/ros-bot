@@ -107,7 +107,7 @@ bool control_callback(pyros_assignment_5::create_control_service::Request  &req,
 			beep[6] = 3;
 			flag = 2;
 			break;
-		case 2:
+		case 7:
 			cout << "Reset iCreate2\n";
 			cmd[0] = 7;
 			flag = 1;
