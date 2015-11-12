@@ -60,7 +60,7 @@ int configure_port(int fd)
 	cfsetospeed(&port_settings, B115200);
 
 	port_settings.c_cflag &= ~PARENB;		// set no parity
-	port_settings.c_cflag &= ~CSTOPB;		// set parity bits to 1
+	port_settings.c_cflag &= ~CSTOPB;		// set stop bits to 1
 	port_settings.c_cflag &= ~CRTSCTS;		// disable hardware flow control
 	port_settings.c_cflag &= ~CSIZE;		// set databits to 8
 	port_settings.c_cflag |= CS8;
@@ -83,38 +83,83 @@ bool control_callback(pyros_assignment_5::create_control_service::Request  &req,
 	}
 	int flag = 0;
 	size_t space = 1;
-	unsigned char *byte = (unsigned char*)malloc(space);
-	unsigned char byter[5];
+	char byte[5];
+	char cmd[1];
+	char beep[7];
 	switch(curr_cmd) {
 		case 1:
 			cout << "Power on\n";
-			*byte = {128};
+			cmd[0] = 128;
+			flag = 1;
 			break;
 		case 2:
 			cout << "Safe mode\n";
-			*byte = {131};
-			break;
-		case 8:
-			cout << "Moving forward at 500 mm/s\n";
-			byte = (unsigned char*)realloc(byte,5*space);
-			//byter = {145, 1, 255, 1, 255};
+			cmd[0] = 131;
 			flag = 1;
 			break;
-		case 'b':
+		case 6:
+			cout << "Beeping\n";
+			beep[0] = 140;
+			beep[1] = 3;
+			beep[2] = 1;
+			beep[3] = 64;
+			beep[4] = 16;
+			beep[5] = 141;
+			beep[6] = 3;
+			flag = 2;
+			break;
+		case 8:
+			cout << "Moving forward at 200 mm/s\n";
+			byte[0] = 145;
+			byte[1] = 0;
+			byte[2] = 200;
+			byte[3] = 0;
+			byte[4] = 200;
+			break;
+		case 9:
+			cout << "Moving backward at 200 mm/s\n";
+			byte[0] = 145;
+			byte[1] = 255;
+			byte[2] = 56;
+			byte[3] = 255;
+			byte[4] = 56;
+			break;
+		case 10:
+			cout << "Rotating left\n";
+			byte[0] = 145;
+			byte[1] = 0;
+			byte[2] = 150;
+			byte[3] = 255;
+			byte[4] = 106;
+			break;
+		case 11:
+			cout << "Rotating right\n";
+			byte[0] = 145;
+			byte[1] = 255;
+			byte[2] = 106;
+			byte[3] = 0;
+			byte[4] = 150;
+			break;
+		case 0:
 			cout << "Brake\n";
-			//unsigned char byte[] = {145, 0, 0, 0, 0};
+			byte[0] = 145;
+			byte[1] = 0;
+			byte[2] = 0;
+			byte[3] = 0;
+			byte[4] = 0;
 			break;
 		default:
 			cout << "I dunno what that is\n";
-			//unsigned char byte[] = {145, 0, 0, 0, 0};
+			//char byte[] = {145, 0, 0, 0, 0};
 			break;
 	}
-	// //unsigned char byte[] = {128, 131, 145, 1, 255, 1, 255};
-	// if (flag == 1) {
-	// 	write(fd, byte, sizeof(byter));
-	// } else {
+	if (flag == 1) {
+		write(fd, cmd, sizeof(cmd));
+	} else if (flag == 2) {
+		write(fd, beep, sizeof(beep));
+	} else {
 		write(fd, byte, sizeof(byte));
-	// }
+	}
 
 	return true;
 }
