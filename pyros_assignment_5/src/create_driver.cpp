@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
 int open_port(void)
 {
 	int fd;
-	fd = open("/dev/ttyUSB0", O_RDWR | O_NOCTTY | O_NDELAY);
+	fd = open("/dev/ttyUSB0", O_RDWR);
 
 	if(fd == -1) {
 		printf("open_port: Unable to open /dev/ttyUSB0. \n");
@@ -82,7 +82,6 @@ bool control_callback(pyros_assignment_5::create_control_service::Request  &req,
 		return true;
 	}
 	int flag = 0;
-	size_t space = 1;
 	char byte[5];
 	char cmd[1];
 	char beep[7];
@@ -107,6 +106,11 @@ bool control_callback(pyros_assignment_5::create_control_service::Request  &req,
 			beep[5] = 141;
 			beep[6] = 3;
 			flag = 2;
+			break;
+		case 2:
+			cout << "Reset iCreate2\n";
+			cmd[0] = 7;
+			flag = 1;
 			break;
 		case 8:
 			cout << "Moving forward at 200 mm/s\n";
