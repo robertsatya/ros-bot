@@ -10,14 +10,21 @@ import sys, glob # for listing serial ports
 import rospy
 from pyros_assignment_5.srv import *
 
+send_mode = None
+
 def create_control_service_client(x):
-    rospy.wait_for_service('create_control_service')
+    global send_mode
     try:
-        send_mode = rospy.ServiceProxy('create_control_service', create_control_service)
         resp1 = send_mode(x)
         return resp1.mode
     except rospy.ServiceException, e:
-        print "Service call failed: %s"%e
+        rospy.wait_for_service('create_control_service')
+        try:
+            send_mode = rospy.ServiceProxy('create_control_service', create_control_service, True)
+            resp1 = send_mode(x)
+            return resp1.mode
+        except rospy.ServiceException, e:
+            print "Service call failed: %s"%e
 
 connection = None
 
@@ -46,6 +53,7 @@ class TetheredDriveApp(Tk):
     callbackKeyLeft = False
     callbackKeyRight = False
     callbackKeyLastDriveCommand = ''
+    send_mode
 
     def __init__(self):
         Tk.__init__(self)
@@ -68,6 +76,12 @@ class TetheredDriveApp(Tk):
 
         self.bind("<Key>", self.callbackKey)
         self.bind("<KeyRelease>", self.callbackKey)
+        rospy.wait_for_service('create_control_service')
+        global send_mode
+        try:
+            send_mode = rospy.ServiceProxy('create_control_service', create_control_service,True)
+        except rospy.ServiceException, e:
+            print "Service call failed: %s"%e
 
     # A handler for keyboard events. Feel free to add more!
     def callbackKey(self, event):
@@ -133,7 +147,10 @@ class TetheredDriveApp(Tk):
 
     def onQuit(self):
         if tkMessageBox.askyesno('Really?', 'Are you sure you want to quit?'):
+            global send_mode
+            send_mode.close()
             self.destroy()
+
 
 if __name__ == "__main__":
     app = TetheredDriveApp()
