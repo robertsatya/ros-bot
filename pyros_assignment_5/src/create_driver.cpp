@@ -80,21 +80,24 @@ bool control_callback(pyros_assignment_5::create_control_service::Request  &req,
 	{
 		return true;
 	}
+	int flag = 0;
 	size_t space = 1;
 	unsigned char *byte = (unsigned char*)malloc(space);
+	unsigned char byter[5];
 	switch(curr_cmd) {
 		case 1:
 			cout << "Power on\n";
 			*byte = {128};
 			break;
-		case 's':
+		case 2:
 			cout << "Safe mode\n";
 			*byte = {131};
 			break;
-		case 'f':
+		case 8:
 			cout << "Moving forward at 500 mm/s\n";
 			byte = (unsigned char*)realloc(byte,5*space);
-			//byte[] = {145, 1, 255, 1, 255};
+			//byter = {145, 1, 255, 1, 255};
+			flag = 1;
 			break;
 		case 'b':
 			cout << "Brake\n";
@@ -105,8 +108,12 @@ bool control_callback(pyros_assignment_5::create_control_service::Request  &req,
 			//unsigned char byte[] = {145, 0, 0, 0, 0};
 			break;
 	}
-	//unsigned char byte[] = {128, 131, 145, 1, 255, 1, 255};
-	write(fd, byte, sizeof(byte));
+	// //unsigned char byte[] = {128, 131, 145, 1, 255, 1, 255};
+	// if (flag == 1) {
+	// 	write(fd, byte, sizeof(byter));
+	// } else {
+		write(fd, byte, sizeof(byte));
+	// }
 
 	return true;
 }
