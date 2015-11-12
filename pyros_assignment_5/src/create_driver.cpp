@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <termios.h>
 #include <malloc.h>
+#include "pyros_assignment_5/create_control_service.h"
 
 #define ROTATIONCHANGE 300
 #define VELOCITYCHANGE 200
@@ -17,10 +18,10 @@ using namespace std;
 
 int open_port(void);
 int configure_port(int fd);
-bool control_callback(pyros_assignment_5::create_driver::Request  &req, pyros_assignment_5::create_driver::Response &res);
+bool control_callback(pyros_assignment_5::create_control_service::Request  &req, pyros_assignment_5::create_control_service::Response &res);
 
 
-int main(int argc, char const *argv[])
+int main(int argc, char *argv[])
 {
 	ros::init(argc, argv, "create_driver");
 	ros::NodeHandle n;
@@ -70,7 +71,7 @@ int configure_port(int fd)
 
 }
 
-bool control_callback(pyros_assignment_5::create_driver::Request  &req, pyros_assignment_5::create_driver::Response &res)
+bool control_callback(pyros_assignment_5::create_control_service::Request  &req, pyros_assignment_5::create_control_service::Response &res)
 {
 	res.mode = req.mode;
 	prev_cmd = curr_cmd;
@@ -82,7 +83,7 @@ bool control_callback(pyros_assignment_5::create_driver::Request  &req, pyros_as
 	size_t space = 1;
 	unsigned char *byte = (unsigned char*)malloc(space);
 	switch(curr_cmd) {
-		case 'p':
+		case 1:
 			cout << "Power on\n";
 			*byte = {128};
 			break;
@@ -93,7 +94,7 @@ bool control_callback(pyros_assignment_5::create_driver::Request  &req, pyros_as
 		case 'f':
 			cout << "Moving forward at 500 mm/s\n";
 			byte = (unsigned char*)realloc(byte,5*space);
-			byte[] = {145, 1, 255, 1, 255};
+			//byte[] = {145, 1, 255, 1, 255};
 			break;
 		case 'b':
 			cout << "Brake\n";
