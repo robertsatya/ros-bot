@@ -45,7 +45,7 @@ import sys, glob # for listing serial ports
 
 import sys
 import rospy
-#from beginner_tutorials.srv import *
+from pyros_assignment_5.srv import *
 
 def create_control_service_client(x):
     rospy.wait_for_service('create_control_service')
@@ -103,7 +103,7 @@ class TetheredDriveApp(Tk):
         createMenu = Menu(self.menubar, tearoff=False)
         self.menubar.add_cascade(label="Create", menu=createMenu)
 
-        createMenu.add_command(label="Connect", command=self.onConnect)
+#        createMenu.add_command(label="Connect", command=self.onConnect)
         createMenu.add_command(label="Help", command=self.onHelp)
         createMenu.add_command(label="Quit", command=self.onQuit)
 
@@ -128,18 +128,18 @@ class TetheredDriveApp(Tk):
 
     # sendCommandRaw takes a string interpreted as a byte array
     def sendCommandRaw(self, command):
-        global connection
-
-        try:
-            if connection is not None:
-                connection.write(command)
-            else:
-                tkMessageBox.showerror('Not connected!', 'Not connected to a robot!')
-                print "Not connected."
-        except serial.SerialException:
-            print "Lost connection"
-            tkMessageBox.showinfo('Uh-oh', "Lost connection to the robot!")
-            connection = None
+#        global connection
+#
+#        try:
+#            if connection is not None:
+#                connection.write(command)
+#            else:
+#                tkMessageBox.showerror('Not connected!', 'Not connected to a robot!')
+#                print "Not connected."
+#        except serial.SerialException:
+#            print "Lost connection"
+#            tkMessageBox.showinfo('Uh-oh', "Lost connection to the robot!")
+#            connection = None
 
         print ' '.join([ str(ord(c)) for c in command ])
         self.text.insert(END, ' '.join([ str(ord(c)) for c in command ]))
@@ -239,23 +239,23 @@ class TetheredDriveApp(Tk):
                 motionChange = True
 
         create_control_service_client(modeNum)
-#        if motionChange == True:
-#            velocity = 0
-#            velocity += VELOCITYCHANGE if self.callbackKeyUp is True else 0
-#            velocity -= VELOCITYCHANGE if self.callbackKeyDown is True else 0
-#            rotation = 0
-#            rotation += ROTATIONCHANGE if self.callbackKeyLeft is True else 0
-#            rotation -= ROTATIONCHANGE if self.callbackKeyRight is True else 0
-#
-#            # compute left and right wheel velocities
-#            vr = velocity + (rotation/2)
-#            vl = velocity - (rotation/2)
-#
-#            # create drive command
-#            cmd = struct.pack(">Bhh", 145, vr, vl)
-#            if cmd != self.callbackKeyLastDriveCommand:
-#                self.sendCommandRaw(cmd)
-#                self.callbackKeyLastDriveCommand = cmd
+        if motionChange == True:
+            velocity = 0
+            velocity += VELOCITYCHANGE if self.callbackKeyUp is True else 0
+            velocity -= VELOCITYCHANGE if self.callbackKeyDown is True else 0
+            rotation = 0
+            rotation += ROTATIONCHANGE if self.callbackKeyLeft is True else 0
+            rotation -= ROTATIONCHANGE if self.callbackKeyRight is True else 0
+
+            # compute left and right wheel velocities
+            vr = velocity + (rotation/2)
+            vl = velocity - (rotation/2)
+
+            # create drive command
+            cmd = struct.pack(">Bhh", 145, vr, vl)
+            if cmd != self.callbackKeyLastDriveCommand:
+                self.sendCommandRaw(cmd)
+                self.callbackKeyLastDriveCommand = cmd
 
     def onConnect(self):
         global connection
