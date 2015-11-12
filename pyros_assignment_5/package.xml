@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <name>kuchbhi_assignment_5</name>
+  <name>pyros_assignment_5</name>
   <version>1.0.0</version>
-  <description>The kuchbhi_assignment_5 package</description>
+  <description>The pyros_assignment_5 package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
@@ -19,7 +19,7 @@
   <!-- Url tags are optional, but mutiple are allowed, one per tag -->
   <!-- Optional attribute type can be: website, bugtracker, or repository -->
   <!-- Example: -->
-  <!-- <url type="website">http://wiki.ros.org/kuchbhi_assignment_5</url> -->
+  <!-- <url type="website">http://wiki.ros.org/pyros_assignment_5</url> -->
 
 
   <!-- Author tags are optional, mutiple are allowed, one per tag -->
@@ -40,9 +40,11 @@
   <!-- Use test_depend for packages you need only for testing: -->
   <!--   <test_depend>gtest</test_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>message_generation</build_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>rospy</build_depend>
   <build_depend>std_msgs</build_depend>
+  <run_depend>message_generation</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>rospy</run_depend>
   <run_depend>std_msgs</run_depend>

@@ -17,7 +17,7 @@ using namespace std;
 
 int open_port(void);
 int configure_port(int fd);
-bool control_callback(kuchbhi_assignment_5::create_driver::Request  &req, kuchbhi_assignment_5::create_driver::Response &res);
+bool control_callback(pyros_assignment_5::create_driver::Request  &req, pyros_assignment_5::create_driver::Response &res);
 
 
 int main(int argc, char const *argv[])
@@ -70,7 +70,7 @@ int configure_port(int fd)
 
 }
 
-bool control_callback(kuchbhi_assignment_5::create_driver::Request  &req, kuchbhi_assignment_5::create_driver::Response &res)
+bool control_callback(pyros_assignment_5::create_driver::Request  &req, pyros_assignment_5::create_driver::Response &res)
 {
 	res.mode = req.mode;
 	prev_cmd = curr_cmd;
