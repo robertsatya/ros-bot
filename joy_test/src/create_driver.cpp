@@ -95,6 +95,10 @@ while(i<2)
 		{
 			// do nothing
 		}
+		if(req.dir==0)
+		{
+			curr_cmd =1;
+		}
 	}
 	else
 	{
@@ -103,8 +107,13 @@ while(i<2)
 			curr_cmd = 8; // front
 		}
 		else
+		if(req.dir==2)
 		{
 			curr_cmd = 9; // back;
+		}
+		else
+		{
+			curr_cmd =2;
 		}
 	}
 	int flag = 0;

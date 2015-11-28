@@ -75,6 +75,10 @@ void TeleopTurtle::joyCallback(const sensor_msgs::Joy::ConstPtr& joy)
 	{
 		srv.request.dir = 2; // Back
 	}
+	if(ax[5]==1)
+	{
+		srv.request.dir = 0;
+	}
 	if(ax[2]>0)
 	{
 		srv.request.turn = 1; // Left
