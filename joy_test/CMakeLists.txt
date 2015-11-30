@@ -9,6 +9,9 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   turtlesim
 	message_generation
+  cv_bridge
+  sensor_msgs
+  image_transport
 )
 
 ## System dependencies are found with CMake's conventions
@@ -102,7 +105,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES joy_test
-  CATKIN_DEPENDS roscpp std_msgs turtlesim
+  CATKIN_DEPENDS roscpp std_msgs turtlesim message_runtime cv_bridge sensor_msgs image_transport
 #  DEPENDS system_lib
 )
 
@@ -131,12 +134,16 @@ include_directories(
 # add_executable(joy_test_node src/joy_test_node.cpp)
 add_executable(joynode src/joynode.cpp)
 add_executable(create_driver_final src/create_driver.cpp)
+add_executable(motion_node_final src/motion_node_service.cpp)
+
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 # add_dependencies(joy_test_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(joynode joy_test_gencpp)
 add_dependencies(create_driver_final joy_test_gencpp)
+add_dependencies(motion_node_final joy_test_gencpp)
+
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(joy_test_node
@@ -147,6 +154,9 @@ target_link_libraries(joynode
    ${catkin_LIBRARIES}
 )
 target_link_libraries(create_driver_final
+   ${catkin_LIBRARIES}
+)
+target_link_libraries(motion_node_final
    ${catkin_LIBRARIES}
 )
 
