@@ -21,10 +21,10 @@ public:
     : it_(nh_)
   {
     // Subscrive to input video feed and publish output video feed
-    image_sub_ = it_.subscribe("/usb_cam/image_raw", 1, &imageCapture::imageCb, this);
+    image_sub_ = it_.subscribe("/webcam/image_raw", 1, &imageCapture::imageCb, this);
     image_pub_ = it_.advertise("/image_converter/output_video", 1);
 
-    //	ROS_INFO("I am here");
+    ROS_INFO("Init");
     cv::namedWindow(MOG2_WINDOW);
     //ros::spinOnce();
     //pMOG2(5, 10, true); //MOG2 approach,
@@ -50,7 +50,12 @@ public:
       return;
     }
 
+
+		cv::cvtColor(cv_ptr->image, cv_ptr->image, CV_BGR2GRAY);
+		cv::waitKey(3);
+
     // Output modified video stream
+		imshow(MOG2_WINDOW,cv_ptr->image);
     image_pub_.publish(cv_ptr->toImageMsg());
   }
 
@@ -58,7 +63,7 @@ public:
 
 int main(int argc, char **argv){
 	ros::init(argc, argv, "motion_node_final");
-	imageCapture modder();
+	imageCapture modder;
 	ros::spin();
 
 	return 0;
