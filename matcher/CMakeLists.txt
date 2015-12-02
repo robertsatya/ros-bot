@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   sensor_msgs
   std_msgs
+  OpenCV
 )
 
 ## System dependencies are found with CMake's conventions
@@ -106,7 +107,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES matcher
- CATKIN_DEPENDS cv_bridge image_transport roscpp rospy sensor_msgs std_msgs
+ CATKIN_DEPENDS cv_bridge image_transport message_runtime roscpp rospy sensor_msgs std_msgs
 #  DEPENDS system_lib
 )
 
@@ -133,6 +134,10 @@ include_directories(
 
 ## Declare a C++ executable
 # add_executable(matcher_node src/matcher_node.cpp)
+
+add_executable(matching_node src/matching_node.cpp)
+target_link_libraries(matching_node ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${OpenCV_LIBS})
+add_dependencies(matching_node matcher_gencpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above

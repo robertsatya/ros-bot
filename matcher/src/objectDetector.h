@@ -25,7 +25,7 @@ enum { NONE_FILTER = 0, CROSS_CHECK_FILTER = 1 };
 	objectDetector();
 
     // Set the Image Template
-	void setImageTemplate(IplImage *img_t);
+	void setImageTemplate(Mat img_t);
 
     // Manually specify the Image Template
     void setImageTemplate(vector<cv::KeyPoint> keypts, cv::Mat desc)
@@ -58,7 +58,7 @@ enum { NONE_FILTER = 0, CROSS_CHECK_FILTER = 1 };
         }
     }
 
-	void setImageSearch(IplImage *img_s);
+	void setImageSearch(Mat img_s);
 
     void setImageSearch(vector<cv::KeyPoint> keypts, cv::Mat desc)
     {

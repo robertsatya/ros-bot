@@ -30,7 +30,7 @@ objectDetector::objectDetector()
 }
 
 
-void objectDetector::setImageTemplate(IplImage *img_t)
+void objectDetector::setImageTemplate(Mat img_t)
 {
 	if(bSetImageTemplate) {
 		bSetImageTemplate = false;
@@ -70,7 +70,7 @@ void objectDetector::setImageTemplate(IplImage *img_t)
 
 }
 
-void objectDetector::setImageSearch(IplImage *img_s)
+void objectDetector::setImageSearch(Mat img_s)
 {
 	if (bSetImageSearch) {
 		bSetImageSearch = false;
