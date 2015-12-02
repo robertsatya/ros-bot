@@ -44,7 +44,7 @@ if __name__ == '__main__':
     while rval:
         cv2.imshow("Stream: " + resource_name, frame)
         rval, frame = cap.read()
-        key = cv2.waitKey(20)
+        key = cv2.waitKey(2)
         # print "key pressed: " + str(key)
         # exit on ESC, you may want to uncomment the print to know which key is ESC for you
         if key == 27 or key == 1048603:
