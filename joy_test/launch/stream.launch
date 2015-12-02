@@ -4,7 +4,7 @@
         <!-- node name and ros graph name -->
         <arg name="camera_name" value="webcam" />
         <!-- means video device 0, /dev/video0 -->
-        <arg name="video_stream_provider" value="http://127.0.0.1:8080/?action=stream.mjpg" />
+        <arg name="video_stream_provider" value="http://192.168.0.23:8080/?action=stream.mjpg" />
         <!-- throttling the querying of frames to -->
         <arg name="fps" value="30" />
         <!-- setting frame_id -->
