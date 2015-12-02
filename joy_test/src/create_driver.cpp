@@ -124,7 +124,7 @@ while(i<2)
 	char beep[7];
 	char h=65,l=65;
 	long int vel = 0;
-	int max_vel = 10000;
+	int max_vel = 200;
 	switch(curr_cmd) {
 		case 1:
 			cout << "Power on\n";
