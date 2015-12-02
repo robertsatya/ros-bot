@@ -132,8 +132,8 @@ include_directories(
 
 ## Declare a C++ executable
 # add_executable(joy_test_node src/joy_test_node.cpp)
-add_executable(joynode src/joynode.cpp)
-add_executable(create_driver_final src/create_driver.cpp)
+add_executable(joynode src/joynode_max.cpp)
+add_executable(create_driver_final src/create_driver_min.cpp)
 add_executable(motion_node_final src/motion_node_service.cpp)
 
 

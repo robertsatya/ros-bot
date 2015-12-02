@@ -1,5 +1,4 @@
-int8 dir
-int8 turn
-float32 vel
+int8[] stream
+int16 flag
 ---
 bool success

@@ -136,7 +136,7 @@ include_directories(
 # add_executable(matcher_node src/matcher_node.cpp)
 
 add_executable(matching_node src/matching_node.cpp)
-target_link_libraries(matching_node ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${OpenCV_LIBS})
+target_link_libraries(matching_node ${OpenCV_LIBRARIES} ${OpenCV_LIBS} ${catkin_LIBRARIES} )
 add_dependencies(matching_node matcher_gencpp)
 
 ## Add cmake target dependencies of the executable
