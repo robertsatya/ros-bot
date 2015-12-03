@@ -103,6 +103,7 @@ void imageCb(const sensor_msgs::Image::ConstPtr& msg)
 		line(src, pt[2], pt[3], randomColor(12350000), 2, 8, 0);
 		line(src, pt[3], pt[0], randomColor(12350000), 2, 8, 0);
 		srv.request.target = (int)(maxX + minX)/2;
+		cout << "Desired X: " << srv.request.target << endl;
 		srv.request.mode = 1;
 	}
 
@@ -127,6 +128,7 @@ void imageCb(const sensor_msgs::Image::ConstPtr& msg)
 		line(src, pt[2], pt[3], randomColor(50), 2, 8, 0);
 		line(src, pt[3], pt[0], randomColor(50), 2, 8, 0);
 		srv.request.target = (int)(maxX + minX)/2;
+		cout << "Desired X: " << srv.request.target << endl;
 		srv.request.mode = 2;
 	}
 
@@ -144,8 +146,8 @@ int main(int argc, char *argv[])
 	ros::NodeHandle n;
 	ros::Subscriber image_sub;
 	rmb_client = n.serviceClient<joy_test::Target>("reach_target");
-	obj = imread("/home/harsha/ros/src/matcher/src/template2.png", CV_LOAD_IMAGE_GRAYSCALE);
-	fire = imread("/home/harsha/ros/src/matcher/src/template1.png", CV_LOAD_IMAGE_GRAYSCALE);
+	obj = imread("/home/harsha/ros/src/matcher/src/template1.png", CV_LOAD_IMAGE_GRAYSCALE);
+	fire = imread("/home/harsha/ros/src/matcher/src/template2.png", CV_LOAD_IMAGE_GRAYSCALE);
 
 	image_sub = n.subscribe("/webcam/image_raw", 1, &imageCb);
 
@@ -349,7 +351,7 @@ void objectDetector::update()
 				//img_template_boundingbox[i] = bb.at<cv::Point2f>(i,0);
 			}
 
-			/*
+
 			// draw inliers
 			drawMatches( img_search, img_template_keypoints,
 						 img_template, img_search_keypoints,
@@ -371,7 +373,7 @@ void objectDetector::update()
 	#endif
 
 			imshow( winName, drawImg );
-			*/
+
 
 		}
 		else {
