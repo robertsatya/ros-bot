@@ -1,4 +1,4 @@
-int8[] stream
+uint8[] stream
 int16 flag
 ---
 bool success
