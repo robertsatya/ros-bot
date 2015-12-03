@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdio>
+#include <cstdlib>
 #include <iostream>
 
 #include <ros/ros.h>
@@ -93,15 +94,16 @@ void imageCb(const sensor_msgs::Image::ConstPtr& msg)
 		pt.push_back(detector.dst_corners[i]);
 	}
 
-	if (contourArea(pt) > 200) {
-		computeContourMaxMin(pt,minX,minY,maxX,maxY);
+	computeContourMaxMin(pt,minX,minY,maxX,maxY);
+
+	if (isContourConvex(pt) && minX > 0 && minY > 0 && maxX < 640 && maxY < 480 && abs(maxX - minX) > 50 && abs(maxY-minY) > 50) {
 		cout << "minX: " << minX << " |minY: " << minY << " |maxX: " << maxX << " |maxY: " << maxY << endl;
 		line(src, pt[0], pt[1], randomColor(12350000), 2, 8, 0);
 		line(src, pt[1], pt[2], randomColor(12350000), 2, 8, 0);
 		line(src, pt[2], pt[3], randomColor(12350000), 2, 8, 0);
 		line(src, pt[3], pt[0], randomColor(12350000), 2, 8, 0);
 		srv.request.target = (int)(maxX + minX)/2;
-		srv.request.mode += 1;
+		srv.request.mode = 1;
 	}
 
 
@@ -116,15 +118,16 @@ void imageCb(const sensor_msgs::Image::ConstPtr& msg)
 		pt.push_back(detector.dst_corners[i]);
 	}
 
-	if (contourArea(pt) > 200) {
-		computeContourMaxMin(pt,minX,minY,maxX,maxY);
+	computeContourMaxMin(pt,minX,minY,maxX,maxY);
+
+	if (isContourConvex(pt) && minX > 0 && minY > 0 && maxX < 640 && maxY < 480 && abs(maxX - minX) > 50 && abs(maxY-minY) > 50) {
 		cout << "minX: " << minX << " |minY: " << minY << " |maxX: " << maxX << " |maxY: " << maxY << endl;
 		line(src, pt[0], pt[1], randomColor(50), 2, 8, 0);
 		line(src, pt[1], pt[2], randomColor(50), 2, 8, 0);
 		line(src, pt[2], pt[3], randomColor(50), 2, 8, 0);
 		line(src, pt[3], pt[0], randomColor(50), 2, 8, 0);
 		srv.request.target = (int)(maxX + minX)/2;
-		srv.request.mode += 2;
+		srv.request.mode = 2;
 	}
 
 	imshow("Source", src);
