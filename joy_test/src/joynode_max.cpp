@@ -46,7 +46,7 @@ void TeleopTurtle::joyCallback(const sensor_msgs::Joy::ConstPtr& joy)
   joy_test::JoyIn srv;
 	char h=65,l=65;
 	long int vel = 0;
-	int max_vel = 10000;
+	int max_vel = 200;
 	vector<uint8_t> stream;
 	{
 		if(b[0]==1)
