@@ -31,7 +31,7 @@ ser.close()
 def callback(req):
 	option = req.mode
 
-	if(option == 1):
+	if(option == 3):
 		ser.open()
 		ser.flush()
 		ser.write("U")
@@ -43,7 +43,7 @@ def callback(req):
 		print "Distance is %s cm\n" % s_data
 		ser.close()
 
-	if(option == 2):
+	if(option == 1):
 		ser.open()
 		ser.flush()
 		ser.write("T")
@@ -56,7 +56,7 @@ def callback(req):
 		ser.close()
 
 					
-	if(option == 3):
+	if(option == 4):
 		ser.open()
 		ser.flush()
 		ser.write("M020\n")
@@ -64,12 +64,12 @@ def callback(req):
 		print 'Sent M020 data to LCU\n'
 
 	
-	if(option == 4):
+	if(option == 2):
 		ser.open()
 		ser.flush()
 		ser.write("G")
 		#ser.close()
-		print 'Set LCU in distance threshold mode\n'
+		print 'Set LCU in gradient threshold mode\n'
 		#sleep(.1)
 		#ser.open()
 		s_data = ser.readline()
