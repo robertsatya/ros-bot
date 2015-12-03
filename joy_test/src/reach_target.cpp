@@ -39,6 +39,8 @@ bool reach_callback(joy_test::Target::Request  &req, joy_test::Target::Response 
 	vector<uint8_t> stream;
 	if(req.mode == 1 || req.mode == 2)
 	{
+		
+		ROS_INFO("%d",diff);
 		if(diff<(-thresh))
 		{
 			cout << "Rotating left\n";
@@ -57,6 +59,25 @@ bool reach_callback(joy_test::Target::Request  &req, joy_test::Target::Response 
     		ROS_ERROR("Failed to call service joy_in");
 	    	return false;
   		}
+
+			stream.clear();	
+			stream.push_back(145);
+			stream.push_back(0);
+			stream.push_back(0);
+			stream.push_back(0);
+			stream.push_back(0);
+			srv.request.stream = stream;
+	  	if (client.call(srv))
+			{
+	  		ROS_INFO("Success: %d", srv.response.success);
+			}
+			else
+			{
+  			ROS_ERROR("Failed to call service joy_in2");
+		  	return false;
+			}
+
+
 		}
 		else if(diff>thresh)
 		{
@@ -76,6 +97,24 @@ bool reach_callback(joy_test::Target::Request  &req, joy_test::Target::Response 
     		ROS_ERROR("Failed to call service joy_in");
 	    	return false;
   		}
+
+			stream.clear();	
+			stream.push_back(145);
+			stream.push_back(0);
+			stream.push_back(0);
+			stream.push_back(0);
+			stream.push_back(0);
+			srv.request.stream = stream;
+	  	if (client.call(srv))
+			{
+	  		ROS_INFO("Success: %d", srv.response.success);
+			}
+			else
+			{
+  			ROS_ERROR("Failed to call service joy_in2");
+		  	return false;
+			}
+
 		}
 		else  
 		{
@@ -95,7 +134,7 @@ bool reach_callback(joy_test::Target::Request  &req, joy_test::Target::Response 
 			}
 			else
 			{
-  			ROS_ERROR("Failed to call service joy_in");
+  			ROS_ERROR("Failed to call service joy_in1");
 		  	return false;
 			}
 			
@@ -112,8 +151,25 @@ bool reach_callback(joy_test::Target::Request  &req, joy_test::Target::Response 
 			}
 			else
 			{
-				ROS_ERROR("Failed to call service joy_in");
+				ROS_ERROR("Failed to call service serial_service");
 				return false;
+			}
+		
+			stream.clear();	
+			stream.push_back(145);
+			stream.push_back(0);
+			stream.push_back(0);
+			stream.push_back(0);
+			stream.push_back(0);
+			srv.request.stream = stream;
+	  	if (client.call(srv))
+			{
+	  		ROS_INFO("Success: %d", srv.response.success);
+			}
+			else
+			{
+  			ROS_ERROR("Failed to call service joy_in2");
+		  	return false;
 			}
 		}
 	}
@@ -122,43 +178,38 @@ bool reach_callback(joy_test::Target::Request  &req, joy_test::Target::Response 
 		ros::NodeHandle dist_n;
 		ros::ServiceClient client_dist = dist_n.serviceClient<sensorcontroller::SerialComm>("serial_service");
 		sensorcontroller::SerialComm srv_dist;
-		srv_dist.request.mode = 2;
-
-			
-		if (client.call(srv_dist))
+		srv_dist.request.mode = 3;
+		int dist = 0;
+		if (client_dist.call(srv_dist))
 		{
-			diff = srv_dist.response.s_intdata;
-			thresh = 2;
-			ROS_INFO("Diff angle: %d", diff);
+			dist = srv_dist.response.s_intdata;
 		}
 		else
 		{
-			ROS_ERROR("Failed to call service joy_in");
+			ROS_ERROR("Failed to call service serial_service");
 			return false;
 		}
-			
-		if(diff<(-thresh))
+		while(true)
 		{
-			cout << "Rotating left\n";
-			stream.push_back(145);
-			stream.push_back(0);
-			stream.push_back(150);
-			stream.push_back(255);
-			stream.push_back(106);
-			srv.request.stream = stream;
-		  if (client.call(srv))
-  		{
-    		ROS_INFO("Success: %d", srv.response.success);
-  		}
-  		else
-  		{
-    		ROS_ERROR("Failed to call service joy_in");
-	    	return false;
-  		}
+			
+		if (client_dist.call(srv_dist))
+		{
+			diff = srv_dist.response.s_intdata - dist;
+			thresh = 10;
+			ROS_INFO("Diff: %d", diff);
 		}
-		else if(diff>thresh)
+		else
+		{
+			ROS_ERROR("Failed to call service serial_service");
+			return false;
+		}
+		
+		ROS_INFO("%d",diff);
+	
+		if(diff<thresh)
 		{
 			cout << "Rotating right\n";
+			stream.clear();
 			stream.push_back(145);
 			stream.push_back(255);
 			stream.push_back(106);
@@ -177,30 +228,108 @@ bool reach_callback(joy_test::Target::Request  &req, joy_test::Target::Response 
 		}
 		else  
 		{
-			vel = (long int)(max_vel);
-			cout << "Moving at " << vel << " mm/s\n";
-			l = (vel&0x00ff);
-			h = ((vel>>8)&0x00ff);
-			stream.push_back(145);
-			stream.push_back(h);
-			stream.push_back(l);
-			stream.push_back(h);
-			stream.push_back(l);
-			srv.request.stream = stream;
-	  	if (client.call(srv))
-			{
-	  		ROS_INFO("Success: %d", srv.response.success);
-			}
-			else
-			{
-  			ROS_ERROR("Failed to call service joy_in");
-		  	return false;
-			}
-			
+
+
 			int safe = 1;
 			ros::NodeHandle dist_n;
 		  ros::ServiceClient client_dist = dist_n.serviceClient<sensorcontroller::SerialComm>("serial_service");
 			sensorcontroller::SerialComm srv_dist;
+			
+			int turn = -1;
+
+			
+			srv_dist.request.mode = 4;
+
+			while(turn)
+			{
+				if(turn == 1)
+				{
+					cout << "Rotating left\n";
+					stream.push_back(145);
+					stream.push_back(0);
+					stream.push_back(150);
+					stream.push_back(255);
+					stream.push_back(106);
+					srv.request.stream = stream;
+				  if (client.call(srv))
+		  		{
+		    		ROS_INFO("Success: %d", srv.response.success);
+		  		}
+		  		else
+		  		{
+		    		ROS_ERROR("Failed to call service joy_in");
+			    	return false;
+		  		}
+		
+					stream.clear();	
+					stream.push_back(145);
+					stream.push_back(0);
+					stream.push_back(0);
+					stream.push_back(0);
+					stream.push_back(0);
+					srv.request.stream = stream;
+			  	if (client.call(srv))
+					{
+			  		ROS_INFO("Success: %d", srv.response.success);
+					}
+					else
+					{
+		  			ROS_ERROR("Failed to call service joy_in2");
+				  	return false;
+					}
+		
+		
+				}
+				else if(turn==-1)
+				{
+					cout << "Rotating right\n";
+					stream.push_back(145);
+					stream.push_back(255);
+					stream.push_back(106);
+					stream.push_back(0);
+					stream.push_back(150);
+					srv.request.stream = stream;
+				  if (client.call(srv))
+		  		{
+		    		ROS_INFO("Success: %d", srv.response.success);
+		  		}
+		  		else
+		  		{
+		    		ROS_ERROR("Failed to call service joy_in");
+			    	return false;
+		  		}
+		
+					stream.clear();	
+					stream.push_back(145);
+					stream.push_back(0);
+					stream.push_back(0);
+					stream.push_back(0);
+					stream.push_back(0);
+					srv.request.stream = stream;
+			  	if (client.call(srv))
+					{
+			  		ROS_INFO("Success: %d", srv.response.success);
+					}
+					else
+					{
+		  			ROS_ERROR("Failed to call service joy_in2");
+				  	return false;
+					}
+		
+				}
+
+				if (client_dist.call(srv_dist))
+				{
+					turn = srv_dist.response.s_intdata;
+					ROS_INFO("Turn: %d", turn);
+				}
+					else
+				{
+					ROS_ERROR("Failed to call service serial_service");
+					return false;
+				}
+			}
+
 			srv_dist.request.mode = 1;
 
 			if (client_dist.call(srv_dist))
@@ -210,9 +339,28 @@ bool reach_callback(joy_test::Target::Request  &req, joy_test::Target::Response 
 			}
 				else
 			{
-				ROS_ERROR("Failed to call service joy_in");
+				ROS_ERROR("Failed to call service serial_service");
 				return false;
 			}
+			
+			stream.clear();
+			stream.push_back(145);
+			stream.push_back(0);
+			stream.push_back(0);
+			stream.push_back(0);
+			stream.push_back(0);
+			srv.request.stream = stream;
+	  	if (client.call(srv))
+			{
+	  		ROS_INFO("Success: %d", srv.response.success);
+			}
+			else
+			{
+  			ROS_ERROR("Failed to call service joy_in");
+		  	return false;
+			}
+			break;
+		}
 		}		
 	}
 //  srv.request.b = atoll(argv[2]);

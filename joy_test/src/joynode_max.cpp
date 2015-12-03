@@ -79,6 +79,13 @@ void TeleopTurtle::joyCallback(const sensor_msgs::Joy::ConstPtr& joy)
 			stream.push_back(7);
 			srv.request.flag = 1;	
 		}
+		else if(b[4]==1)
+		{
+			cout << "Power down\n";
+			stream.push_back(133);
+			srv.request.flag = 1;	
+		}
+
 		else if(ax[2]>0)
 		{
 			cout << "Rotating left\n";
