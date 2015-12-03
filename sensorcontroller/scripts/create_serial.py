@@ -8,7 +8,7 @@ import os
 import sys
 from time import sleep
 
-os.system("echo BB-UART1 > /sys/devices/platform/bone_capemgr/slots")
+#os.system("echo BB-UART1 > /sys/devices/platform/bone_capemgr/slots")
 
 #UART.setup("UART1")
 
