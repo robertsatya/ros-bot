@@ -101,8 +101,8 @@ objectDetector::objectDetector()
 
 	initModule_nonfree();
 
-	detector = cv::FeatureDetector::create( "DynamicSURF" ); // [“Grid”, “Pyramid”, “Dynamic”] SIFT, SURF, FAST, GFTT, MSER and HARRIS
-	descriptorExtractor = cv::DescriptorExtractor::create( "SURF" ); // ["Opponent"] SIFT, SURF and BRIEF
+	detector = cv::FeatureDetector::create( "GridFAST" ); // [“Grid”, “Pyramid”, “Dynamic”] SIFT, SURF, FAST, GFTT, MSER and HARRIS
+	descriptorExtractor = cv::DescriptorExtractor::create( "SIFT" ); // ["Opponent"] SIFT, SURF and BRIEF
 	descriptorMatcher = cv::DescriptorMatcher::create( "FlannBased" ); // “FlannBased”, “BruteForceMatcher”, “BruteForce-L1” and “BruteForce-HammingLUT”
 	matcherFilterType = CROSS_CHECK_FILTER;
 
@@ -126,7 +126,6 @@ void objectDetector::setImageTemplate(Mat img_t)
 	{
 		printf("[OK] Found %d keypoints.\n", n);
 		bSetImageTemplate = true;
-
 
 		CvPoint dst[] = { cvPoint(0, 0),
 						cvPoint(0, img_t.rows),
