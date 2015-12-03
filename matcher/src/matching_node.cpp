@@ -130,7 +130,7 @@ void imageCb(const sensor_msgs::Image::ConstPtr& msg)
 	imshow("Source", src);
 	waitKey(3);
 
-	client.call(srv);	//exit(0);
+	rmb_client.call(srv);	//exit(0);
 
 }
 

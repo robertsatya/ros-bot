@@ -58,6 +58,7 @@ find_package(catkin REQUIRED COMPONENTS
  add_service_files(
    FILES
    JoyIn.srv
+	 Target.srv
  )
 
 ## Generate actions in the 'action' folder
@@ -135,6 +136,7 @@ include_directories(
 add_executable(joynode src/joynode_max.cpp)
 add_executable(create_driver_final src/create_driver_min.cpp)
 add_executable(motion_node_final src/motion_node_service.cpp)
+add_executable(reach_target_node src/reach_target.cpp)
 
 
 ## Add cmake target dependencies of the executable
@@ -143,6 +145,7 @@ add_executable(motion_node_final src/motion_node_service.cpp)
 add_dependencies(joynode joy_test_gencpp)
 add_dependencies(create_driver_final joy_test_gencpp)
 add_dependencies(motion_node_final joy_test_gencpp)
+add_dependencies(reach_target_node joy_test_gencpp)
 
 
 ## Specify libraries to link a library or executable target against
@@ -157,6 +160,9 @@ target_link_libraries(create_driver_final
    ${catkin_LIBRARIES}
 )
 target_link_libraries(motion_node_final
+   ${catkin_LIBRARIES}
+)
+target_link_libraries(reach_target_node 
    ${catkin_LIBRARIES}
 )
 

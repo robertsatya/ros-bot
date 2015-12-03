@@ -2,6 +2,8 @@
 #include<geometry_msgs/Twist.h>
 #include <sensor_msgs/Joy.h>
 #include <joy_test/JoyIn.h>
+#include <joy_test/Target.h>
+#include <sensorcontroller/SerialComm.h>
 
 using namespace std;
 int x_mid = 320;
@@ -9,7 +11,7 @@ int thresh = 1;
 float fwd_thresh = 1;
 
 
-void reach_callback(joy_test::Target::Request  &req, joy_test::Target::Response &res)
+bool reach_callback(joy_test::Target::Request  &req, joy_test::Target::Response &res)
 {
 
 //  	vel.linear.x = ax[1];
@@ -53,7 +55,7 @@ void reach_callback(joy_test::Target::Request  &req, joy_test::Target::Response 
   		else
   		{
     		ROS_ERROR("Failed to call service joy_in");
-	    	return;
+	    	return false;
   		}
 		}
 		else if(diff>thresh)
@@ -72,7 +74,7 @@ void reach_callback(joy_test::Target::Request  &req, joy_test::Target::Response 
   		else
   		{
     		ROS_ERROR("Failed to call service joy_in");
-	    	return;
+	    	return false;
   		}
 		}
 		else  
@@ -94,7 +96,7 @@ void reach_callback(joy_test::Target::Request  &req, joy_test::Target::Response 
 			else
 			{
   			ROS_ERROR("Failed to call service joy_in");
-		  	return;
+		  	return false;
 			}
 			
 			int safe = 1;
@@ -103,15 +105,15 @@ void reach_callback(joy_test::Target::Request  &req, joy_test::Target::Response 
 			sensorcontroller::SerialComm srv_dist;
 			srv_dist.request.mode = 1;
 
-			if (client.call(srv_dist))
+			if (client_dist.call(srv_dist))
 			{
-				safe = srv_dist.response.sint_data;
+				safe = srv_dist.response.s_intdata;
 				ROS_INFO("Safe: %d", safe);
 			}
 			else
 			{
 				ROS_ERROR("Failed to call service joy_in");
-				return;
+				return false;
 			}
 		}
 	}
@@ -125,14 +127,14 @@ void reach_callback(joy_test::Target::Request  &req, joy_test::Target::Response 
 			
 		if (client.call(srv_dist))
 		{
-			diff = srv_dist.response.sint_data;
+			diff = srv_dist.response.s_intdata;
 			thresh = 2;
 			ROS_INFO("Diff angle: %d", diff);
 		}
 		else
 		{
 			ROS_ERROR("Failed to call service joy_in");
-			return;
+			return false;
 		}
 			
 		if(diff<(-thresh))
@@ -151,7 +153,7 @@ void reach_callback(joy_test::Target::Request  &req, joy_test::Target::Response 
   		else
   		{
     		ROS_ERROR("Failed to call service joy_in");
-	    	return;
+	    	return false;
   		}
 		}
 		else if(diff>thresh)
@@ -170,7 +172,7 @@ void reach_callback(joy_test::Target::Request  &req, joy_test::Target::Response 
   		else
   		{
     		ROS_ERROR("Failed to call service joy_in");
-	    	return;
+	    	return false;
   		}
 		}
 		else  
@@ -192,7 +194,7 @@ void reach_callback(joy_test::Target::Request  &req, joy_test::Target::Response 
 			else
 			{
   			ROS_ERROR("Failed to call service joy_in");
-		  	return;
+		  	return false;
 			}
 			
 			int safe = 1;
@@ -201,21 +203,21 @@ void reach_callback(joy_test::Target::Request  &req, joy_test::Target::Response 
 			sensorcontroller::SerialComm srv_dist;
 			srv_dist.request.mode = 1;
 
-			if (client.call(srv))
+			if (client_dist.call(srv_dist))
 			{
-				safe = srv.response.sint_data;
+				safe = srv_dist.response.s_intdata;
 				ROS_INFO("Safe: %d", safe);
 			}
 				else
 			{
 				ROS_ERROR("Failed to call service joy_in");
-				return;
+				return false;
 			}
 		}		
 	}
 //  srv.request.b = atoll(argv[2]);
 //sleep(1);
-
+	return true;
 }
 
 
