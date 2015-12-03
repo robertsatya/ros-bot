@@ -47,7 +47,7 @@ void TeleopTurtle::joyCallback(const sensor_msgs::Joy::ConstPtr& joy)
 	char h=65,l=65;
 	long int vel = 0;
 	int max_vel = 10000;
-	vector<char> stream;
+	vector<uint8_t> stream;
 	{
 		if(b[0]==1)
 		{
@@ -110,6 +110,7 @@ void TeleopTurtle::joyCallback(const sensor_msgs::Joy::ConstPtr& joy)
 			stream.push_back(l);
 		}
 	}
+	srv.request.stream = stream;
 //  srv.request.b = atoll(argv[2]);
   if (client.call(srv))
   {
@@ -123,6 +124,7 @@ void TeleopTurtle::joyCallback(const sensor_msgs::Joy::ConstPtr& joy)
  
 //sleep(1);
 	ROS_INFO("%f %f %f %f %f %f %ld",ax[0],ax[1],ax[2],ax[3],ax[4],ax[5],ax.size());
+	ROS_INFO("%ld %ld %ld %ld  %ld",b[0],b[1],b[2],b[3],b.size());
 
 }
 

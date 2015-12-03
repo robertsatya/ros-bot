@@ -79,18 +79,19 @@ bool control_callback(joy_test::JoyIn::Request  &req, joy_test::JoyIn::Response 
 
 
 	int flag = req.flag;
-	
+//	ROS_INFO("%ld",req.stream.size());
+	vector<uint8_t> v = req.stream;
 	if (flag == 1) {
 		char cmd[1];
-		copy(req.stream.begin(),req.stream.end(),cmd);
+		copy(v.begin(),v.end(),cmd);
 		write(fd, cmd, sizeof(cmd));
 	} else if (flag == 2) {
 		char beep[7];
-		copy(req.stream.begin(),req.stream.end(),beep);
+		copy(v.begin(),v.end(),beep);
 		write(fd, beep, sizeof(beep));
 	} else {
 		char byte[5];
-		copy(req.stream.begin(),req.stream.end(),byte);
+		copy(v.begin(),v.end(),byte);
 		write(fd, byte, sizeof(byte));
 	}
 	return true;
