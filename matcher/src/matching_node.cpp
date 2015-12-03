@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
 	ros::NodeHandle n;
 	ros::Subscriber image_sub;
 	hcsr_client = n.serviceClient<sensorcontroller::SerialComm>("serial_service");
-	obj = imread("/home/harsha/ros/src/matcher/src/template.png", CV_LOAD_IMAGE_GRAYSCALE);
+	obj = imread("/home/harsha/ros/src/matcher/src/template2.png", CV_LOAD_IMAGE_GRAYSCALE);
 	fire = imread("/home/harsha/ros/src/matcher/src/template1.png", CV_LOAD_IMAGE_GRAYSCALE);
 
 	image_sub = n.subscribe("/webcam/image_raw", 1, &imageCb);
