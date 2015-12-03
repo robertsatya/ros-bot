@@ -8,7 +8,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 #include <sensor_msgs/Image.h>
-#include "sensorcontroller/SerialComm.h"
+#include "joy_test/Target.h"
 
 
 
@@ -28,7 +28,8 @@ using namespace cv;
 Mat src, obj, cur, fire;
 RNG rng(0xFFFFFFFF);
 objectDetector detector;
-ros::ServiceClient hcsr_client, rmb_client;
+ros::ServiceClient rmb_client;
+joy_test::Target srv;
 
 static Scalar randomColor(int icolor)
 {
@@ -66,6 +67,8 @@ void imageCb(const sensor_msgs::Image::ConstPtr& msg)
 	vector<Point> pt;
 	int minX, minY, maxX, maxY;
 	cv_bridge::CvImagePtr cv_ptr;
+	srv.request.mode = 0;
+	srv.request.target = 0;
 	// cout << "Before try\n";
 	try
 	{
@@ -97,6 +100,8 @@ void imageCb(const sensor_msgs::Image::ConstPtr& msg)
 		line(src, pt[1], pt[2], randomColor(12350000), 2, 8, 0);
 		line(src, pt[2], pt[3], randomColor(12350000), 2, 8, 0);
 		line(src, pt[3], pt[0], randomColor(12350000), 2, 8, 0);
+		srv.request.target = (int)(maxX + minX)/2;
+		srv.request.mode += 1;
 	}
 
 
@@ -118,13 +123,14 @@ void imageCb(const sensor_msgs::Image::ConstPtr& msg)
 		line(src, pt[1], pt[2], randomColor(50), 2, 8, 0);
 		line(src, pt[2], pt[3], randomColor(50), 2, 8, 0);
 		line(src, pt[3], pt[0], randomColor(50), 2, 8, 0);
+		srv.request.target = (int)(maxX + minX)/2;
+		srv.request.mode += 2;
 	}
-
-
 
 	imshow("Source", src);
 	waitKey(3);
-	//exit(0);
+
+	client.call(srv);	//exit(0);
 
 }
 
@@ -134,7 +140,7 @@ int main(int argc, char *argv[])
 	ros::init(argc, argv, "matching_node");
 	ros::NodeHandle n;
 	ros::Subscriber image_sub;
-	hcsr_client = n.serviceClient<sensorcontroller::SerialComm>("serial_service");
+	rmb_client = n.serviceClient<joy_test::Target>("reach_target");
 	obj = imread("/home/harsha/ros/src/matcher/src/template2.png", CV_LOAD_IMAGE_GRAYSCALE);
 	fire = imread("/home/harsha/ros/src/matcher/src/template1.png", CV_LOAD_IMAGE_GRAYSCALE);
 
