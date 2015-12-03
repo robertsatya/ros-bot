@@ -108,39 +108,39 @@ enum { NONE_FILTER = 0, CROSS_CHECK_FILTER = 1 };
 					 double ransacReprojThreshold);
 
 
-	vector<cv::Point2f>								img_search_points_inliers[2], img_search_points_outliers[2];
-	vector<cv::Point2f> 							img_template_boundingbox;
-	cv::Point2f										src_corners[4], dst_corners[4], prev_dst_corners[4];
+	vector<cv::Point2f> img_search_points_inliers[2], img_search_points_outliers[2];
+	vector<cv::Point2f> img_template_boundingbox;
+	cv::Point2f src_corners[4], dst_corners[4], prev_dst_corners[4];
 
 private:
 
-	int												matcherFilterType;
+	int matcherFilterType;
 
-	bool											bSetImageTemplate, bSetImageSearch;
+	bool bSetImageTemplate, bSetImageSearch;
 
-	cv::Ptr<cv::FeatureDetector>					detector;
-    cv::Ptr<cv::DescriptorExtractor>				descriptorExtractor;
-    cv::Ptr<cv::DescriptorMatcher>					descriptorMatcher;
+	cv::Ptr<cv::FeatureDetector> detector;
+    cv::Ptr<cv::DescriptorExtractor> descriptorExtractor;
+    cv::Ptr<cv::DescriptorMatcher> descriptorMatcher;
 
-	cv::Mat											img_template, img_search;
+	cv::Mat img_template, img_search;
 
-	bool											bInitialized, bTracking;
-	cv::Mat											prev_img_search;
+	bool bInitialized, bTracking;
+	cv::Mat prev_img_search;
 
-	vector<cv::KeyPoint>							img_search_keypoints, img_template_keypoints;
-	vector<cv::KeyPoint>							img_search_keypoints_inliers[2], img_search_keypoints_outliers[2];
+	vector<cv::KeyPoint> img_search_keypoints, img_template_keypoints;
+	vector<cv::KeyPoint> img_search_keypoints_inliers[2], img_search_keypoints_outliers[2];
 
-	cv::Mat											img_search_descriptors, img_template_descriptors;
+	cv::Mat img_search_descriptors, img_template_descriptors;
 
-	vector<cv::DMatch>								filteredMatches;
+	vector<cv::DMatch> filteredMatches;
 
-	float											ransacReprojThreshold;
+	float ransacReprojThreshold;
 
 
-    cv::Mat											H12;
+    cv::Mat H12;
 
-	bool											bShowImage;
-    cv::Mat											drawImg;
-	string											winName;
+	bool bShowImage;
+    cv::Mat drawImg;
+	string winName;
 
 };

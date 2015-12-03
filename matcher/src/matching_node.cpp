@@ -8,6 +8,8 @@
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 #include <sensor_msgs/Image.h>
+#include "sensorcontroller/SerialComm.h"
+
 
 
 #include "objectDetector.h"
@@ -23,20 +25,46 @@ using namespace std;
 using namespace cv;
 
 
-Mat src, obj, cur;
+Mat src, obj, cur, fire;
 RNG rng(0xFFFFFFFF);
 objectDetector detector;
+ros::ServiceClient hcsr_client, rmb_client;
 
-static Scalar randomColor(RNG& rng)
+static Scalar randomColor(int icolor)
 {
-    int icolor = 50;//(unsigned)rng;
+    //int icolor = 50;//(unsigned)rng;
     return Scalar(icolor&255, (icolor>>8)&255, (icolor>>16)&255);
+}
+
+void computeContourMaxMin(vector<Point> &contour, int& minX, int& minY, int& maxX, int& maxY)
+{
+//		cout << "Size:" << contour.size() << endl;
+	for(int i=0; i< contour.size(); i++)
+	{
+		if(i==0)
+		{
+			minX = maxX = contour[i].x;
+			minY = maxY = contour[i].y;
+		}
+		else
+		{
+			if(contour[i].x > maxX)
+				maxX = contour[i].x;
+			if(contour[i].y > maxY)
+				maxY = contour[i].y;
+			if(contour[i].x < minX)
+				minX = contour[i].x;
+			if(contour[i].y < minY)
+				minY = contour[i].y;
+		}
+	}
 }
 
 void imageCb(const sensor_msgs::Image::ConstPtr& msg)
 {
-	Point pt1, pt2, pt3, pt4;
-
+	// Point2f pt[4]; //1, pt2, pt3, pt4;
+	vector<Point> pt;
+	int minX, minY, maxX, maxY;
 	cv_bridge::CvImagePtr cv_ptr;
 	// cout << "Before try\n";
 	try
@@ -52,21 +80,51 @@ void imageCb(const sensor_msgs::Image::ConstPtr& msg)
 	src = cv_ptr->image;
 	cur = src;
 	cv::cvtColor(cur, cur, CV_BGR2GRAY);
+	detector.setImageTemplate(obj);
 	detector.setImageSearch(cur);
 	detector.update();
+	pt.clear();
 
-	pt1.x = detector.dst_corners[0].x; pt1.y = detector.dst_corners[0].y;
-	pt2.x = detector.dst_corners[1].x; pt2.y = detector.dst_corners[1].y;
-	pt3.x = detector.dst_corners[2].x; pt3.y = detector.dst_corners[2].y;
-	pt4.x = detector.dst_corners[3].x; pt4.y = detector.dst_corners[3].y;
+	for (int i = 0; i < 4; ++i)
+	{
+		pt.push_back(detector.dst_corners[i]);
+	}
 
-	line(src, pt1, pt2, randomColor(rng), 2, 8, 0);
-	line(src, pt2, pt3, randomColor(rng), 2, 8, 0);
-	line(src, pt3, pt4, randomColor(rng), 2, 8, 0);
-	line(src, pt4, pt1, randomColor(rng), 2, 8, 0);
+	if (contourArea(pt) > 200) {
+		computeContourMaxMin(pt,minX,minY,maxX,maxY);
+		cout << "minX: " << minX << " |minY: " << minY << " |maxX: " << maxX << " |maxY: " << maxY << endl;
+		line(src, pt[0], pt[1], randomColor(12350000), 2, 8, 0);
+		line(src, pt[1], pt[2], randomColor(12350000), 2, 8, 0);
+		line(src, pt[2], pt[3], randomColor(12350000), 2, 8, 0);
+		line(src, pt[3], pt[0], randomColor(12350000), 2, 8, 0);
+	}
+
+
+
+	detector.setImageTemplate(fire);
+	detector.setImageSearch(cur);
+	detector.update();
+	pt.clear();
+
+	for (int i = 0; i < 4; ++i)
+	{
+		pt.push_back(detector.dst_corners[i]);
+	}
+
+	if (contourArea(pt) > 200) {
+		computeContourMaxMin(pt,minX,minY,maxX,maxY);
+		cout << "minX: " << minX << " |minY: " << minY << " |maxX: " << maxX << " |maxY: " << maxY << endl;
+		line(src, pt[0], pt[1], randomColor(50), 2, 8, 0);
+		line(src, pt[1], pt[2], randomColor(50), 2, 8, 0);
+		line(src, pt[2], pt[3], randomColor(50), 2, 8, 0);
+		line(src, pt[3], pt[0], randomColor(50), 2, 8, 0);
+	}
+
+
 
 	imshow("Source", src);
 	waitKey(3);
+	//exit(0);
 
 }
 
@@ -76,11 +134,11 @@ int main(int argc, char *argv[])
 	ros::init(argc, argv, "matching_node");
 	ros::NodeHandle n;
 	ros::Subscriber image_sub;
+	hcsr_client = n.serviceClient<sensorcontroller::SerialComm>("serial_service");
 	obj = imread("/home/harsha/ros/src/matcher/src/template.png", CV_LOAD_IMAGE_GRAYSCALE);
-	detector.setImageTemplate(obj);
-	// imshow("new", obj);
-	// cout << "Hello\n";
-	image_sub = n.subscribe("/webcam/image_raw", 100, &imageCb);
+	fire = imread("/home/harsha/ros/src/matcher/src/template1.png", CV_LOAD_IMAGE_GRAYSCALE);
+
+	image_sub = n.subscribe("/webcam/image_raw", 1, &imageCb);
 
 	ros::spin();
 
