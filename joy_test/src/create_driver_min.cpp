@@ -89,6 +89,10 @@ bool control_callback(joy_test::JoyIn::Request  &req, joy_test::JoyIn::Response 
 		char beep[7];
 		copy(v.begin(),v.end(),beep);
 		write(fd, beep, sizeof(beep));
+	} else if (flag == 3) {
+		char song[2];
+		copy(v.begin(),v.end(),song);
+		write(fd, song, sizeof(song));
 	} else {
 		char byte[5];
 		copy(v.begin(),v.end(),byte);

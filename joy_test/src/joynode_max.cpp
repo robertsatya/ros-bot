@@ -67,9 +67,9 @@ void TeleopTurtle::joyCallback(const sensor_msgs::Joy::ConstPtr& joy)
 			stream.push_back(140);
 			stream.push_back(3);
 			stream.push_back(1);
-			stream.push_back(64);
+			stream.push_back(6);
 			stream.push_back(16);
-			stream.push_back(141);
+			stream.push_back(14);
 			stream.push_back(3);
 			srv.request.flag = 2;
 		}
@@ -85,7 +85,19 @@ void TeleopTurtle::joyCallback(const sensor_msgs::Joy::ConstPtr& joy)
 			stream.push_back(133);
 			srv.request.flag = 1;	
 		}
-
+		else if(b[5]==1)
+		{
+			cout << "Dock\n";
+			stream.push_back(143);
+			srv.request.flag = 1;	
+		}
+		else if(b[6]==1)
+		{
+			cout << "Play song\n";
+			stream.push_back(141);
+			stream.push_back(1);
+			srv.request.flag = 3;	
+		}
 		else if(ax[2]>0)
 		{
 			cout << "Rotating left\n";
