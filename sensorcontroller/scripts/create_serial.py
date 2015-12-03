@@ -31,6 +31,12 @@ ser.close()
 def callback(req):
    option = req.mode
 
+#1 is distance threshold mode
+#2 is gradient threshold mode
+#3 is ultra sonic distance mode
+#4 is all clear check mode
+#5 is motor only mode
+
    if(option == 3):
        ser.open()
        ser.flush()
@@ -56,7 +62,7 @@ def callback(req):
        ser.close()
 
 
-   if(option == 4):
+   if(option == 5):
        ser.open()
        ser.flush()
        ser.write("M020\n")
@@ -76,14 +82,16 @@ def callback(req):
        print "Distance is %s cm\n" % s_data
        ser.close()
 
-   if(option == 5):
+   if(option == 4):
+       ser.open()
        ser.flush()
-       ser.write("S")
+       ser.write("C")
        #ser.close()
-       print 'Sent SLTA data to LCU\n'
+       print 'Set LCU in all clear check mode\n'
+       #sleep(.1)
        #ser.open()
-       s_data = ser.read()
-       print 'Distance is %s cm\n' % s_data
+       s_data = ser.readline()
+       print "Output is %s \n" % s_data
        ser.close()
 
    s_intdata = int(float(s_data))
