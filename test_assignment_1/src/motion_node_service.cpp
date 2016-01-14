@@ -6,8 +6,8 @@
 
 using namespace std;
 
-  ros::Publisher marker_pub;
-	ros::Publisher location_pub;
+//  ros::Publisher marker_pub;
+//	ros::Publisher location_pub;
 
 
 long cntr;
