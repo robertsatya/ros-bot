@@ -1,5 +1,0 @@
-<launch>
-
-	<node name="odroid" pkg="HandOfGod_odroid" type="h_odroid_node" output="screen" />	
-	
-</launch>

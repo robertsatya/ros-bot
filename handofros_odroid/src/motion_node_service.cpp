@@ -1,5 +1,5 @@
 #include <ros/ros.h>
-#include "HandOfROS_odroid/motion_node.h"
+#include "handofros_odroid/motion_node.h"
 #include <geometry_msgs/PoseStamped.h>
 #include <visualization_msgs/Marker.h>
 
@@ -11,7 +11,7 @@ ros::Publisher location_pub;
 visualization_msgs::Marker marker;
 geometry_msgs::Pose p;
 
-bool select_mode(HandOfROS_odroid::motion_node::Request  &req, HandOfROS_odroid::motion_node::Response &res);
+bool select_mode(handofros_odroid::motion_node::Request  &req, handofros_odroid::motion_node::Response &res);
 
 int main(int argc, char **argv){
 	ros::init(argc, argv, "h_odroid_node");
@@ -82,7 +82,7 @@ int main(int argc, char **argv){
 	return 0;
 }
 
-bool select_mode(HandOfROS_odroid::motion_node::Request  &req, HandOfROS_odroid::motion_node::Response &res)
+bool select_mode(handofros_odroid::motion_node::Request  &req, handofros_odroid::motion_node::Response &res)
 {
 
 	ros::NodeHandle n,n1;

@@ -1,6 +1,0 @@
-<launch>
-
-	<node name="laptop" pkg="HandOfROS_laptop" type="h_keyboard_node" output="screen" />	
-	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find HandOfROS_laptop)/rviz/odroid.rviz" required="true" />
-	
-</launch>

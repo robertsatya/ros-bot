@@ -1,15 +1,15 @@
 #include "ros/ros.h"
 #include <stdio.h>
-#include "HandOfROS_odroid/motion_node.h"
+#include "handofros_odroid/motion_node.h"
 
 int modeselected;
 
 int main(int argc, char **argv){
 	ros::init(argc, argv, "h_keyboard_node");
 	ros::NodeHandle n;
-	ros::ServiceClient client = n.serviceClient<HandOfROS_odroid::motion_node>("motion_node_service");
+	ros::ServiceClient client = n.serviceClient<handofros_odroid::motion_node>("motion_node_service");
 	int flag = 0;
-	HandOfROS_odroid::motion_node srv;
+	handofros_odroid::motion_node srv;
 
 	while(flag != 1) {
 		ROS_INFO("Please enter the movement direction: \n");

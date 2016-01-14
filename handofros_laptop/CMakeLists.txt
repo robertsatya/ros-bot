@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(HandOfROS_odroid)
+project(handofros_laptop)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  message_generation
   message_runtime
+  message_generation
   roscpp
   rospy
   std_msgs
@@ -54,9 +54,8 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate services in the 'srv' folder
- add_service_files(
-   FILES
-	 motion_node.srv
+# add_service_files(
+#   FILES
 #   Service1.srv
 #   Service2.srv
 # )
@@ -106,8 +105,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES HandOfROS_odroid
-#  CATKIN_DEPENDS message_generation message_runtime roscpp rospy std_msgs visualization_msgs
+#  LIBRARIES handofros_laptop
+#  CATKIN_DEPENDS messagDe_runtime message_generation roscpp rospy std_msgs visualization_msgs
 #  DEPENDS system_lib
 )
 
@@ -123,32 +122,30 @@ include_directories(
 )
 
 ## Declare a C++ library
-# add_library(HandOfROS_odroid
-#   src/${PROJECT_NAME}/HandOfROS_odroid.cpp
+# add_library(handofros_laptop
+#   src/${PROJECT_NAME}/handofros_laptop.cpp
 # )
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
-# add_dependencies(HandOfROS_odroid ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(handofros_laptop ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
-# add_executable(HandOfROS_odroid_node src/HandOfROS_odroid_node.cpp)
+# add_executable(handofros_laptop_node src/handofros_laptop_node.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-# add_dependencies(HandOfROS_odroid_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(handofros_laptop_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(HandOfROS_odroid_node
+# target_link_libraries(handofros_laptop_node
 #   ${catkin_LIBRARIES}
 # )
-add_executable(h_odroid_node src/motion_node_service.cpp)
-target_link_libraries(h_odroid_node
+add_executable(h_keyboard_node src/modeselectornode.cpp)
+target_link_libraries(h_keyboard_node
   ${catkin_LIBRARIES}
 )
-
-
 
 #############
 ## Install ##
@@ -165,7 +162,7 @@ target_link_libraries(h_odroid_node
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS HandOfROS_odroid HandOfROS_odroid_node
+# install(TARGETS handofros_laptop handofros_laptop_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -190,7 +187,7 @@ target_link_libraries(h_odroid_node
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_HandOfROS_odroid.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_handofros_laptop.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
