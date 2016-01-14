@@ -1,11 +1,16 @@
 #include <ros/ros.h>
 #include "test_assignment_1/motion_node.h"
-#include <geometry_msgs/Pose.h>
+#include <geometry_msgs/PoseStamped.h>
 #include <visualization_msgs/Marker.h>
 
 
 using namespace std;
 
+  ros::Publisher marker_pub;
+	ros::Publisher location_pub;
+
+
+long cntr;
 geometry_msgs::Pose p;
 
 bool select_mode(test_assignment_1::motion_node::Request  &req, test_assignment_1::motion_node::Response &res);
@@ -13,7 +18,7 @@ bool select_mode(test_assignment_1::motion_node::Request  &req, test_assignment_
 int main(int argc, char **argv){
 	ros::init(argc, argv, "odroid_node");
 	ros::NodeHandle n;
- 	 
+	 
 	p.position.x = 0;
   p.position.y = 0;
   p.position.z = 0;
@@ -22,8 +27,9 @@ int main(int argc, char **argv){
   p.orientation.z = 0.0;
   p.orientation.w = 1.0;
 
-
+	cntr = 0;
 	ros::ServiceServer service = n.advertiseService("motion_node_service",select_mode);
+
 	ros::spin();
 
 	return 0;
@@ -31,12 +37,16 @@ int main(int argc, char **argv){
 
 bool select_mode(test_assignment_1::motion_node::Request  &req, test_assignment_1::motion_node::Response &res)
 {
-	ros::NodeHandle n;
+
+	ros::NodeHandle n,n1;
 	res.mode = req.mode;
 	ROS_INFO("\n Selected mode is %ld", res.mode);
 	int dir = res.mode;
   ros::Rate r(1);
+
   ros::Publisher marker_pub = n.advertise<visualization_msgs::Marker>("visualization_marker", 1);
+	ros::Publisher location_pub = n1.advertise<geometry_msgs::PoseStamped>("loc", 100);
+
 
   // Set our initial shape type to be a cube
   uint32_t shape = visualization_msgs::Marker::CUBE;
@@ -133,6 +143,18 @@ bool select_mode(test_assignment_1::motion_node::Request  &req, test_assignment_
     marker_pub.publish(marker);
 		
 		r.sleep();
+//		ros::spinOnce();
+
+		geometry_msgs::PoseStamped ps;
+		cntr++;
+//		ps.header.seq = cntr;
+		ps.header.stamp = ros::Time::now();
+		ps.header.frame_id = "/my_frame";
+		ps.pose = p;
+		location_pub.publish(ps);
+
+		r.sleep();
+//		ros::spinOnce();
 
 	if (res.mode == 0) {
 		exit(0);

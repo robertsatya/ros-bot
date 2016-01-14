@@ -7,6 +7,7 @@ Panels:
         - /Global Options1
         - /Status1
         - /Marker1
+        - /Pose1
       Splitter Ratio: 0.5
     Tree Height: 540
   - Class: rviz/Selection
@@ -54,8 +55,22 @@ Visualization Manager:
       Marker Topic: visualization_marker
       Name: Marker
       Namespaces:
-        {}
+        motion_node: true
       Queue Size: 100
+      Value: true
+    - Alpha: 1
+      Axes Length: 0
+      Axes Radius: 0
+      Class: rviz/Pose
+      Color: 255; 25; 0
+      Enabled: true
+      Head Length: 0.3
+      Head Radius: 0.1
+      Name: Pose
+      Shaft Length: 1
+      Shaft Radius: 0.05
+      Shape: Axes
+      Topic: /loc
       Value: true
   Enabled: true
   Global Options:
@@ -114,5 +129,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1200
-  X: 32
-  Y: 32
+  X: 18
+  Y: 19
