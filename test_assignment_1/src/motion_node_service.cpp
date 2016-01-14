@@ -87,8 +87,8 @@ bool select_mode(test_assignment_1::motion_node::Request  &req, test_assignment_
 
 	ros::NodeHandle n,n1;
 	res.mode = req.mode;
-	ROS_INFO("\n Selected mode is %ld", res.mode);
 	int dir = res.mode;
+	ROS_INFO("\n Selected mode is %d", dir);
   ros::Rate r(1);
 
   marker_pub = n.advertise<visualization_msgs::Marker>("visualization_marker", 1);
