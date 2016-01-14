@@ -1,5 +1,0 @@
-<launch>
-
-	<node name="odroid" pkg="handofros_odroid" type="h_odroid_node" output="screen" />	
-	
-</launch>
