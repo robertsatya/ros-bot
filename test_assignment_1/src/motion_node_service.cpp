@@ -6,20 +6,9 @@
 
 using namespace std;
 
-int dir = 0;
 geometry_msgs::Pose p;
 
 bool select_mode(test_assignment_1::motion_node::Request  &req, test_assignment_1::motion_node::Response &res);
-
-class viz
-{
-	public:
-	viz()
-	{
-
-	
-	}
-};
 
 int main(int argc, char **argv){
 	ros::init(argc, argv, "odroid_node");
@@ -34,8 +23,6 @@ int main(int argc, char **argv){
   p.orientation.w = 1.0;
 
 
-	ROS_INFO("\nYou idiot\n");
-	viz v;
 	ros::ServiceServer service = n.advertiseService("motion_node_service",select_mode);
 	ros::spin();
 
@@ -47,7 +34,7 @@ bool select_mode(test_assignment_1::motion_node::Request  &req, test_assignment_
 	ros::NodeHandle n;
 	res.mode = req.mode;
 	ROS_INFO("\n Selected mode is %ld", res.mode);
-	dir = res.mode;
+	int dir = res.mode;
   ros::Rate r(1);
   ros::Publisher marker_pub = n.advertise<visualization_msgs::Marker>("visualization_marker", 1);
 
@@ -123,7 +110,7 @@ bool select_mode(test_assignment_1::motion_node::Request  &req, test_assignment_
       sleep(1);
     }
 
-		switch (dir)
+/*		switch (dir)
     {
     case 1:
       shape = visualization_msgs::Marker::SPHERE;
@@ -137,7 +124,7 @@ bool select_mode(test_assignment_1::motion_node::Request  &req, test_assignment_
     case 4:
       shape = visualization_msgs::Marker::CUBE;
       break;
-    }
+    }*/
 
 		// Set the marker type.  Initially this is CUBE, and cycles between that and SPHERE, ARROW, and CYLINDER
     marker.type = shape;
