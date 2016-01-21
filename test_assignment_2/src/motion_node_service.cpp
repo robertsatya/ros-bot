@@ -176,7 +176,7 @@ bool select_mode(test_assignment_2::motion_node::Request  &req, test_assignment_
     tcp_client c;
 
 //    string host="192.168.0.17";
-		string host="128.54.233.30";
+		string host="192.168.43.97";
      
 /*    cout<<"Enter hostname : ";
     cin>>host;
@@ -187,15 +187,17 @@ bool select_mode(test_assignment_2::motion_node::Request  &req, test_assignment_
     //send some data
 		string o_str = dir_str + " " + boost::lexical_cast<std::string>(angle);
     c.send_data(o_str);
-     
+    	 
     //receive and echo reply
     cout<<"----------------------------\n\n";
+		res.angle = "";
+//		cout << c.receive(1024);
     res.angle = c.receive(1024);
 //		res.angle = boost::lexical_cast<float>(c.receive(1024));
 		cout << res.angle;
     cout<<"\n\n----------------------------\n\n";
      
-//	res.angle = 0;
+//		res.angle = "0";
  /*	if (res.mode == 0) {
 		exit(0);
 	}*/

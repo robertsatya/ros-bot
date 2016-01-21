@@ -20,17 +20,7 @@ int main(int argc, char **argv){
 		scanf("%ld", &srv.request.dir);
 
 		if(client.call(srv)){
-/*			switch(srv.response.success){
-				case 1:*/
-					cout << "Moved " << srv.response.angle << " degrees\n";
-/*					break;
-				case 3.8452:
-					ROS_INFO("Exiting the program");
-					flag = 1;
-					break;
-				default:
-					ROS_INFO("Invalid input\n");
-			}*/
+					cout << "Currently at" << srv.response.angle << " degrees\n";
 		}
 		else{
 			ROS_ERROR("Failed to call service motion_node");
