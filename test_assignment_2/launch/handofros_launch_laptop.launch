@@ -1,0 +1,5 @@
+<launch>
+	<param name="rpi_ip" value="$(env RPI_IP)">
+	<node name="laptop" pkg="handofros_laptop" type="h2_keyboard_node" output="screen" />	
+	
+</launch>
