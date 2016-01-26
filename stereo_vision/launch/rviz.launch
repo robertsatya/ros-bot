@@ -1,0 +1,4 @@
+<launch>
+	<param name="robot_description" textfile="$(find stereo_vision)/launch/basic.urdf" />
+	<node name="rviz" type="rviz" pkg="rviz" args="-d $(find stereo_vision)/launch/stereo.rviz" />
+</launch>
