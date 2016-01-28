@@ -27,20 +27,21 @@ void updateDisp(int, void* );
 class DisparityTrack
 {
 	ros::NodeHandle n;
-	ros::Subscriber image_sub;
+	ros::Subscriber image_sub1, image_sub2;
 	ros::Publisher left_point_pub;
 	float x_center, y_center;
 	float img_width, img_height;
 	int lower_thresh[3], upper_thresh[3];
 	float prev_left_pos[2];
 	float dx, depth;
+	double Kmat[3][3];
 	Mat K;
 
 public:
 	DisparityTrack() {
 		left_point_pub = n.advertise<geometry_msgs::PointStamped>("left_point", 5);
-		image_sub = n.subscribe("/left_cam/image_raw", 100, &DisparityTrack::left_cb, this);
-		image_sub = n.subscribe("/right_cam/image_raw", 100, &DisparityTrack::right_cb, this);
+		image_sub1 = n.subscribe("/left_cam/image_raw", 100, &DisparityTrack::left_cb, this);
+		image_sub2 = n.subscribe("/right_cam/image_raw", 100, &DisparityTrack::right_cb, this);
 		lower_thresh[0] = 39; lower_thresh[1] = 68; lower_thresh[2] = 163;
 		upper_thresh[0] = 79; upper_thresh[1] = 222; upper_thresh[2] = 255;
 		disparity_ratio = 211.1;
@@ -49,8 +50,13 @@ public:
 		img_width = 640.0;
 		img_height = 480.0;
 		x_center = img_width/2; y_center = img_height/2;
-		double Kmat[3][3] = {822.324161923132, 0, 335.9440815662755, 0, 837.2065020719881, 199.7435926780396, 0, 0, 1};
+		Kmat[0][0] = 822.324161923132; Kmat[0][1] = 0; Kmat[0][2] = 335.9440815662755;
+		Kmat[1][0] = 0; Kmat[1][1] = 837.2065020719881; Kmat[1][2] = 199.7435926780396;
+		Kmat[2][0] = 0; Kmat[2][1] = 0; Kmat[2][2] = 1;
 		K = Mat(3, 3, DataType<double>::type, &Kmat);
+		// cout << K << endl;
+		K = K.inv();
+		// cout << K << endl;
 		namedWindow("Disp Control", WINDOW_AUTOSIZE);
 		disparity_ratio_int = disparity_ratio*10;
 		createTrackbar("Disparity Ratio", "Disp Control", &disparity_ratio_int, 500, updateDisp);
@@ -111,6 +117,8 @@ public:
 			dx = (float)(prev_left_pos[0] - cx);
 			depth = disparity_ratio/dx;
 
+			//cout << prev_left_pos[0] << " "<< prev_left_pos[1] <<" " << depth << endl;
+
 			postLeftPoint(prev_left_pos[0], prev_left_pos[1], depth);
 		}
 
@@ -118,9 +126,13 @@ public:
 	}
 
 	void postLeftPoint (float x, float y, float depth) {
+		cout << K << endl;
 		float _x[3] = {x, y, depth};
-		Mat pos = cv::Mat(3, 1, DataType<float>::type, &_x);
-		transpose(pos, pos);
+		//cout << _x[0] << " / " << _x[1] << " / "<< _x[2] << endl;
+		Mat pos = cv::Mat(3, 1, DataType<double>::type, *_x);
+		// cout << pos << endl;
+		// transpose(pos, pos);
+		// cout << K << endl;
 		Mat worldPos = K * pos * depth ;
 
 		geometry_msgs::PointStamped point;
@@ -146,6 +158,6 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-void updateDisp(int value, void* ) {
-	disparity_ratio = (float)value*0.1;
+void updateDisp(int , void* ) {
+	disparity_ratio = (float)disparity_ratio_int*0.1;
 }

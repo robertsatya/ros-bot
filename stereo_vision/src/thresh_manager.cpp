@@ -48,24 +48,26 @@ public:
 		image_sub = n.subscribe("/left_cam/image_raw", 100, &ThreshMan::image_cb, this);
 		lower_thresh[0] = 39; lower_thresh[1] = 68; lower_thresh[2] = 163;
 		upper_thresh[0] = 79; upper_thresh[1] = 222; upper_thresh[2] = 255;
-		f = 1190.0;
+		f = 640.0;
 
 		img_width = 640.0;
 		img_height = 480.0;
-		x_center = (img_width/2)/0.6906; y_center = (img_height/2)/0.6906;
-		double Kmat[3][3] = {f, 0, x_center, 0, f, y_center, 0, 0, 1.0};
+		x_center = (img_width/2)/1.0; y_center = (img_height/2)/1.0;
+		double Kmat[3][3] = {822.324161923132, 0, 335.9440815662755, 0, 837.2065020719881, 199.7435926780396, 0, 0, 1};
 		K = Mat(3, 3, DataType<double>::type, &Kmat);
+		cv::invert(K, K);
 		namedWindow("Color Control", WINDOW_AUTOSIZE);
 		namedWindow("Tracking", WINDOW_AUTOSIZE);
 		for (int i = 0; i < 7; ++i)
 			tb[i] = 0;
-		createTrackbar("H_min", "Color Control", &tb[0], 255, updateHmin);
-		createTrackbar("S_min", "Color Control", &tb[1], 255, updateSmin);
-		createTrackbar("V_min", "Color Control", &tb[2], 255, updateVmin);
-		createTrackbar("H_max", "Color Control", &tb[3], 255, updateHmax);
-		createTrackbar("S_max", "Color Control", &tb[4], 255, updateSmax);
-		createTrackbar("V_max", "Color Control", &tb[5], 255, updateVmax);
-		createTrackbar("Offset", "Color Control", &tb[6], 7000, updateF);
+		// createTrackbar("H_min", "Color Control", &lower_thresh[0], 255);
+		// updateHmin(tb[0], 0);
+		// createTrackbar("S_min", "Color Control", &lower_thresh[1], 255);
+		// createTrackbar("V_min", "Color Control", &lower_thresh[2], 255);
+		// createTrackbar("H_max", "Color Control", &upper_thresh[0], 255);
+		// createTrackbar("S_max", "Color Control", &upper_thresh[1], 255);
+		// createTrackbar("V_max", "Color Control", &upper_thresh[2], 255);
+		// createTrackbar("Offset", "Color Control", &tb[6], 7000, updateF);
 
 	}
 
@@ -105,8 +107,8 @@ public:
 	}
 
 	void postLeftPoint (float x, float y) {
-		float _x[3] = {x, y, 0.6906};
-		Mat pos = cv::Mat(3, 1, DataType<float>::type, &_x);
+		float _x[3] = {x, y, 1.0};
+		Mat pos = cv::Mat(3, 1, DataType<double>::type, *_x);
 		//transpose(pos, pos);
 		Mat worldPos = K * pos;
 
