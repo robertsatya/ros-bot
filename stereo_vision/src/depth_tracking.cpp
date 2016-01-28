@@ -139,14 +139,14 @@ public:
 		Mat worldPos = (K * pos) * depth ;
 		cout << worldPos << endl;
 		float* wData = (float*) worldPos.data;
-		cout << wData[0] << endl;
+//		cout << wData[0] << endl;
 		geometry_msgs::PointStamped point;
 		point.header.frame_id = "/left_camera";
-		point.header.stamp = ros::Time();
-		point.point.x = worldPos.at<float>(0);
-		point.point.y = worldPos.at<float>(1);
-		point.point.z = worldPos.at<float>(2);
-
+		point.header.stamp = ros::Time().now();
+		point.point.x = worldPos.at<double>(0)/100;
+		point.point.y = worldPos.at<double>(1)/100;
+		point.point.z = worldPos.at<double>(2)/100;
+//		cout << point.point.x << " " << point.point.y << " " << point.point.z << endl;
 		left_point_pub.publish(point);
 	}
 
