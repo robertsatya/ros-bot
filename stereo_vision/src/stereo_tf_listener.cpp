@@ -39,7 +39,7 @@ void locCallback(const geometry_msgs::PointStamped &loc)
 
 	  	child_point.header.stamp = ros::Time();
 
-			ROS_INFO("\nTransform %lf %lf %lf",transform.getOrigin().x(),transform.getOrigin().y(),transform.getOrigin().z());
+			//ROS_INFO("\nTransform %lf %lf %lf",transform.getOrigin().x(),transform.getOrigin().y(),transform.getOrigin().z());
     	listener.transformPose("usb_cam", child_point, parent_point);
 
 
@@ -60,7 +60,7 @@ void locCallback(const geometry_msgs::PointStamped &loc)
       marker.action = visualization_msgs::Marker::ADD;
 
       marker.pose = parent_point.pose;
-  		ROS_INFO(" %lf %lf %lf \n",marker.pose.position.x,marker.pose.position.y,marker.pose.position.z);
+  		ROS_INFO("Final position: %lf %lf %lf \n",marker.pose.position.x,marker.pose.position.y,marker.pose.position.z);
       // Publish the marker
       marker_pub.publish(marker);
 
