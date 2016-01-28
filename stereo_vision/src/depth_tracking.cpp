@@ -20,8 +20,9 @@ using namespace std;
 using namespace cv;
 
 
+float disparity_ratio;
+int disparity_ratio_int;
 void updateDisp(int, void* );
-int disparity_ratio;
 
 class DisparityTrack
 {
@@ -32,6 +33,7 @@ class DisparityTrack
 	float img_width, img_height;
 	int lower_thresh[3], upper_thresh[3];
 	float prev_left_pos[2];
+	float dx, depth;
 	Mat K;
 
 public:
@@ -41,7 +43,8 @@ public:
 		image_sub = n.subscribe("/right_cam/image_raw", 100, &DisparityTrack::right_cb, this);
 		lower_thresh[0] = 39; lower_thresh[1] = 68; lower_thresh[2] = 163;
 		upper_thresh[0] = 79; upper_thresh[1] = 222; upper_thresh[2] = 255;
-		disparity_ratio = 211;
+		disparity_ratio = 211.1;
+		dx = 1;
 
 		img_width = 640.0;
 		img_height = 480.0;
@@ -49,7 +52,9 @@ public:
 		double Kmat[3][3] = {822.324161923132, 0, 335.9440815662755, 0, 837.2065020719881, 199.7435926780396, 0, 0, 1};
 		K = Mat(3, 3, DataType<double>::type, &Kmat);
 		namedWindow("Disp Control", WINDOW_AUTOSIZE);
-		createTrackbar("Disparity Ratio", "Disp Control", &disparity_ratio, 500, updateDisp);
+		disparity_ratio_int = disparity_ratio*10;
+		createTrackbar("Disparity Ratio", "Disp Control", &disparity_ratio_int, 500, updateDisp);
+		//updateDisp(disparity_ratio_int, 0);
 		prev_left_pos[0] = 0; prev_left_pos[1] = 0;
 	}
 
@@ -61,14 +66,73 @@ public:
 			ROS_ERROR("cv_bridge exception: %s", e.what());
 			return;
 	    }
-	    Mat hsv;
+	    Mat hsv, masked;
 	    Mat img = cv_ptr->image;
 		cvtColor(img, hsv, CV_BGR2HSV);
+		inRange(hsv, Scalar(lower_thresh[0], lower_thresh[1], lower_thresh[2]),
+			Scalar(upper_thresh[0], upper_thresh[1], upper_thresh[2]), masked);
+
+		erode(masked, masked, getStructuringElement(MORPH_ERODE, Point(3,3)) );
+		dilate(masked, masked, getStructuringElement(MORPH_DILATE, Point(3,3)) );
+
+		Moments moments = cv::moments(masked, false);
+
+		if(moments.m00 > 0) {
+			prev_left_pos[0] = moments.m10/moments.m00;
+			prev_left_pos[1] = moments.m01/moments.m00;
+		}
+
+		waitKey(3);
 	}
 
 	void right_cb(const sensor_msgs::Image& msg) {
+		cv_bridge::CvImagePtr cv_ptr;
+		try {
+			cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+	    } catch (cv_bridge::Exception& e) {
+			ROS_ERROR("cv_bridge exception: %s", e.what());
+			return;
+	    }
+	    Mat hsv, masked;
+	    Mat img = cv_ptr->image;
+		cvtColor(img, hsv, CV_BGR2HSV);
+		inRange(hsv, Scalar(lower_thresh[0], lower_thresh[1], lower_thresh[2]),
+			Scalar(upper_thresh[0], upper_thresh[1], upper_thresh[2]), masked);
 
+		erode(masked, masked, getStructuringElement(MORPH_ERODE, Point(3,3)) );
+		dilate(masked, masked, getStructuringElement(MORPH_DILATE, Point(3,3)) );
+
+		Moments moments = cv::moments(masked, false);
+
+		if(moments.m00 > 0) {
+			float cx = moments.m10/moments.m00;
+			float cy = moments.m01/moments.m00;
+
+			dx = (float)(prev_left_pos[0] - cx);
+			depth = disparity_ratio/dx;
+
+			postLeftPoint(prev_left_pos[0], prev_left_pos[1], depth);
+		}
+
+		waitKey(3);
 	}
+
+	void postLeftPoint (float x, float y, float depth) {
+		float _x[3] = {x, y, depth};
+		Mat pos = cv::Mat(3, 1, DataType<float>::type, &_x);
+		transpose(pos, pos);
+		Mat worldPos = K * pos * depth ;
+
+		geometry_msgs::PointStamped point;
+		point.header.frame_id = "/left_camera";
+		point.header.stamp = ros::Time();
+		point.point.x = worldPos.at<float>(0);
+		point.point.y = worldPos.at<float>(1);
+		point.point.z = worldPos.at<float>(2);
+
+		left_point_pub.publish(point);
+	}
+
 
 };
 
@@ -78,9 +142,10 @@ int main(int argc, char *argv[])
 {
 	ros::init(argc, argv, "depth_tracking");
 	DisparityTrack dt = DisparityTrack();
+	ros::spin();
 	return 0;
 }
 
-void updateDisp(int, void*) {
-
+void updateDisp(int value, void* ) {
+	disparity_ratio = (float)value*0.1;
 }
