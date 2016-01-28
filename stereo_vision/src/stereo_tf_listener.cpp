@@ -8,7 +8,7 @@ ros::Publisher location_pub;
 visualization_msgs::Marker marker;
 geometry_msgs::Pose p;
 
-void locCallback(const geometry_msgs::PoseStamped &loc)
+void locCallback(const geometry_msgs::PointStamped &loc)
 {
   tf::TransformListener listener;
 
@@ -18,12 +18,16 @@ void locCallback(const geometry_msgs::PoseStamped &loc)
 //		const ros::Time time = ros::Time(0);
 
 		geometry_msgs::PoseStamped parent_point;
-		geometry_msgs::PoseStamped loc1 = loc;
-		loc1.pose.position.x = loc.pose.position.z;
-		loc1.pose.position.y = loc.pose.position.x;
-		loc1.pose.position.z = loc.pose.position.y;
+		geometry_msgs::PoseStamped loc1;
+    loc1.pose.orientation.x = 0;
+    loc1.pose.orientation.y = 0;
+    loc1.pose.orientation.z = 0;
+    loc1.pose.orientation.w = 0;
+		loc1.pose.position.x = loc.point.z;
+		loc1.pose.position.y = loc.point.x;
+		loc1.pose.position.z = loc.point.y;
+    loc1.header = loc.header;
 
- 
 		parent_point = loc1;
     try{
 			listener.waitForTransform("/stereo_cam", "/usb_cam",
@@ -46,15 +50,15 @@ void locCallback(const geometry_msgs::PoseStamped &loc)
     //  continue;
     }
   	ros::NodeHandle n;
-  
-		
+
+
     marker_pub = n.advertise<visualization_msgs::Marker>("visualization_marker", 1);
-  
+
       // Set the frame ID and timestamp.  See the TF tutorials for information on these.
 			marker.header = parent_point.header;
       marker.header.stamp = ros::Time::now();
       marker.action = visualization_msgs::Marker::ADD;
- 			 
+
       marker.pose = parent_point.pose;
   		ROS_INFO(" %lf %lf %lf \n",marker.pose.position.x,marker.pose.position.y,marker.pose.position.z);
       // Publish the marker
@@ -83,7 +87,7 @@ int main(int argc, char** argv){
 
   ros::NodeHandle n,n1;
 
-	ros::Subscriber sub = n.subscribe("/loc", 10, locCallback);
+	ros::Subscriber sub = n.subscribe("/left_point", 10, locCallback);
 	p.position.x = 0;
   p.position.y = 0;
   p.position.z = 0;
@@ -139,9 +143,9 @@ int main(int argc, char** argv){
 		// Set the marker type.  Initially this is CUBE, and cycles between that and SPHERE, ARROW, and CYLINDER
     marker.type = shape;
     marker_pub.publish(marker);
-	
+
 	ros::spin();
-	return 0; 
+	return 0;
 }
 
 

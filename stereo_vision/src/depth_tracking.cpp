@@ -126,7 +126,7 @@ public:
 	}
 
 	void postLeftPoint (float x, float y, float depth) {
-		cout << K << endl;
+		// cout << K << endl;
 		float _x[3] = {x, y, depth};
 		//cout << _x[0] << " / " << _x[1] << " / "<< _x[2] << endl;
 		Mat pos = cv::Mat(3, 1, DataType<double>::type, *_x);
