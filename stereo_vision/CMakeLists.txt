@@ -4,7 +4,15 @@ project(stereo_vision)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED)
+find_package(catkin REQUIRED COMPONENTS
+  cv_bridge
+  image_transport
+  roscpp
+  rospy
+  sensor_msgs
+  std_msgs
+  OpenCV
+)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -61,10 +69,11 @@ find_package(catkin REQUIRED)
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs  # Or other packages containing msgs
-# )
+generate_messages(
+   DEPENDENCIES
+   std_msgs
+   sensor_msgs
+ )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -98,7 +107,7 @@ find_package(catkin REQUIRED)
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES stereo_vision
-#  CATKIN_DEPENDS other_catkin_pkg
+CATKIN_DEPENDS cv_bridge image_transport message_runtime roscpp rospy sensor_msgs std_msgs
 #  DEPENDS system_lib
 )
 
@@ -109,6 +118,9 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 # include_directories(include)
+include_directories(
+  ${catkin_INCLUDE_DIRS}
+)
 
 ## Declare a C++ library
 # add_library(stereo_vision
@@ -122,6 +134,10 @@ catkin_package(
 
 ## Declare a C++ executable
 # add_executable(stereo_vision_node src/stereo_vision_node.cpp)
+
+add_executable(depth_tracking src/depth_tracking.cpp)
+target_link_libraries(depth_tracking ${OpenCV_LIBRARIES} ${OpenCV_LIBS} ${catkin_LIBRARIES} )
+add_dependencies(depth_tracking depth_tracking_gencpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
