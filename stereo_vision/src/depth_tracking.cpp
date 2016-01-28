@@ -20,7 +20,7 @@ using namespace std;
 using namespace cv;
 
 
-float disparity_ratio;
+double disparity_ratio;
 int disparity_ratio_int;
 void updateDisp(int, void* );
 
@@ -29,11 +29,11 @@ class DisparityTrack
 	ros::NodeHandle n;
 	ros::Subscriber image_sub1, image_sub2;
 	ros::Publisher left_point_pub;
-	float x_center, y_center;
-	float img_width, img_height;
+	double x_center, y_center;
+	double img_width, img_height;
 	int lower_thresh[3], upper_thresh[3];
-	float prev_left_pos[2];
-	float dx, depth;
+	double prev_left_pos[2];
+	double dx, depth;
 	double Kmat[3][3];
 	Mat K;
 
@@ -68,12 +68,12 @@ public:
 		cv_bridge::CvImagePtr cv_ptr;
 		try {
 			cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
-	    } catch (cv_bridge::Exception& e) {
+		} catch (cv_bridge::Exception& e) {
 			ROS_ERROR("cv_bridge exception: %s", e.what());
 			return;
-	    }
-	    Mat hsv, masked;
-	    Mat img = cv_ptr->image;
+		}
+		Mat hsv, masked;
+		Mat img = cv_ptr->image;
 		cvtColor(img, hsv, CV_BGR2HSV);
 		inRange(hsv, Scalar(lower_thresh[0], lower_thresh[1], lower_thresh[2]),
 			Scalar(upper_thresh[0], upper_thresh[1], upper_thresh[2]), masked);
@@ -98,12 +98,12 @@ public:
 		cv_bridge::CvImagePtr cv_ptr;
 		try {
 			cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
-	    } catch (cv_bridge::Exception& e) {
+		} catch (cv_bridge::Exception& e) {
 			ROS_ERROR("cv_bridge exception: %s", e.what());
 			return;
-	    }
-	    Mat hsv, masked;
-	    Mat img = cv_ptr->image;
+		}
+		Mat hsv, masked;
+		Mat img = cv_ptr->image;
 		cvtColor(img, hsv, CV_BGR2HSV);
 		inRange(hsv, Scalar(lower_thresh[0], lower_thresh[1], lower_thresh[2]),
 			Scalar(upper_thresh[0], upper_thresh[1], upper_thresh[2]), masked);
@@ -114,10 +114,10 @@ public:
 		Moments moments = cv::moments(masked, false);
 
 		if(moments.m00 > 0) {
-			float cx = moments.m10/moments.m00;
-			float cy = moments.m01/moments.m00;
+			double cx = moments.m10/moments.m00;
+			double cy = moments.m01/moments.m00;
 
-			dx = (float)(prev_left_pos[0] - cx);
+			dx = (double)(prev_left_pos[0] - cx);
 			depth = disparity_ratio/dx;
 
 			//cout << prev_left_pos[0] << " "<< prev_left_pos[1] <<" " << depth << endl;
@@ -128,24 +128,36 @@ public:
 		waitKey(3);
 	}
 
-	void postLeftPoint (float x, float y, float depth) {
-		// cout << K << endl;
-		float _x[3] = {x, y, depth};
-		//cout << _x[0] << " / " << _x[1] << " / "<< _x[2] << endl;
+	void postLeftPoint (double x, double y, double depth) {
+		//cout << "***********start**************" << endl;
+		double _x[3] = {x, y, 1.0};
+		//cout << K << endl;
+		//cout << _x[0] << "  " << _x[1] << "  "<< _x[2] << endl;
 		Mat pos = cv::Mat(3, 1, DataType<double>::type, *_x);
 		// cout << pos << endl;
 		// transpose(pos, pos);
 		// cout << K << endl;
-		Mat worldPos = (K * pos) * depth ;
-		cout << worldPos << endl;
-		float* wData = (float*) worldPos.data;
+		Mat worldPos; //worldPos = (K * pos);// * depth ;
+		//gemm(K, pos, 1.0, NULL, 0, worldPos, 0);
+
+		double sum;
+		double c[3] = {0};
+		for(int i=0;i<3;i++){ //row of first matrix
+			sum=0;
+			for(int k=0;k<3;k++)
+				sum = sum + K.at<double>(i,k) * _x[k];
+			c[i]=sum*depth;
+		}
+		//cout << c[0] << "  " << c[1] << "  "<< c[2] << endl;
+		//cout << worldPos << endl;
+//		double* wData = (double*) worldPos.data;
 //		cout << wData[0] << endl;
 		geometry_msgs::PointStamped point;
 		point.header.frame_id = "/left_camera";
 		point.header.stamp = ros::Time().now();
-		point.point.x = worldPos.at<double>(0)/100;
-		point.point.y = worldPos.at<double>(1)/100;
-		point.point.z = worldPos.at<double>(2)/100;
+		point.point.x = c[0]; //worldPos.at<double>(0);
+		point.point.y = c[1]; //worldPos.at<double>(1);
+		point.point.z = c[2]; //worldPos.at<double>(2);
 //		cout << point.point.x << " " << point.point.y << " " << point.point.z << endl;
 		left_point_pub.publish(point);
 	}
@@ -164,5 +176,5 @@ int main(int argc, char *argv[])
 }
 
 void updateDisp(int , void* ) {
-	disparity_ratio = (float)disparity_ratio_int*0.1;
+	disparity_ratio = (double)disparity_ratio_int*0.1;
 }
