@@ -11,23 +11,46 @@
 
 	<link name="stereo_cam">
 		<visual>
-			<origin xyz="0.1 0.1 0" rpy ="0 -1.57 0"/>
-      <geometry>
-        <cylinder length="0.3" radius="0.05"/>
-      </geometry>
-    </visual>
-		<visual>
-			<origin xyz="0.1 -0.1 0" rpy ="0 -1.57 0"/>
-      <geometry>
-        <cylinder length="0.3" radius="0.05"/>
-      </geometry>
-    </visual>
+			<geometry>
+				<box size="0.1 0.2 0.1"/>
+			</geometry>
+		</visual>
 	</link>
 
 	<joint name="usb_cam_to_stereo_cam" type="fixed">
 		<origin xyz="0 0 1"/>
 		<parent link="usb_cam"/>
 		<child link="stereo_cam"/>
+	</joint>
+
+	<link name="left_camera">
+		<visual name="left_camera">
+			<origin rpy ="0 -1.57 0"/>
+   	  <geometry>
+     	  <cylinder length="0.3" radius="0.05"/>
+      </geometry>
+ 	  </visual>
+	</link>
+
+	<joint name="stereo_cam_to_left_camera" type="fixed">
+		<origin xyz="0.1 0.1 0" />
+		<parent link="stereo_cam"/>
+		<child link="left_camera"/>
+	</joint>
+
+	<link name="right_camera">
+		<visual name="right_camera">
+			<origin rpy ="0 -1.57 0"/>
+   	  <geometry>
+     	  <cylinder length="0.3" radius="0.05"/>
+      </geometry>
+ 	  </visual>
+	</link>
+
+	<joint name="stereo_cam_to_right_camera" type="fixed">
+		<origin xyz="0.1 -0.1 0" />
+		<parent link="stereo_cam"/>
+		<child link="right_camera"/>
 	</joint>
 
 </robot>
