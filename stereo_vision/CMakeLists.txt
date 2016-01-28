@@ -143,6 +143,10 @@ add_executable(thresh_manager src/thresh_manager.cpp)
 target_link_libraries(thresh_manager ${OpenCV_LIBRARIES} ${OpenCV_LIBS} ${catkin_LIBRARIES} )
 add_dependencies(thresh_manager thresh_manager_gencpp)
 
+add_executable(object_tracking src/object_tracking.cpp)
+target_link_libraries(object_tracking ${OpenCV_LIBRARIES} ${OpenCV_LIBS} ${catkin_LIBRARIES} )
+add_dependencies(object_tracking object_tracking_gencpp)
+
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 # add_dependencies(stereo_vision_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
