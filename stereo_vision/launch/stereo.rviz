@@ -10,6 +10,10 @@ Panels:
         - /Camera1
         - /Camera2
         - /RobotModel1
+        - /RobotModel1/Links1
+        - /RobotModel2
+        - /TF1
+        - /TF1/Frames1
       Splitter Ratio: 0.5
     Tree Height: 201
   - Class: rviz/Selection
@@ -74,6 +78,7 @@ Visualization Manager:
         Grid: true
         Marker: true
         RobotModel: true
+        TF: true
         Value: true
       Zoom Factor: 1
     - Class: rviz/Camera
@@ -90,6 +95,7 @@ Visualization Manager:
         Grid: true
         Marker: true
         RobotModel: true
+        TF: true
         Value: true
       Zoom Factor: 1
     - Alpha: 1
@@ -102,12 +108,56 @@ Visualization Manager:
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: ""
+        ball:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        usb_cam:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        world:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
       Name: RobotModel
       Robot Description: robot_description
       TF Prefix: ""
       Update Interval: 0
       Value: true
       Visual Enabled: true
+    - Alpha: 1
+      Class: rviz/RobotModel
+      Collision Enabled: false
+      Enabled: true
+      Links:
+        All Links Enabled: true
+        Expand Joint Details: false
+        Expand Link Details: false
+        Expand Tree: false
+        Link Tree Style: Links in Alphabetic Order
+      Name: RobotModel
+      Robot Description: robot_description_1
+      TF Prefix: ""
+      Update Interval: 0
+      Value: true
+      Visual Enabled: true
+    - Class: rviz/TF
+      Enabled: true
+      Frame Timeout: 15
+      Frames:
+        All Enabled: true
+      Marker Scale: 1
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: true
+      Tree:
+        {}
+      Update Interval: 0
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -167,5 +217,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1200
-  X: -10
+  X: -14
   Y: 19

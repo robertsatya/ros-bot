@@ -12,6 +12,9 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   std_msgs
   OpenCV
+	visualization_msgs
+	geometry_msgs
+	tf
 )
 
 ## System dependencies are found with CMake's conventions
@@ -73,6 +76,8 @@ generate_messages(
    DEPENDENCIES
    std_msgs
    sensor_msgs
+	 visualization_msgs
+	 geometry_msgs
  )
 
 ################################################
@@ -107,7 +112,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES stereo_vision
-CATKIN_DEPENDS cv_bridge image_transport message_runtime roscpp rospy sensor_msgs std_msgs
+CATKIN_DEPENDS cv_bridge image_transport message_runtime roscpp rospy sensor_msgs std_msgs tf visualization_msgs geometry_msgs
 #  DEPENDS system_lib
 )
 
@@ -146,6 +151,11 @@ add_dependencies(thresh_manager thresh_manager_gencpp)
 add_executable(object_tracking src/object_tracking.cpp)
 target_link_libraries(object_tracking ${OpenCV_LIBRARIES} ${OpenCV_LIBS} ${catkin_LIBRARIES} )
 add_dependencies(object_tracking object_tracking_gencpp)
+
+add_executable(stereo_tf_listener src/stereo_tf_listener.cpp)
+target_link_libraries(stereo_tf_listener ${OpenCV_LIBRARIES} ${OpenCV_LIBS} ${catkin_LIBRARIES} )
+add_dependencies(stereo_tf_listener stereo_tf_listener_gencpp)
+
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
