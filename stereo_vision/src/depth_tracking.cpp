@@ -42,8 +42,8 @@ public:
 		left_point_pub = n.advertise<geometry_msgs::PointStamped>("left_point", 5);
 		image_sub1 = n.subscribe("/left_cam/image_raw", 100, &DisparityTrack::left_cb, this);
 		image_sub2 = n.subscribe("/right_cam/image_raw", 100, &DisparityTrack::right_cb, this);
-		lower_thresh[0] = 39; lower_thresh[1] = 68; lower_thresh[2] = 163;
-		upper_thresh[0] = 79; upper_thresh[1] = 222; upper_thresh[2] = 255;
+		lower_thresh[0] = 3; lower_thresh[1] = 113; lower_thresh[2] = 123;
+		upper_thresh[0] = 18; upper_thresh[1] = 222; upper_thresh[2] = 255;
 		disparity_ratio = 211.1;
 		dx = 1;
 
@@ -86,6 +86,9 @@ public:
 		if(moments.m00 > 0) {
 			prev_left_pos[0] = moments.m10/moments.m00;
 			prev_left_pos[1] = moments.m01/moments.m00;
+			int cx = prev_left_pos[0];
+			int cy = prev_left_pos[1];
+			cv::circle(img, cv::Point(cx, cy), 10, Scalar(0, 0, 255), 2);
 		}
 
 		waitKey(3);
@@ -133,8 +136,10 @@ public:
 		// cout << pos << endl;
 		// transpose(pos, pos);
 		// cout << K << endl;
-		Mat worldPos = K * pos * depth ;
-
+		Mat worldPos = (K * pos) * depth ;
+		cout << worldPos << endl;
+		float* wData = (float*) worldPos.data;
+		cout << wData[0] << endl;
 		geometry_msgs::PointStamped point;
 		point.header.frame_id = "/left_camera";
 		point.header.stamp = ros::Time();

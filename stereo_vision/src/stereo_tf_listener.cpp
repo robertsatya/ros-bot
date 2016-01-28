@@ -22,7 +22,7 @@ void locCallback(const geometry_msgs::PointStamped &loc)
     loc1.pose.orientation.x = 0;
     loc1.pose.orientation.y = 0;
     loc1.pose.orientation.z = 0;
-    loc1.pose.orientation.w = 0;
+    loc1.pose.orientation.w = 1;
 		loc1.pose.position.x = loc.point.z;
 		loc1.pose.position.y = loc.point.x;
 		loc1.pose.position.z = loc.point.y;
@@ -30,9 +30,9 @@ void locCallback(const geometry_msgs::PointStamped &loc)
 
 		parent_point = loc1;
     try{
-			listener.waitForTransform("/stereo_cam", "/usb_cam",
+			listener.waitForTransform("/left_camera", "/usb_cam",
                               ros::Time(0), ros::Duration(3.0));
-      listener.lookupTransform("/stereo_cam", "/usb_cam",
+      listener.lookupTransform("/left_camera", "/usb_cam",
                                ros::Time(0), transform);
 			geometry_msgs::PoseStamped child_point;
 			child_point = loc1;
@@ -122,9 +122,9 @@ int main(int argc, char** argv){
     marker.scale.z = 0.11;
 
     // Set the color -- be sure to set alpha to something non-zero!
-    marker.color.r = 0.0f;
-    marker.color.g = 1.0f;
-    marker.color.b = 0.0f;
+    marker.color.r = 0.84f;
+    marker.color.g = 0.55f;
+    marker.color.b = 0.23f;
     marker.color.a = 1.0;
 
     marker.lifetime = ros::Duration();
