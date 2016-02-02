@@ -49,10 +49,11 @@ void locCallback(const geometry_msgs::PointStamped &loc)
       ros::Duration(1.0).sleep();
     //  continue;
     }
-  	ros::NodeHandle n;
+  	ros::NodeHandle n,n1;
 
 
     marker_pub = n.advertise<visualization_msgs::Marker>("visualization_marker", 1);
+		location_pub = n1.advertise<geometry_msgs::PoseStamped>("loc", 100);
 
       // Set the frame ID and timestamp.  See the TF tutorials for information on these.
 			marker.header = parent_point.header;
@@ -63,6 +64,21 @@ void locCallback(const geometry_msgs::PointStamped &loc)
   		ROS_INFO("Final position: %lf %lf %lf \n",marker.pose.position.x,marker.pose.position.y,marker.pose.position.z);
       // Publish the marker
       marker_pub.publish(marker);
+
+			p.position.x = 0;
+		  p.position.y = 0;
+		  p.position.z = 0;
+		  p.orientation.x = 0.0;
+	  	p.orientation.y = 0.0;
+  		p.orientation.z = 0.0;
+  		p.orientation.w = 1.0;
+
+
+			geometry_msgs::PoseStamped ps;
+			ps.header.stamp = ros::Time::now();
+			ps.header.frame_id = "/usb_cam";
+			ps.pose = p;
+			location_pub.publish(ps);
 
  /*   try{
       listener1.lookupTransform("/usb_cam", "/world",
