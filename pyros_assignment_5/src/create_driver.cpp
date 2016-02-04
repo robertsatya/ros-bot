@@ -20,7 +20,7 @@ using namespace std;
 int open_port(void);
 int configure_port(int fd);
 bool control_callback(pyros_assignment_5::create_control_service::Request  &req, pyros_assignment_5::create_control_service::Response &res);
-
+int tcdrain(int fildes);
 
 int main(int argc, char *argv[])
 {
@@ -82,9 +82,11 @@ bool control_callback(pyros_assignment_5::create_control_service::Request  &req,
 		return true;
 	}
 	int flag = 0;
+	int read_f = 0;
 	char byte[5];
 	char cmd[1];
 	char beep[7];
+	char sense[2];
 	switch(curr_cmd) {
 		case 1:
 			cout << "Power on\n";
@@ -144,6 +146,22 @@ bool control_callback(pyros_assignment_5::create_control_service::Request  &req,
 			byte[3] = 0;
 			byte[4] = 150;
 			break;
+		case 12:
+			cout << "Bump and Wheeldrop Status";
+			flag = 3;
+			read_f = 1;
+			sense[0] = 142;
+		//	sense[1] = 25; // Battery charge
+			sense[1] = 7;
+			break;
+		case 13:
+			cout << "Brake\n";
+			byte[0] = 145;
+			byte[1] = 0;
+			byte[2] = 0;
+			byte[3] = 0;
+			byte[4] = 0;
+			break;
 		case 0:
 			cout << "Brake\n";
 			byte[0] = 145;
@@ -161,9 +179,22 @@ bool control_callback(pyros_assignment_5::create_control_service::Request  &req,
 		write(fd, cmd, sizeof(cmd));
 	} else if (flag == 2) {
 		write(fd, beep, sizeof(beep));
+	} else if ( flag == 3 ) {
+		write(fd, sense, sizeof(sense));
 	} else {
 		write(fd, byte, sizeof(byte));
 	}
+	tcdrain(fd);
+	if ( read_f == 1 )
+	{
+/* 		read(fd, sense, sizeof(sense));
+		uint16_t n = sense[0] | sense[1] << 8;
+		cout << n; */
 
+ 		read(fd, cmd, sizeof(cmd));
+		uint16_t n = cmd[0] & 3 , n1 = cmd[0] & 12;
+		cout << " " << n << " " << n1 << " "; 
+
+	}
 	return true;
 }
