@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<package>
+  <name>assignment_3</name>
+  <version>2.0.0</version>
+  <description>
+    Turtlebot mapping automation
+  </description>
+
+  <maintainer email="vaduri@cs.ucsd.edu">Harsha Aduri</maintainer>
+  <author email="vaduri@cs.ucsd.edu">Harsha Aduri</author>
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>stage_ros</build_depend>
+  <build_depend>navigation</build_depend>
+  <build_depend>turtlebot_bringup</build_depend>
+  <build_depend>turtlebot_navigation</build_depend>
+  <build_depend>yocs_virtual_sensor</build_depend>
+  <build_depend>yocs_velocity_smoother</build_depend>
+  <run_depend>stage_ros</run_depend>
+  <run_depend>navigation</run_depend>
+  <run_depend>turtlebot_bringup</run_depend>
+  <run_depend>turtlebot_navigation</run_depend>
+  <run_depend>yocs_virtual_sensor</run_depend>
+  <run_depend>yocs_velocity_smoother</run_depend>
+
+  <build_depend>roscpp</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>nav_msgs</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>turtlesim</build_depend>
+  <build_depend>tf</build_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>nav_msgs</run_depend>
+  <run_depend>geometry_msgs</run_depend>
+  <run_depend>turtlesim</run_depend>
+  <run_depend>tf</run_depend>
+</package>
