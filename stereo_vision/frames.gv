@@ -1,7 +1,0 @@
-digraph G {
-"usb_cam" -> "stereo_cam"[label="Broadcaster: /robot_state_publisher\nAverage rate: 50.205 Hz\nMost recent transform: 1453977584.170 ( 0.002 sec old)\nBuffer length: 4.980 sec\n"];
-edge [style=invis];
- subgraph cluster_legend { style=bold; color=black; label ="view_frames Result";
-"Recorded at time: 1453977584.173"[ shape=plaintext ] ;
- }->"usb_cam";
-}

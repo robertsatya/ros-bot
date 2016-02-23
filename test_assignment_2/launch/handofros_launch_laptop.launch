@@ -1,4 +1,0 @@
-<launch>
-	<node name="laptop" pkg="test_assignment_2" type="h2_keyboard_node" output="screen" />	
-	
-</launch>

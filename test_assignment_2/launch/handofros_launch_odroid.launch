@@ -1,5 +1,0 @@
-<launch>
-
-	<node name="odroid" pkg="test_assignment_2" type="h2_odroid_node" output="screen" />	
-	
-</launch>
