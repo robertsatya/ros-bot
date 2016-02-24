@@ -1,1 +1,0 @@
-/usr/bin/c++  -fPIC -O2 -g -DNDEBUG   -shared -Wl,-soname,libgtest_main.so -o /home/harsha/ros/src/gscam/lib/libgtest_main.so CMakeFiles/gtest_main.dir/src/gtest_main.cc.o  -L/home/harsha/ros/src/gscam/build/gtest/src -lpthread /home/harsha/ros/src/gscam/lib/libgtest.so -lpthread -Wl,-rpath,/home/harsha/ros/src/gscam/build/gtest/src:/home/harsha/ros/src/gscam/lib 
