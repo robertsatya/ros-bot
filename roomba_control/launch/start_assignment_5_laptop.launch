@@ -1,0 +1,6 @@
+<launch>
+
+   <node pkg="roomba_control" type="create_controller.py" name="create_controller.py" output="screen">
+  </node>
+
+</launch>

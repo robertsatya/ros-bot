@@ -8,7 +8,7 @@ import struct
 import sys, glob # for listing serial ports
 
 import rospy
-from pyros_assignment_5.srv import *
+from roomba_control.srv import *
 
 send_mode = None
 

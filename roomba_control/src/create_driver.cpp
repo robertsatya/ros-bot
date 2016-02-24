@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <termios.h>
 #include <malloc.h>
-#include "pyros_assignment_5/create_control_service.h"
+#include "roomba_control/create_control_service.h"
  // #include <serial/serial.h>
 
 #define ROTATIONCHANGE 300
@@ -19,7 +19,7 @@ using namespace std;
 
 int open_port(void);
 int configure_port(int fd);
-bool control_callback(pyros_assignment_5::create_control_service::Request  &req, pyros_assignment_5::create_control_service::Response &res);
+bool control_callback(roomba_control::create_control_service::Request  &req, roomba_control::create_control_service::Response &res);
 int tcdrain(int fildes);
 
 int main(int argc, char *argv[])
@@ -72,7 +72,7 @@ int configure_port(int fd)
 
 }
 
-bool control_callback(pyros_assignment_5::create_control_service::Request  &req, pyros_assignment_5::create_control_service::Response &res)
+bool control_callback(roomba_control::create_control_service::Request  &req, roomba_control::create_control_service::Response &res)
 {
 	res.mode = req.mode;
 	prev_cmd = curr_cmd;

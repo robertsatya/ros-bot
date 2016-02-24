@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(pyros_assignment_5)
+project(roomba_control)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -101,7 +101,7 @@ generate_messages(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES pyros_assignment_5
+#  LIBRARIES roomba_control
  CATKIN_DEPENDS message_generation roscpp rospy std_msgs
 #  DEPENDS system_lib
 )
@@ -114,32 +114,32 @@ catkin_package(
 ## Your package locations should be listed before other locations
 # include_directories(include)
 include_directories(
-  ${catkin_INCLUDE_DIRS} include/pyros_assignment_5
+  ${catkin_INCLUDE_DIRS} include/roomba_control
 )
 
 ## Declare a C++ library
-# add_library(pyros_assignment_5
-#   src/${PROJECT_NAME}/pyros_assignment_5.cpp
+# add_library(roomba_control
+#   src/${PROJECT_NAME}/roomba_control.cpp
 # )
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
-# add_dependencies(pyros_assignment_5 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(roomba_control ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
-# add_executable(pyros_assignment_5_node src/pyros_assignment_5_node.cpp)
+# add_executable(roomba_control_node src/roomba_control_node.cpp)
 
 add_executable(create_driver src/create_driver.cpp)
 target_link_libraries(create_driver ${catkin_LIBRARIES})
-add_dependencies(create_driver pyros_assignment_5_gencpp)
+add_dependencies(create_driver roomba_control_gencpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-# add_dependencies(pyros_assignment_5_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(roomba_control_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(pyros_assignment_5_node
+# target_link_libraries(roomba_control_node
 #   ${catkin_LIBRARIES}
 # )
 
@@ -158,7 +158,7 @@ add_dependencies(create_driver pyros_assignment_5_gencpp)
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS pyros_assignment_5 pyros_assignment_5_node
+# install(TARGETS roomba_control roomba_control_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -183,7 +183,7 @@ add_dependencies(create_driver pyros_assignment_5_gencpp)
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_pyros_assignment_5.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_roomba_control.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
