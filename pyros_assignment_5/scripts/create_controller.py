@@ -134,6 +134,14 @@ class TetheredDriveApp(Tk):
                 modeNum = 12
             elif k == 'E':
                 modeNum = 13
+            elif k == 'Z':
+                modeNum = 14;
+            elif k == 'X':
+                modeNum = 15;
+            elif k == 'B':
+                modeNum = 16;
+            elif k == 'O':
+                modeNum = 17;
             else:
                 print repr(k), "not handled"
         elif event.type == '3': # KeyRelease; need to figure out how to get constant

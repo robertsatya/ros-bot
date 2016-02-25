@@ -139,6 +139,7 @@ add_executable(motion_node_final src/motion_node_service.cpp)
 add_executable(reach_target_node src/reach_target.cpp)
 
 
+
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 # add_dependencies(joy_test_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
@@ -165,7 +166,6 @@ target_link_libraries(motion_node_final
 target_link_libraries(reach_target_node 
    ${catkin_LIBRARIES}
 )
-
 #############
 ## Install ##
 #############

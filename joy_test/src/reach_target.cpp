@@ -29,7 +29,7 @@ bool reach_callback(joy_test::Target::Request  &req, joy_test::Target::Response 
 	if(req.mode ==1 || req.mode ==2)
 	{
 		diff = req.target - x_mid;
-		thresh = 100;
+		thresh = 50;
 	}
 	else
 	{	
@@ -47,9 +47,9 @@ bool reach_callback(joy_test::Target::Request  &req, joy_test::Target::Response 
 			stream.clear();
 			stream.push_back(145);
 			stream.push_back(0);
-			stream.push_back(5);
+			stream.push_back(150);
 			stream.push_back(255);
-			stream.push_back(251);
+			stream.push_back(106);
 			srv.request.stream = stream;
 		  if (client.call(srv))
   		{
@@ -87,9 +87,9 @@ bool reach_callback(joy_test::Target::Request  &req, joy_test::Target::Response 
 			stream.clear();
 			stream.push_back(145);
 			stream.push_back(255);
-			stream.push_back(251);
+			stream.push_back(106);
 			stream.push_back(0);
-			stream.push_back(5);
+			stream.push_back(150);
 			srv.request.stream = stream;
 		  if (client.call(srv))
   		{
@@ -231,9 +231,9 @@ bool reach_callback(joy_test::Target::Request  &req, joy_test::Target::Response 
 			stream.clear();
 			stream.push_back(145);
 			stream.push_back(255);
-			stream.push_back(251);
+			stream.push_back(106);
 			stream.push_back(0);
-			stream.push_back(5);
+			stream.push_back(150);
 			srv.request.stream = stream;
 		  if (client.call(srv))
   		{
@@ -259,7 +259,7 @@ bool reach_callback(joy_test::Target::Request  &req, joy_test::Target::Response 
 			
 			srv_dist.request.mode = 4;
 
-			while(turn)
+			while(turn!=0)
 			{
 				if(turn == 1)
 				{
@@ -267,9 +267,9 @@ bool reach_callback(joy_test::Target::Request  &req, joy_test::Target::Response 
 					stream.clear();
 					stream.push_back(145);
 					stream.push_back(0);
-					stream.push_back(5);
+					stream.push_back(150);
 					stream.push_back(255);
-					stream.push_back(251);
+					stream.push_back(106);
 					srv.request.stream = stream;
 				  if (client.call(srv))
 		  		{
@@ -352,6 +352,8 @@ bool reach_callback(joy_test::Target::Request  &req, joy_test::Target::Response 
 					return false;
 				}
 			}
+
+			ROS_INFO("here i am");	
 
 			srv_dist.request.mode = 1;
 

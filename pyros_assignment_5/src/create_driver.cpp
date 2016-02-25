@@ -87,6 +87,10 @@ bool control_callback(pyros_assignment_5::create_control_service::Request  &req,
 	char cmd[1];
 	char beep[7];
 	char sense[2];
+	int cnt = 16;
+	ros::Rate r(50);
+	uint16_t n=0,left=0,right=0,diff_l=0,diff_r=0,sum_l=0,sum_r=0;
+
 	switch(curr_cmd) {
 		case 1:
 			cout << "Power on\n";
@@ -152,7 +156,8 @@ bool control_callback(pyros_assignment_5::create_control_service::Request  &req,
 			read_f = 1;
 			sense[0] = 142;
 		//	sense[1] = 25; // Battery charge
-			sense[1] = 7;
+//				sense[1] = 43;
+			sense[1] = 7; // Bump and wheeldrop
 			break;
 		case 13:
 			cout << "Brake\n";
@@ -161,6 +166,131 @@ bool control_callback(pyros_assignment_5::create_control_service::Request  &req,
 			byte[2] = 0;
 			byte[3] = 0;
 			byte[4] = 0;
+			break;
+		case 14:
+			cout << "Left Encoder Status: ";
+			flag = 3;
+			read_f = 1;
+			sense[0] = 142;
+		//	sense[1] = 25; // Battery charge
+				sense[1] = 43;
+		//	sense[1] = 7; // Bump and wheeldrop
+			break;
+		case 15:
+			cout << "Right Enconder Status: ";
+			flag = 3;
+			read_f = 1;
+			sense[0] = 142;
+		//	sense[1] = 25; // Battery charge
+				sense[1] = 44;
+		//	sense[1] = 7; // Bump and wheeldrop
+			break;
+		case 16:
+			cout << "Battery Status: ";
+			flag = 3;
+			read_f = 1;
+			sense[0] = 142;
+			sense[1] = 25; // Battery charge
+		//		sense[1] = 43;
+		//	sense[1] = 7; // Bump and wheeldrop
+			break;
+		case 17:
+			cout << "Battery Status: ";
+			flag = 4;
+			read_f = 1;
+			cnt = 16;
+			n=0,left=0,right=0,diff_l=0,diff_r=0,sum_l=0,sum_r=0;
+
+			sense[0] = 142;
+			sense[1] = 43;
+			tcflush(fd,TCIOFLUSH);
+//			r.sleep();
+//			r.sleep();
+			write(fd, sense, sizeof(sense));
+			tcdrain(fd);
+			r.sleep();
+			read(fd, sense, sizeof(sense));
+			n = sense[0] | sense[1] << 8;
+			cout << "Left: " << n << endl; 
+			left = n;
+//			r.sleep();
+			sense[0] = 142;
+			sense[1] = 44;
+//			tcflush(fd,TCIOFLUSH);
+			write(fd, sense, sizeof(sense));
+			tcdrain(fd);
+			r.sleep();
+			read(fd, sense, sizeof(sense));
+			n = sense[0] | sense[1] << 8;
+			cout << "Right: " << n << endl; 
+			right = n;
+			r.sleep();
+
+/*			while(cnt > 0 )
+			{
+			
+			
+			cout << "Moving forward at 200 mm/s\n";
+			byte[0] = 145;
+			byte[1] = 0;
+			byte[2] = 200;
+			byte[3] = 0;
+			byte[4] = 200;
+
+			write(fd, byte, sizeof(byte));
+			tcdrain(fd);
+			r.sleep();
+
+			sense[0] = 142;
+			sense[1] = 43;
+			write(fd, sense, sizeof(sense));
+			tcdrain(fd);
+			r.sleep();
+
+			read(fd, sense, sizeof(sense));
+			r.sleep();
+
+			write(fd, sense, sizeof(sense));
+			tcdrain(fd);
+			r.sleep();
+
+			read(fd, sense, sizeof(sense));
+			r.sleep();
+
+			n = sense[0] | sense[1] << 8;
+			diff_l = n - left;
+			diff_l = (diff_l<0)?(diff_l+65535):(diff_l);
+			cout << "Left: " << n  << " Diff: " << diff_l << endl; 
+			left = n;
+			sense[0] = 142;
+			sense[1] = 44;
+			write(fd, sense, sizeof(sense));
+			tcdrain(fd);
+			r.sleep();
+
+			read(fd, sense, sizeof(sense));
+			r.sleep();
+
+			write(fd, sense, sizeof(sense));
+			tcdrain(fd);
+			r.sleep();
+
+			read(fd, sense, sizeof(sense));
+			r.sleep();
+
+			n = sense[0] | sense[1] << 8;
+			cout << "Right: " << n << " Diff: " << diff_r << endl; 
+			diff_r = n - right;
+			diff_r = (diff_r<0)?(diff_r+65535):(diff_r);
+			right = n;
+			
+			sum_l += diff_l;
+			sum_r += diff_r;
+			cout << cnt << endl; 
+			cnt--;		 
+			}
+			cout << "Left: " << sum_l/16 << " Right: " << sum_r/16 << endl;
+*/
 			break;
 		case 0:
 			cout << "Brake\n";
@@ -181,19 +311,19 @@ bool control_callback(pyros_assignment_5::create_control_service::Request  &req,
 		write(fd, beep, sizeof(beep));
 	} else if ( flag == 3 ) {
 		write(fd, sense, sizeof(sense));
-	} else {
+	} else if (flag != 4 ){
 		write(fd, byte, sizeof(byte));
 	}
 	tcdrain(fd);
-	if ( read_f == 1 )
+	if ( read_f == 1 && flag !=4 )
 	{
-/* 		read(fd, sense, sizeof(sense));
+ 		read(fd, sense, sizeof(sense));
 		uint16_t n = sense[0] | sense[1] << 8;
-		cout << n; */
+		cout << n << endl; 
 
- 		read(fd, cmd, sizeof(cmd));
+/* 		read(fd, cmd, sizeof(cmd));
 		uint16_t n = cmd[0] & 3 , n1 = cmd[0] & 12;
-		cout << " " << n << " " << n1 << " "; 
+		cout << " " << n << " " << n1 << " "; */
 
 	}
 	return true;
