@@ -1,12 +1,25 @@
 #include <ros/ros.h>
 #include <tf/transform_listener.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/PointStamped.h>
 #include <visualization_msgs/Marker.h>
 
 ros::Publisher marker_pub;
 ros::Publisher location_pub;
 visualization_msgs::Marker marker;
 geometry_msgs::Pose p;
+
+/*void locCB(const geometry_msgs::PoseStampedConstPtr& loc)
+{
+		geometry_msgs::PointStamped p;
+  	p.header = loc->header;
+		p.point = loc->pose.position;
+		int mode = 1;
+    MyNode.doStuff(p,mode);
+  	while(MyNode.fin<3)
+  	{
+  	}
+}*/
 
 void locCallback(const geometry_msgs::PointStamped &loc)
 {
@@ -101,9 +114,11 @@ void locCallback(const geometry_msgs::PointStamped &loc)
 int main(int argc, char** argv){
   ros::init(argc, argv, "stereo_tf_listener");
 
-  ros::NodeHandle n,n1;
+  ros::NodeHandle n,n1,n2;
 
 	ros::Subscriber sub = n.subscribe("/left_point", 10, locCallback);
+//	ros::Subscriber loc_sub = n2.subscribe("loc",1000,locCB);
+
 	p.position.x = 0;
   p.position.y = 0;
   p.position.z = 0;
