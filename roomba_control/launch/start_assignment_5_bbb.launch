@@ -1,0 +1,6 @@
+<launch>
+
+  <node pkg="roomba_control" type="create_driver" name="create_driver" output="screen">
+  </node>
+
+</launch>

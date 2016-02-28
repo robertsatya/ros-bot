@@ -1,0 +1,18 @@
+<launch>
+ <node pkg="joy" type="joy_node" name="joy_stick">
+       <param name="dev" type="string" value="/dev/input/js0" />
+       <param name="deadzone" value="0.12" />
+       <param name="autorepeat_rate" value="30"/>
+ </node>
+
+ <node pkg="rosserial_python" type="serial_node.py" name="arduino_serial">
+       <param name="port" value="/dev/ttyACM0"/>
+       <param name="baud" value="115200"/>       
+ </node>
+
+  <node pkg="owi_arm" type="owi_joystick_node.py" name="controller">
+  </node>
+
+  <node pkg="owi_arm" type="arm_controller.py" name="animate_service">
+  </node>
+</launch>

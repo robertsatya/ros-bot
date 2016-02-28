@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot name="twitchy">
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <box size="0.097 0.070 0.014"/>
+      </geometry>
+      <material name="white">
+	<color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+  </link>
+  <link name="body_link">
+    <visual>
+      <geometry>
+        <box size="0.078 0.068 0.080"/>
+      </geometry>
+      <material name="magenta">
+	<color rgba="1 0 1 1"/>
+      </material>
+    </visual>
+  </link>
+  <link name="arm_link_1">
+    <visual>
+      <origin xyz="0 0 0.07" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.027 0.025 0.137"/>
+      </geometry>
+      <material name="yellow">
+	<color rgba="1 1 0 1"/>
+      </material>
+    </visual>
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="1"/>
+      <inertia ixx="100"  ixy="0"  ixz="0" iyy="100" iyz="0" izz="100" />
+    </inertial>
+  </link>
+  <link name="arm_link_2">
+    <visual>
+      <origin xyz="0.0705 0 0.0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.151 0.017 0.022"/>
+      </geometry>
+      <material name="cyan">
+	<color rgba="0 1 1 1"/>
+      </material>
+    </visual>
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="1"/>
+      <inertia ixx="100"  ixy="0"  ixz="0" iyy="100" iyz="0" izz="100" />
+    </inertial>
+  </link>
+  <link name="wrist">
+    <visual>
+      <geometry>
+        <cylinder length="0.01" radius="0.016"/>
+      </geometry>
+      <material name="mystery2">
+	<color rgba="0.1 1 0.3 1"/>
+      </material>
+    </visual>
+  </link>
+
+  <link name="end_effector">
+    <visual>
+      <geometry>
+        <cylinder length="0.01" radius="0.016"/>
+      </geometry>
+      <material name="mystery">
+	<color rgba="0.5 0.5 0.5 1"/>
+      </material>
+    </visual>
+  </link>
+  <link name="magnet">
+    <visual>
+      <geometry>
+        <cylinder length="0.005" radius="0.008"/>
+      </geometry>
+      <material name="mystery_red">
+	<color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+  </link>
+
+
+  <joint name="base_to_body" type="revolute">
+    <axis xyz="0 0 1"/>
+    <limit effort="1000.0" lower="-1.57" upper="1.57" velocity="0.5"/>
+    <parent link="base_link"/>
+    <child link="body_link"/>
+    <origin xyz="0.01 0 0.047"/>
+  </joint>
+  <joint name="body_to_arm1" type="revolute"> 
+    <limit effort="1000.0" lower="0" upper="1" velocity="0.5"/>
+    <axis xyz="0 1 0"/>
+    <parent link="body_link"/>
+    <child link="arm_link_1"/>
+    <origin xyz="0.015 0 0.035"/>
+  </joint>
+  <joint name="arm1_to_arm2" type="revolute">
+    <limit effort="1000.0" lower="-1.7" upper="1.7" velocity="0.5"/>  
+    <axis xyz="0 1 0"/>
+    <parent link="arm_link_1"/>
+    <child link="arm_link_2"/>
+    <origin xyz="0.0 0.0 0.137"/>
+  </joint>
+
+  <joint name="arm2_to_wrist" type="revolute">
+    <limit effort="1000.0" lower="-3.1415" upper="3.1415" velocity="0.5"/>  
+    <axis xyz="0 1 0"/>
+    <parent link="arm_link_2"/>
+    <child link="wrist"/>
+    <origin xyz="0.14 0.0 -0.015" />
+  </joint>
+
+  <joint name="wrist_to_endeffector" type="revolute">
+    <limit effort="1000.0" lower="-1.57" upper="1.57" velocity="0.5"/>  
+    <axis xyz="0 0 1"/>
+    <parent link="wrist"/>
+    <child link="end_effector"/>
+    <origin xyz="0.0 0.0 0.01" rpy="0 0 0"/>
+  </joint>
+
+  <joint name="endeffector_to_magnet" type="fixed">
+    <parent link="end_effector"/>
+    <child link="magnet"/>
+    <origin xyz="0.0 0.0 -0.005"/>
+  </joint>
+
+
+</robot>

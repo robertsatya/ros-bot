@@ -1,6 +1,8 @@
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
+#include <csignal>
+#include <cmath>
 
 #include <ros/ros.h>
 #include <image_transport/image_transport.h>
@@ -20,48 +22,52 @@ using namespace std;
 using namespace cv;
 
 
-double disparity_ratio;
-int disparity_ratio_int;
-void updateDisp(int, void* );
+void sigHandle(int sig_id);
 
 class DisparityTrack
 {
 	ros::NodeHandle n;
 	ros::Subscriber image_sub1, image_sub2;
 	ros::Publisher left_point_pub;
-	double x_center, y_center;
-	double img_width, img_height;
 	int lower_thresh[3], upper_thresh[3];
-	double prev_left_pos[2];
-	double dx, depth;
-	double Kmat[3][3];
-	Mat K;
+	double prev_left_pos[2], prev_right_pos[2];
+	Mat Pj_left, Pj_right, left_pt, right_pt;
+	double Pjl[3][4], Pjr[3][4];
+	double x_pos, y_pos, depth;
 
 public:
 	DisparityTrack() {
 		left_point_pub = n.advertise<geometry_msgs::PointStamped>("left_point", 5);
 		image_sub1 = n.subscribe("/left_cam/image_raw", 100, &DisparityTrack::left_cb, this);
 		image_sub2 = n.subscribe("/right_cam/image_raw", 100, &DisparityTrack::right_cb, this);
-		lower_thresh[0] = 3; lower_thresh[1] = 113; lower_thresh[2] = 123;
+		lower_thresh[0] = 3; lower_thresh[1] = 134; lower_thresh[2] = 130;
 		upper_thresh[0] = 18; upper_thresh[1] = 222; upper_thresh[2] = 255;
-		disparity_ratio = 211.1;
-		dx = 1;
+		x_pos = 0; y_pos = 0; depth = 0;
 
-		img_width = 640.0;
-		img_height = 480.0;
-		x_center = img_width/2; y_center = img_height/2;
-		Kmat[0][0] = 822.324161923132; Kmat[0][1] = 0; Kmat[0][2] = 335.9440815662755;
-		Kmat[1][0] = 0; Kmat[1][1] = 837.2065020719881; Kmat[1][2] = 199.7435926780396;
-		Kmat[2][0] = 0; Kmat[2][1] = 0; Kmat[2][2] = 1;
-		K = Mat(3, 3, DataType<double>::type, &Kmat);
-		// cout << K << endl;
-		K = K.inv();
-		// cout << K << endl;
-		namedWindow("Disp Control", WINDOW_AUTOSIZE);
-		disparity_ratio_int = disparity_ratio*10;
-		createTrackbar("Disparity Ratio", "Disp Control", &disparity_ratio_int, 500, updateDisp);
-		//updateDisp(disparity_ratio_int, 0);
+		Pjl[0][0] = 870.1896695734192; Pjl[0][1] = 0; Pjl[0][2] = 345.4360542297363; Pjl[0][3] = 0;
+		Pjl[1][0] = 0; Pjl[1][1] = 870.1896695734192; Pjl[1][2] = 260.3978462219238; Pjl[1][3] = 0;
+		Pjl[2][0] =	0; Pjl[2][1] = 0; Pjl[2][2] = 1; Pjl[2][3] = 0;
+
+		Pj_left = Mat(3, 4, DataType<double>::type, &Pjl);
+
+		Pjr[0][0] = 870.1896695734192; Pjr[0][1] = 0; Pjr[0][2] = 345.4360542297363; Pjr[0][3] = 13321.68894098538;
+		Pjr[1][0] = 0; Pjr[1][1] = 870.1896695734192; Pjr[1][2] = 260.3978462219238; Pjr[1][3] = 0;
+		Pjr[2][0] =	0; Pjr[2][1] = 0; Pjr[2][2] = 1; Pjr[2][3] = 0;
+
+		Pj_right = Mat(3, 4, DataType<double>::type, &Pjr);
+
+		namedWindow("Control Window", WINDOW_AUTOSIZE);
+		createTrackbar("H_min", "Control Window", &lower_thresh[0], 255);
+		createTrackbar("S_min", "Control Window", &lower_thresh[1], 255);
+		createTrackbar("V_min", "Control Window", &lower_thresh[2], 255);
+		createTrackbar("H_max", "Control Window", &upper_thresh[0], 255);
+		createTrackbar("S_max", "Control Window", &upper_thresh[1], 255);
+		createTrackbar("V_max", "Control Window", &upper_thresh[2], 255);
+
 		prev_left_pos[0] = 0; prev_left_pos[1] = 0;
+		prev_right_pos[0] = 0; prev_right_pos[1] = 0;
+		left_pt = cv::Mat(1,1,CV_64FC2);
+		right_pt = cv::Mat(1,1,CV_64FC2);
 	}
 
 	void left_cb(const sensor_msgs::Image& msg) {
@@ -72,11 +78,21 @@ public:
 			ROS_ERROR("cv_bridge exception: %s", e.what());
 			return;
 		}
-		Mat hsv, masked;
+		Mat hsv, masked, thr_img, fin;
+		vector<Vec3f> balls;
 		Mat img = cv_ptr->image;
 		cvtColor(img, hsv, CV_BGR2HSV);
+
 		inRange(hsv, Scalar(lower_thresh[0], lower_thresh[1], lower_thresh[2]),
 			Scalar(upper_thresh[0], upper_thresh[1], upper_thresh[2]), masked);
+
+		GaussianBlur( masked, masked, Size(9, 9), 2, 2 );
+
+		thr_img = masked;
+
+		HoughCircles( masked, balls, CV_HOUGH_GRADIENT, 1, 10, 50, 30, 0, 0 );
+
+		cv::bitwise_and(img, img, fin, thr_img);
 
 		erode(masked, masked, getStructuringElement(MORPH_ERODE, Point(3,3)) );
 		dilate(masked, masked, getStructuringElement(MORPH_DILATE, Point(3,3)) );
@@ -88,8 +104,17 @@ public:
 			prev_left_pos[1] = moments.m01/moments.m00;
 			int cx = prev_left_pos[0];
 			int cy = prev_left_pos[1];
-			cv::circle(img, cv::Point(cx, cy), 10, Scalar(0, 0, 255), 2);
+
+			left_pt.at<cv::Vec2d>(0,0)[0] = cx;
+			left_pt.at<cv::Vec2d>(0,0)[1] = cy;
+
+			cv::circle(fin, cv::Point(cx, cy), 10, Scalar(0, 0, 255), 2);
+			draw(fin, balls);
+			if (balls.size() != 0)
+				cout << "count: " << balls.size() << endl;
 		}
+
+		imshow("Thresh Image", fin);
 
 		waitKey(3);
 	}
@@ -105,8 +130,11 @@ public:
 		Mat hsv, masked;
 		Mat img = cv_ptr->image;
 		cvtColor(img, hsv, CV_BGR2HSV);
+
 		inRange(hsv, Scalar(lower_thresh[0], lower_thresh[1], lower_thresh[2]),
 			Scalar(upper_thresh[0], upper_thresh[1], upper_thresh[2]), masked);
+
+		GaussianBlur( hsv, hsv, Size(9, 9), 2, 2 );
 
 		erode(masked, masked, getStructuringElement(MORPH_ERODE, Point(3,3)) );
 		dilate(masked, masked, getStructuringElement(MORPH_DILATE, Point(3,3)) );
@@ -117,64 +145,59 @@ public:
 			double cx = moments.m10/moments.m00;
 			double cy = moments.m01/moments.m00;
 
-			dx = (double)(prev_left_pos[0] - cx);
-			depth = disparity_ratio/dx;
+			prev_right_pos[0] = cx;
+			prev_right_pos[1] = cy;
 
-			//cout << prev_left_pos[0] << " "<< prev_left_pos[1] <<" " << depth << endl;
+			right_pt.at<cv::Vec2d>(0,0)[0] = cx;
+			right_pt.at<cv::Vec2d>(0,0)[1] = cy;
 
-			postLeftPoint(prev_left_pos[0], prev_left_pos[1], depth);
+			Mat out = Mat(4, 1, DataType<double>::type);
+			cv::triangulatePoints(Pj_left, Pj_right, left_pt, right_pt, out);
+
+			out = out / out.at<double>(0,3);
+
+			x_pos = out.at<double>(0,0);
+			y_pos = out.at<double>(0,1);
+			depth = out.at<double>(0,2);
+
+			postLeftPoint(x_pos, y_pos, depth);
 		}
 
 		waitKey(3);
 	}
 
 	void postLeftPoint (double x, double y, double depth) {
-		//cout << "***********start**************" << endl;
-		double _x[3] = {x, y, 1.0};
-		//cout << K << endl;
-		//cout << _x[0] << "  " << _x[1] << "  "<< _x[2] << endl;
-		Mat pos = cv::Mat(3, 1, DataType<double>::type, *_x);
-		// cout << pos << endl;
-		// transpose(pos, pos);
-		// cout << K << endl;
-		Mat worldPos; //worldPos = (K * pos);// * depth ;
-		//gemm(K, pos, 1.0, NULL, 0, worldPos, 0);
-
-		double sum;
-		double c[3] = {0};
-		for(int i=0;i<3;i++){ //row of first matrix
-			sum=0;
-			for(int k=0;k<3;k++)
-				sum = sum + K.at<double>(i,k) * _x[k];
-			c[i]=sum*depth;
-		}
-		//cout << c[0] << "  " << c[1] << "  "<< c[2] << endl;
-		//cout << worldPos << endl;
-//		double* wData = (double*) worldPos.data;
-//		cout << wData[0] << endl;
 		geometry_msgs::PointStamped point;
 		point.header.frame_id = "/left_camera";
 		point.header.stamp = ros::Time().now();
-		point.point.x = c[0]; //worldPos.at<double>(0);
-		point.point.y = c[1]; //worldPos.at<double>(1);
-		point.point.z = c[2]; //worldPos.at<double>(2);
-//		cout << point.point.x << " " << point.point.y << " " << point.point.z << endl;
+		point.point.x = x_pos;
+		point.point.y = y_pos;
+		point.point.z = depth;
+
 		left_point_pub.publish(point);
 	}
 
+	 void draw(cv::Mat& mat, const std::vector<cv::Vec3f>& container)
+	{
+		if(!container.empty())
+			for(unsigned i = 0; i != container.size() && i != 4; ++i)
+				if(container[i][2] > 5 && container[i][2] < 80)
+					cv::circle(mat, cv::Point(container[i][0], container[i][1]), 45, cv::Scalar(255,0,0), 3);
+	}
 
 };
-
-
 
 int main(int argc, char *argv[])
 {
 	ros::init(argc, argv, "depth_tracking");
+	signal(SIGINT, sigHandle);
+	signal(SIGTERM, sigHandle);
 	DisparityTrack dt = DisparityTrack();
 	ros::spin();
 	return 0;
 }
 
-void updateDisp(int , void* ) {
-	disparity_ratio = (double)disparity_ratio_int*0.1;
+void sigHandle(int sig_id) {
+	cout << "KIller !! :(" << endl;
+	exit(sig_id);
 }

@@ -13,7 +13,7 @@ void locCallback(const geometry_msgs::PointStamped &loc)
   tf::TransformListener listener;
 
 	ros::NodeHandle node;
-  ros::Rate rate(1.0);
+  ros::Rate rate(100);
     tf::StampedTransform transform;
 //		const ros::Time time = ros::Time(0);
 
@@ -24,8 +24,8 @@ void locCallback(const geometry_msgs::PointStamped &loc)
     loc1.pose.orientation.z = 0;
     loc1.pose.orientation.w = 1;
 		loc1.pose.position.x = loc.point.z;
-		loc1.pose.position.y = loc.point.x;
-		loc1.pose.position.z = loc.point.y;
+		loc1.pose.position.y = -loc.point.x;
+		loc1.pose.position.z = -loc.point.y;
     loc1.header = loc.header;
 
 		parent_point = loc1;
@@ -135,7 +135,7 @@ int main(int argc, char** argv){
     // Set the scale of the marker -- 1x1x1 here means 1m on a side
     marker.scale.x = 0.1;
     marker.scale.y = 0.1;
-    marker.scale.z = 0.11;
+    marker.scale.z = 0.1;
 
     // Set the color -- be sure to set alpha to something non-zero!
     marker.color.r = 0.84f;

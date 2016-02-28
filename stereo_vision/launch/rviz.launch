@@ -1,7 +1,8 @@
 <launch>
 
 	<param name="robot_description" textfile="$(find stereo_vision)/launch/basic.urdf" />
-<!--	<param name="robot_description_1" textfile="$(find stereo_vision)/launch/ball.urdf" /> -->
+	<!--	<param name="robot_description_1" textfile="$(find stereo_vision)/launch/ball.urdf" /> -->
+	<!-- Left Camera -->
 	<node name="left_cam" pkg="usb_cam" type="usb_cam_node">
 		<param name="video_device" value="/dev/video1" />
 		<param name="camera_frame_id" value="left_camera" />
@@ -11,6 +12,8 @@
 		<param name="image_width" value="640" />
 		<param name="image_height" value="480" />
 	</node>
+
+<!-- Right Camera -->
 
 	<node name="right_cam" pkg="usb_cam" type="usb_cam_node">
 		<param name="video_device" value="/dev/video2" />
@@ -22,9 +25,9 @@
 		<param name="image_height" value="480" />
 	</node>
 
-  <node name="stereo_tf_listener" pkg="stereo_vision" type="stereo_tf_listener" output="screen" />
+	<node name="stereo_tf_listener" pkg="stereo_vision" type="stereo_tf_listener" output="screen" />
 	<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
 	<node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
-  <node name="rviz" type="rviz" pkg="rviz" args="-d $(find stereo_vision)/launch/stereo.rviz" />
+	<node name="rviz" type="rviz" pkg="rviz" args="-d $(find stereo_vision)/launch/stereo.rviz" />
 	<node name="depth_tracking" pkg="stereo_vision" type="depth_tracking" output="screen" />
 </launch>

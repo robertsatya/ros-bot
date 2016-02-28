@@ -1,4 +1,0 @@
-uint8[] stream
-int16 flag
----
-bool success
