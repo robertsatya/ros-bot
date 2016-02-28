@@ -1,8 +1,0 @@
-<launch>
-
-	<node pkg="joy_test" name="joynode" type="joynode" output="screen"/>
-	<node pkg="joy" name="joy_node" type="joy_node" output="screen"/>
-	<node pkg="joy_test" name="create_driver_final" type="create_driver_final" output="screen"/>
-	<node pkg="joy_test" name="reach_target_node" type="reach_target_node" output="screen"/>
-<!-- Run streamer_run.sh for beaglebone -->
-</launch>
