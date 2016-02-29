@@ -1,0 +1,9 @@
+#goal definition
+geometry_msgs/PointStamped dest
+uint8 type
+---
+#result definition
+geometry_msgs/PointStamped final_loc
+---
+#feedback
+geometry_msgs/PointStamped cur_loc
