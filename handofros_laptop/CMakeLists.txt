@@ -142,7 +142,7 @@ include_directories(
 # target_link_libraries(handofros_laptop_node
 #   ${catkin_LIBRARIES}
 # )
-add_executable(h2_keyboard_node src/modeselectornode.cpp)
+add_executable(h_keyboard_node src/modeselectornode.cpp)
 target_link_libraries(h_keyboard_node
   ${catkin_LIBRARIES}
 )

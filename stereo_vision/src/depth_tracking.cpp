@@ -30,6 +30,7 @@ class DisparityTrack
 	ros::Subscriber image_sub1, image_sub2;
 	ros::Publisher left_point_pub;
 	int lower_thresh[3], upper_thresh[3];
+	int glower_thresh[3], gupper_thresh[3];
 	double prev_left_pos[2], prev_right_pos[2];
 	Mat Pj_left, Pj_right, left_pt, right_pt;
 	double Pjl[3][4], Pjr[3][4];
@@ -42,6 +43,8 @@ public:
 		image_sub2 = n.subscribe("/right_cam/image_raw", 100, &DisparityTrack::right_cb, this);
 		lower_thresh[0] = 3; lower_thresh[1] = 134; lower_thresh[2] = 130;
 		upper_thresh[0] = 18; upper_thresh[1] = 222; upper_thresh[2] = 255;
+		glower_thresh[0] = 37; glower_thresh[1] = 160; glower_thresh[2] = 44;
+		gupper_thresh[0] = 52; gupper_thresh[1] = 215; gupper_thresh[2] = 255;
 		x_pos = 0; y_pos = 0; depth = 0;
 
 		Pjl[0][0] = 870.1896695734192; Pjl[0][1] = 0; Pjl[0][2] = 345.4360542297363; Pjl[0][3] = 0;
@@ -78,7 +81,7 @@ public:
 			ROS_ERROR("cv_bridge exception: %s", e.what());
 			return;
 		}
-		Mat hsv, masked, thr_img, fin;
+		Mat hsv, masked, gmasked, thr_img, fin;
 		vector<Vec3f> balls;
 		Mat img = cv_ptr->image;
 		cvtColor(img, hsv, CV_BGR2HSV);
@@ -86,18 +89,26 @@ public:
 		inRange(hsv, Scalar(lower_thresh[0], lower_thresh[1], lower_thresh[2]),
 			Scalar(upper_thresh[0], upper_thresh[1], upper_thresh[2]), masked);
 
+		inRange(hsv, Scalar(glower_thresh[0], glower_thresh[1], glower_thresh[2]),
+			Scalar(gupper_thresh[0], gupper_thresh[1], gupper_thresh[2]), gmasked);
+
 		GaussianBlur( masked, masked, Size(9, 9), 2, 2 );
+		GaussianBlur( gmasked, gmasked, Size(9, 9), 2, 2 );
 
 		thr_img = masked;
 
-		HoughCircles( masked, balls, CV_HOUGH_GRADIENT, 1, 10, 50, 30, 0, 0 );
+		// HoughCircles( masked, balls, CV_HOUGH_GRADIENT, 1, 10, 50, 30, 0, 0 );
 
 		cv::bitwise_and(img, img, fin, thr_img);
 
 		erode(masked, masked, getStructuringElement(MORPH_ERODE, Point(3,3)) );
 		dilate(masked, masked, getStructuringElement(MORPH_DILATE, Point(3,3)) );
 
+		erode(gmasked, gmasked, getStructuringElement(MORPH_ERODE, Point(3,3)) );
+		dilate(gmasked, gmasked, getStructuringElement(MORPH_DILATE, Point(3,3)) );
+
 		Moments moments = cv::moments(masked, false);
+		Moments gmoments = cv::moments(gmasked, false);
 
 		if(moments.m00 > 0) {
 			prev_left_pos[0] = moments.m10/moments.m00;
@@ -109,9 +120,19 @@ public:
 			left_pt.at<cv::Vec2d>(0,0)[1] = cy;
 
 			cv::circle(fin, cv::Point(cx, cy), 10, Scalar(0, 0, 255), 2);
-			draw(fin, balls);
-			if (balls.size() != 0)
-				cout << "count: " << balls.size() << endl;
+			// draw(fin, balls);
+			// if (balls.size() != 0)
+			// 	cout << "count: " << balls.size() << endl;
+		}
+
+		if(gmoments.m00 > 0) {
+			int cx = gmoments.m10/gmoments.m00;
+			int cy = gmoments.m01/gmoments.m00;
+
+			cv::circle(fin, cv::Point(cx, cy), 10, Scalar(0, 0, 255), 2);
+			// draw(fin, balls);
+			// if (balls.size() != 0)
+			// 	cout << "count: " << balls.size() << endl;
 		}
 
 		imshow("Thresh Image", fin);
