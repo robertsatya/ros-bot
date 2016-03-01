@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
 	geometry_msgs
+	serial
 )
 
 ## System dependencies are found with CMake's conventions
@@ -168,6 +169,18 @@ target_link_libraries(
 
 add_dependencies(
   nav_client
+  ${rob_nav_EXPORTED_TARGETS}
+)
+
+add_executable(nav_serial src/serial_test.cpp)
+
+target_link_libraries( 
+  nav_serial
+  ${catkin_LIBRARIES}
+)
+
+add_dependencies(
+  nav_serial
   ${rob_nav_EXPORTED_TARGETS}
 )
 #############
