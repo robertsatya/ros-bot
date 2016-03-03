@@ -57,11 +57,12 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
+ add_service_files(
+   FILES
+	 Arm.srv
 #   Service1.srv
 #   Service2.srv
-# )
+ )
 
 ## Generate actions in the 'action' folder
  add_action_files(
@@ -183,6 +184,18 @@ add_dependencies(
   nav_serial
   ${rob_nav_EXPORTED_TARGETS}
 )
+
+add_executable(nav_arm src/nav_arm.cpp)
+
+target_link_libraries( 
+  nav_arm
+  ${catkin_LIBRARIES}
+)
+
+add_dependencies(
+  nav_arm
+  ${rob_nav_EXPORTED_TARGETS}
+)
 #############
 ## Install ##
 #############
@@ -192,10 +205,10 @@ add_dependencies(
 
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
-# install(PROGRAMS
-#   scripts/my_python_script
-#   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
+ install(PROGRAMS
+   scripts/arm_server.py
+   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+ )
 
 ## Mark executables and/or libraries for installation
 # install(TARGETS rob_nav rob_nav_node
