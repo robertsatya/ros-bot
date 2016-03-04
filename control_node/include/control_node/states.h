@@ -14,6 +14,7 @@
 #define STATE_MOVE_TO_GOAL 11
 #define STATE_DROP_BALL_AT_GOAL 12
 #define STATE_SEARCH_MISSED_BALLS 13
+#define STATE_ERROR -1
 
 extern int control_state;
 
