@@ -10,6 +10,7 @@
 #include <sensor_msgs/image_encodings.h>
 #include <sensor_msgs/Image.h>
 #include <geometry_msgs/PointStamped.h>
+#include <control_node/BroadSearch.h>
 
 #include <opencv2/opencv.hpp>
 #include <opencv2/features2d/features2d.hpp>
@@ -198,6 +199,13 @@ public:
 		left_point_pub.publish(point);
 	}
 
+	bool send_loc(control_node::BroadSearch::Request &req, control_node::BroadSearch::Response &res) {
+		res.x = x_pos;
+		res.y = y_pos;
+		res.depth = depth;
+		return true;
+	}
+
 	 void draw(cv::Mat& mat, const std::vector<cv::Vec3f>& container)
 	{
 		if(!container.empty())
@@ -214,6 +222,8 @@ int main(int argc, char *argv[])
 	signal(SIGINT, sigHandle);
 	signal(SIGTERM, sigHandle);
 	DisparityTrack dt = DisparityTrack();
+	ros::NodeHandle nh;
+	ros::ServiceServer service = nh.advertiseService("broad_search_service", &DisparityTrack::send_loc, &dt);
 	ros::spin();
 	return 0;
 }
