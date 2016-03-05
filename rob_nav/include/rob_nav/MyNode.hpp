@@ -22,12 +22,13 @@ public:
 	
 
 
-  void doStuff(geometry_msgs::PointStamped point, int mode)
+  void doStuff(geometry_msgs::PointStamped point, int mode, double angle, int dir)
   {
     navigationGoal goal;
     goal.dest = point;
 		goal.type = mode;
-
+		goal.angle = angle;
+		goal.dir = dir;
     // Need boost::bind to pass in the 'this' pointer
     ac.sendGoal(goal,
                 boost::bind(&MyNode::doneCb, this, _1, _2),
@@ -40,7 +41,7 @@ public:
 	void doneCb(const actionlib::SimpleClientGoalState& state,
 	            const navigationResultConstPtr& result)
 	{
-	  ROS_INFO("Got Final location : (%f , %f , %f)\n", result->final_loc.point.x,result->final_loc.point.y,result->final_loc.point.z);
+	  ROS_INFO("Got Final location : (%f , %f , %f, %f)\n", result->final_loc.point.x,result->final_loc.point.y,result->final_loc.point.z,result->angle);
 /*	  ROS_INFO("Finished in state [%s]", state.toString().c_str());
 	  ROS_INFO("Answer: %i", result->sequence.back());*/
 		fin = 3;

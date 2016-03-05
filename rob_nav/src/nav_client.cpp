@@ -14,20 +14,35 @@ int main (int argc, char **argv)
 
 	MyNode my_node;
 	geometry_msgs::PointStamped p;
-	int i=1,mode=0;
+	int i=1,mode=0,dir=0;
+	double angle=0;
 	while(ros::ok())
 	{
   	p.header.seq = i;
   	p.header.stamp = ros::Time::now();
   	p.header.frame_id = "/robot";
-		cout << "Please enter forward coordinate";
-  	cin >> p.point.x;
 		cout << "Please enter mode: 1) Forward 2) Circular";
   	cin >> mode;
-
-  	p.point.y = 0;
+		
+		switch(mode)
+		{
+			case 0: cout << "\nPlease enter angle";
+  						cin >> angle;
+							break;
+			case 1: cout << "\nPlease enter forward X coordinate";
+				  		cin >> p.point.x;
+							cout << "\nPlease enter forward Y coordinate";
+				  		cin >> p.point.y;
+							break;
+			case 2: cout << "\nPlease enter timed dir";
+				  		cin >> dir;
+			case 3: cout << "\nPlease enter max search angle";
+							break;
+			default: break;
+		}
+	
   	p.point.z = 0;
-    my_node.doStuff(p,mode);
+    my_node.doStuff(p,mode,angle,dir);
   	while(my_node.fin<3)
   	{
   	}
