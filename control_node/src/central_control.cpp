@@ -13,6 +13,9 @@
 #include <control_node/states.h>
 #include <control_node/BroadSearch.h>
 
+#include <geometry_msgs/PointStamped.h>
+#include <rob_nav/MyNode.hpp>
+
 using namespace std;
 
 int control_state, prev_state;
@@ -28,6 +31,7 @@ int main(int argc, char *argv[])
 	ros::ServiceClient broadSearchClient = n.serviceClient<control_node::BroadSearch>("broad_search_service");
 	control_node::BroadSearch searchsrv;
 	float pos[3] = {0};
+	int frame_seq = 0;
 	while(control_state != STATE_ERROR) {
 		switch(control_state) {
 			case STATE_INIT:
@@ -46,6 +50,20 @@ int main(int argc, char *argv[])
 				break;
 			case STATE_MOVE_TO_BALL:
 				cout << "Going to ball" << endl;
+				MyNode motion_node;
+				geometry_msgs::PointStamped p;
+				int mode=1,dir=0,cmd_freq=1;
+				double angle=0;
+			 	p.header.seq = frame_seq++;
+		  	p.header.stamp = ros::Time::now();
+  			p.header.frame_id = "/robot";
+				p.point.x = pos[2];
+				p.point.y = -pos[0];
+				p.point.z = -pos[1];
+				motion_node.doStuff(p,mode,angle,dir,cmd_freq);
+				while(motion_node.fin<3)
+  			{
+  			}
 				control_state = STATE_ERROR;
 				break;
 		}

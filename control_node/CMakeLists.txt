@@ -5,10 +5,13 @@ project(control_node)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+#  actionlib
+#  actionlib_msgs
   roscpp
   rospy
   std_msgs
   message_generation
+	rob_nav
 )
 
 ## System dependencies are found with CMake's conventions
@@ -102,7 +105,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES control_node
- CATKIN_DEPENDS roscpp rospy std_msgs message_runtime
+  CATKIN_DEPENDS roscpp rospy std_msgs message_runtime rob_nav
 #  DEPENDS system_lib
 )
 
