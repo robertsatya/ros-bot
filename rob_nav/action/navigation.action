@@ -2,7 +2,8 @@
 geometry_msgs/PointStamped dest
 uint8 type # 0-Rotate 1-Goal 2-Close Search 3-Home Search
 float64 angle #in radians
-uint8 dir # 0-Forward 1-Backward 2-Left 3-Right
+uint8 dir # 0-Forward 1-Backward 2-Left 3-Right 4-Successful 5-Unsuccessful
+uint8 cmd_freq 
 ---
 #result definition
 geometry_msgs/PointStamped final_loc

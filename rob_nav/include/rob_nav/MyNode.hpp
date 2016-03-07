@@ -22,13 +22,16 @@ public:
 	
 
 
-  void doStuff(geometry_msgs::PointStamped point, int mode, double angle, int dir)
+  void doStuff(geometry_msgs::PointStamped point, int mode, double angle, int dir, int cmd_freq)
   {
     navigationGoal goal;
     goal.dest = point;
 		goal.type = mode;
 		goal.angle = angle;
 		goal.dir = dir;
+		goal.cmd_freq = cmd_freq;
+
+		fin = 0;
     // Need boost::bind to pass in the 'this' pointer
     ac.sendGoal(goal,
                 boost::bind(&MyNode::doneCb, this, _1, _2),

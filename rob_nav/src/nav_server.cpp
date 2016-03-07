@@ -133,20 +133,26 @@ public:
 		rw.sleep();
 	}*/
 
-	void move_timed_straight(int dir)
+	void move_timed_straight(int dir, int freq=1)
 	{
-		move_straight(100*dir,100*dir);
-		usleep(time_burst_sleep);
-		move_straight(0,0);
-		usleep(time_burst_sleep);
+		for(int i=0; i<freq; i++)
+		{
+			move_straight(100*dir,100*dir);
+			usleep(time_burst_sleep);
+			move_straight(0,0);
+			usleep(time_burst_sleep);
+		}
 	}
 
-	void move_timed_turn(int dir)
+	void move_timed_turn(int dir, int freq=1)
 	{
-		move_turn(100*dir,-100*dir);
-		usleep(time_burst_sleep);
-		move_straight(0,0);
-		usleep(time_burst_sleep);
+		for(int i=0; i<freq; i++)
+		{
+			move_turn(100*dir,-100*dir);
+			usleep(time_burst_sleep);
+			move_straight(0,0);
+			usleep(time_burst_sleep);
+		}
 	}
 
 	void move_controlled_straight(double dist, double &dist_final)
@@ -421,17 +427,21 @@ public:
 		start();
 		safe();
 
-		double x_del = goal->dest.point.x - stationary_loc.pose.position.x;
-		double y_del = goal->dest.point.y - stationary_loc.pose.position.y;
+//		double x_del = goal->dest.point.x - stationary_loc.pose.position.x;
+//		double y_del = goal->dest.point.y - stationary_loc.pose.position.y;
+		double x_del = goal->dest.point.x;
+		double y_del = goal->dest.point.y;
 
-		cout << "x_del:" << x_del << " y_del:" << y_del << "Init angle:" << stationary_loc.pose.orientation.z << endl;
+
+//		cout << "x_del:" << x_del << " y_del:" << y_del << "Init angle:" << stationary_loc.pose.orientation.z << endl;
 
 		double dist_est = 10*pow(pow(x_del,2) +	pow(y_del,2),0.5), dist_final = 0;
-		double angle_diff_est = (x_del==0)?(y_del>=0?PI/2:-PI/2):atan2(y_del,x_del) - stationary_loc.pose.orientation.z;
-		
-		cout << "Init calc D:" << dist_est << " A:" << angle_diff_est << endl;
+//		double angle_diff_est = (x_del==0)?(y_del>=0?PI/2:-PI/2):atan2(y_del,x_del) - stationary_loc.pose.orientation.z;
+		double angle_diff_est = (x_del==0)?(y_del>=0?PI/2:-PI/2):atan2(y_del,x_del);
+	
+//		cout << "Init calc D:" << dist_est << " A:" << angle_diff_est << endl;
 		force_angle_range(angle_diff_est);
-		cout << "Init calc D:" << dist_est << " A:" << angle_diff_est << endl;
+//		cout << "Init calc D:" << dist_est << " A:" << angle_diff_est << endl;
 
 
 		// Set turn_dir from goal->turn_dir
@@ -451,15 +461,16 @@ public:
 		else
 		if(goal->type == 2)
 		{
+			int freq = goal->cmd_freq;
 			switch(goal->dir)
 			{
-				case 0: move_timed_straight(1);
+				case 0: move_timed_straight(1,freq);
 								break;
-				case 1: move_timed_straight(-1);
+				case 1: move_timed_straight(-1,freq);
 								break;
-				case 2: move_timed_turn(1);
+				case 2: move_timed_turn(1,freq);
 								break;
-				case 3: move_timed_turn(-1);
+				case 3: move_timed_turn(-1,freq);
 								break;
 				default: break;
 			}
