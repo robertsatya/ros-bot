@@ -13,6 +13,8 @@
 #include <control_node/states.h>
 #include <control_node/BroadSearch.h>
 
+#include <rob_nav/MyNode.hpp>
+
 using namespace std;
 
 int control_state, prev_state;
