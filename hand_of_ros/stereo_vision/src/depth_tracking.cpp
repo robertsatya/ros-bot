@@ -90,11 +90,11 @@ public:
 		inRange(hsv, Scalar(lower_thresh[0], lower_thresh[1], lower_thresh[2]),
 			Scalar(upper_thresh[0], upper_thresh[1], upper_thresh[2]), masked);
 
-		inRange(hsv, Scalar(glower_thresh[0], glower_thresh[1], glower_thresh[2]),
-			Scalar(gupper_thresh[0], gupper_thresh[1], gupper_thresh[2]), gmasked);
+		// inRange(hsv, Scalar(glower_thresh[0], glower_thresh[1], glower_thresh[2]),
+		// 	Scalar(gupper_thresh[0], gupper_thresh[1], gupper_thresh[2]), gmasked);
 
 		GaussianBlur( masked, masked, Size(9, 9), 2, 2 );
-		GaussianBlur( gmasked, gmasked, Size(9, 9), 2, 2 );
+		// GaussianBlur( gmasked, gmasked, Size(9, 9), 2, 2 );
 
 		thr_img = masked;
 
@@ -105,11 +105,11 @@ public:
 		erode(masked, masked, getStructuringElement(MORPH_ERODE, Point(3,3)) );
 		dilate(masked, masked, getStructuringElement(MORPH_DILATE, Point(3,3)) );
 
-		erode(gmasked, gmasked, getStructuringElement(MORPH_ERODE, Point(3,3)) );
-		dilate(gmasked, gmasked, getStructuringElement(MORPH_DILATE, Point(3,3)) );
+		// erode(gmasked, gmasked, getStructuringElement(MORPH_ERODE, Point(3,3)) );
+		// dilate(gmasked, gmasked, getStructuringElement(MORPH_DILATE, Point(3,3)) );
 
 		Moments moments = cv::moments(masked, false);
-		Moments gmoments = cv::moments(gmasked, false);
+		// Moments gmoments = cv::moments(gmasked, false);
 
 		if(moments.m00 > 0) {
 			prev_left_pos[0] = moments.m10/moments.m00;
@@ -126,15 +126,15 @@ public:
 			// 	cout << "count: " << balls.size() << endl;
 		}
 
-		if(gmoments.m00 > 0) {
-			int cx = gmoments.m10/gmoments.m00;
-			int cy = gmoments.m01/gmoments.m00;
+		// if(gmoments.m00 > 0) {
+		// 	int cx = gmoments.m10/gmoments.m00;
+		// 	int cy = gmoments.m01/gmoments.m00;
 
-			cv::circle(fin, cv::Point(cx, cy), 10, Scalar(0, 0, 255), 2);
-			// draw(fin, balls);
-			// if (balls.size() != 0)
-			// 	cout << "count: " << balls.size() << endl;
-		}
+		// 	cv::circle(fin, cv::Point(cx, cy), 10, Scalar(0, 0, 255), 2);
+		// 	// draw(fin, balls);
+		// 	// if (balls.size() != 0)
+		// 	// 	cout << "count: " << balls.size() << endl;
+		// }
 
 		imshow("Thresh Image", fin);
 
@@ -178,7 +178,7 @@ public:
 
 			out = out / out.at<double>(0,3);
 
-			x_pos = out.at<double>(0,0);
+			x_pos = out.at<double>(0,0) + 9.0;
 			y_pos = out.at<double>(0,1);
 			depth = out.at<double>(0,2);
 
