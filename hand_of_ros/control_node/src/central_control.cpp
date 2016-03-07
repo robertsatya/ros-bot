@@ -55,8 +55,8 @@ int main(int argc, char *argv[])
 				int mode=1,dir=0,cmd_freq=1;
 				double angle=0;
 			 	p.header.seq = frame_seq++;
-		  	p.header.stamp = ros::Time::now();
-  			p.header.frame_id = "/robot";
+				p.header.stamp = ros::Time::now();
+				p.header.frame_id = "/robot";
 				p.point.x = pos[2];
 				p.point.y = -pos[0];
 				p.point.z = -pos[1];
