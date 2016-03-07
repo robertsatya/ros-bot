@@ -207,7 +207,7 @@ bool control_callback(roomba_control::create_control_service::Request  &req, roo
 //			r.sleep();
 //			r.sleep();
 			write(fd, sense, sizeof(sense));
-			tcdrain(fd);
+//			tcdrain(fd);
 			r.sleep();
 			read(fd, sense, sizeof(sense));
 			n = sense[0] | sense[1] << 8;
@@ -218,7 +218,7 @@ bool control_callback(roomba_control::create_control_service::Request  &req, roo
 			sense[1] = 44;
 //			tcflush(fd,TCIOFLUSH);
 			write(fd, sense, sizeof(sense));
-			tcdrain(fd);
+//			tcdrain(fd);
 			r.sleep();
 			read(fd, sense, sizeof(sense));
 			n = sense[0] | sense[1] << 8;
@@ -292,6 +292,21 @@ bool control_callback(roomba_control::create_control_service::Request  &req, roo
 			cout << "Left: " << sum_l/16 << " Right: " << sum_r/16 << endl;
 */
 			break;
+		case 18:
+			cout << "Distance: ";
+			flag = 3;
+			read_f = 1;
+			sense[0] = 142;
+			sense[1] = 19; // Distance
+			break;
+		case 19:
+			cout << "Angle: ";
+			flag = 3;
+			read_f = 1;
+			sense[0] = 142;
+			sense[1] = 20; // Angle
+			break;
+
 		case 0:
 			cout << "Brake\n";
 			byte[0] = 145;
@@ -314,9 +329,11 @@ bool control_callback(roomba_control::create_control_service::Request  &req, roo
 	} else if (flag != 4 ){
 		write(fd, byte, sizeof(byte));
 	}
-	tcdrain(fd);
+//	tcdrain(fd);
 	if ( read_f == 1 && flag !=4 )
 	{
+	r.sleep();
+
  		read(fd, sense, sizeof(sense));
 		uint16_t n = sense[0] | sense[1] << 8;
 		cout << n << endl; 
