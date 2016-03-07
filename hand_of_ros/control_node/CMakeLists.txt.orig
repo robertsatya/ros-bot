@@ -11,7 +11,11 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   message_generation
+<<<<<<< HEAD:control_node/CMakeLists.txt
 	rob_nav
+=======
+  rob_nav
+>>>>>>> 6a98bfbb55f9e9feea3d83b20820fe6510da528c:hand_of_ros/control_node/CMakeLists.txt
 )
 
 ## System dependencies are found with CMake's conventions
