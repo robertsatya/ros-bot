@@ -29,6 +29,7 @@ protected:
 	ros::Rate rw,r;
 	uint8_t byte[5],sense[2],cmd[1];
 	double dist_per_enc;
+	double dist_per_enc_ang;
 	double axle_length;
 	int vel;
 	int turn_dir; // 0-No turn, 1-Left, 2-Right
@@ -59,7 +60,8 @@ public:
 
     as_.start();
 //		dist_per_enc = 0.4446; //72*PI/508.8;
-		dist_per_enc = 0.003451*53/100; //72*PI/65536;
+		dist_per_enc = 0.003451*48/100; //72*PI/65536;
+		dist_per_enc_ang = 0.003451*54/100;
 
   }
 
@@ -302,7 +304,7 @@ public:
 			sum_r += diff_r;
 			cout << j << endl; 
 
-			angle_diff = (diff_r + diff_l)*dist_per_enc/axle_length;
+			angle_diff = (diff_r + diff_l)*dist_per_enc_ang/axle_length;
 			if(angle_diff_est>=0)
 				angle_diff_final +=angle_diff;
 			else
