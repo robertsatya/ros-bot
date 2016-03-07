@@ -283,7 +283,7 @@ public:
 		cout << "Angle target:" << angle_diff_est << "Angle final" << angle_diff_final << endl;
 		//Coordinate in mm
 		int j=0;
-		for(j=0; !((angle_diff_final<(angle_diff_est+0.07)) && ((angle_diff_final) > (angle_diff_est-0.07))); j++)
+		for(j=0; !((angle_diff_final<(angle_diff_est+0.04)) && ((angle_diff_final) > (angle_diff_est-0.04))); j++)
 		{
 
 			n = read_left_enc();
@@ -309,9 +309,9 @@ public:
 				angle_diff_final -=angle_diff;
 
 //		feedback_.cur_loc
-/*				if(j>=3)
+				if(j>=3)
 			{
-  			ddiff += diff_l - diff_r;
+/*  			ddiff += diff_l - diff_r;
   			int vel_change = ddiff/100;
 				vel_change = (vel_change>0)?vel_change:-vel_change;
   			if(ddiff>50)
@@ -325,19 +325,33 @@ public:
   				vel_r = vel;
   			}
   			else
-  			{
-  				vel_r = vel;
-					vel_l = -vel;
-  			}
-  			cout << "Diff L:" << diff_l << " R:" << diff_r << " Diff diff:" << ddiff << endl;
+  			{*/
+ 		if(angle_diff_est >= 0)
+		{
+			vel_r = 25;
+			vel_l = -vel_r;
+		}
+		else
+		{
+			vel_l = 25;
+			vel_r = -vel_l;
+		}  			/*}
+  			cout << "Diff L:" << diff_l << " R:" << diff_r << " Diff diff:" << ddiff << endl;*/
 			}
 			else
 			{
-				ddiff = 0;
-				vel_r = 25;
-				vel_l = -vel_r;
-			}
-*/
+//				ddiff = 0;
+ 		if(angle_diff_est >= 0)
+		{
+			vel_r = 25;
+			vel_l = -vel_r;
+		}
+		else
+		{
+			vel_l = 25;
+			vel_r = -vel_l;
+		}			}
+
 			move_turn(vel_r,vel_l);
 			cout << "Angle diff total:" << angle_diff_final << " Angle diff step:" << angle_diff << endl;
 			force_angle_range(angle_diff_final);

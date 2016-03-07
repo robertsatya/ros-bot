@@ -18,20 +18,20 @@ int main (int argc, char **argv)
 	int i=1,mode=0,dir=0,cmd_freq=1;
 	double angle=0;
 
-    tcp_client c;
+/*    tcp_client c;
 
 //    string host="192.168.0.17";
     string host="192.168.43.97";
          
     //connect to host
     c.conn(host , 9998);
-
+*/
 	while(ros::ok())
 	{
   	p.header.seq = i;
   	p.header.stamp = ros::Time::now();
   	p.header.frame_id = "/robot";
-/*		cout << "Please enter mode: 1) Forward 2) Circular";
+		cout << "Please enter mode: 1) Forward 2) Circular";
   	cin >> mode;
 		
 		switch(mode)
@@ -52,9 +52,9 @@ int main (int argc, char **argv)
 			default: break;
 		}
 	
-  	p.point.z = 0;*/
+  	p.point.z = 0;
 
-		
+/*		
 		mode = 2;
          
     //send some data
@@ -75,8 +75,8 @@ int main (int argc, char **argv)
 
 		if(dir==4 || dir == 5)
 			break;
-	
-//    my_node.doStuff(p,mode,angle,dir,cmd_freq);
+*/	
+    my_node.doStuff(p,mode,angle*3.141592/180,dir,cmd_freq);
 		cin >> my_node.fin;
   	while(my_node.fin<3)
   	{
