@@ -44,7 +44,7 @@ public:
 	void doneCb(const actionlib::SimpleClientGoalState& state,
 	            const navigationResultConstPtr& result)
 	{
-	  ROS_INFO("Got Final location : (%f , %f , %f, %f)\n", result->final_loc.point.x,result->final_loc.point.y,result->final_loc.point.z,result->angle*180/3.141592);
+	  ROS_INFO("Got Final location : (%f , %f , %f, %f)\n", result->final_loc.point.x,result->final_loc.point.y,result->final_loc.point.z,result->angle);
 /*	  ROS_INFO("Finished in state [%s]", state.toString().c_str());
 	  ROS_INFO("Answer: %i", result->sequence.back());*/
 		fin = 3;
