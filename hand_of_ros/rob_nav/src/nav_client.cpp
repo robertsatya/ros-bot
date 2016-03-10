@@ -52,9 +52,13 @@ int main (int argc, char **argv)
 							break;
 			case 2: cout << "\nPlease enter timed dir";
 				  		cin >> dir;
-							cmd_freq = 1;
-			case 3: cout << "\nPlease enter max search angle";
+							cout << "\nPlease enter cmd_freq";
+							cin >> cmd_freq;
 							break;
+			case 3: cout << "\nPlease enter forward absolute X coordinate";
+				  		cin >> p.point.x;
+							cout << "\nPlease enter forward absolute Y coordinate";
+				  		cin >> p.point.y;
 			default: break;
 		}
 	
