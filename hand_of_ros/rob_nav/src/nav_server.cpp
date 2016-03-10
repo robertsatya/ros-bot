@@ -215,14 +215,16 @@ public:
   			}
   			else
   			{
-  				vel_l = vel_r = vel;
+  				vel_l = vel;
+					vel_r = vel;
   			}
   			cout << "Diff L:" << diff_l << " R:" << diff_r << " Diff diff:" << ddiff << endl;
 			}
 			else
 			{
 				ddiff = 0;
-				vel_r = vel_l = 25;
+				vel_r = 25;
+				vel_l = 25;
 			}
 	
 //		feedback_.cur_loc
@@ -441,10 +443,14 @@ public:
 		start();
 		safe();
 
-//		double x_del = goal->dest.point.x - stationary_loc.pose.position.x;
-//		double y_del = goal->dest.point.y - stationary_loc.pose.position.y;
 		double x_del = goal->dest.point.x;
 		double y_del = goal->dest.point.y;
+		if(goal->type==3)
+		{
+			x_del -= stationary_loc.pose.position.x;
+			y_del -= stationary_loc.pose.position.y;
+		}
+
 
 
 //		cout << "x_del:" << x_del << " y_del:" << y_del << "Init angle:" << stationary_loc.pose.orientation.z << endl;
@@ -461,12 +467,12 @@ public:
 		// Set turn_dir from goal->turn_dir
 		if(goal->type == 0)
 		{
-			angle_diff_est = goal->angle;
+			angle_diff_est = (PI/180)*goal->angle;
 			force_angle_range(angle_diff_est);
 			move_controlled_turn(angle_diff_est,angle_diff_final);
 		}
 		else	
-		if(goal->type == 1)
+		if(goal->type == 1 || goal->type == 3)
 		{
 			move_controlled_turn(angle_diff_est,angle_diff_final);
 			rw.sleep();
@@ -496,7 +502,7 @@ public:
 		//Correct the expected goal position using calculated differences
 		stationary_loc.pose.position.x += dist_final*cos(angle_diff_final)/10;
 		stationary_loc.pose.position.x += dist_final*sin(angle_diff_final)/10;
-		stationary_loc.pose.orientation.z += angle_diff_final;
+		stationary_loc.pose.orientation.z += (180/PI)*angle_diff_final;
 		force_angle_range(stationary_loc.pose.orientation.z);
 
 		stationary_loc.header = goal->dest.header;

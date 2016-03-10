@@ -24,7 +24,13 @@ int main (int argc, char **argv)
     string host="192.168.43.97";
          
     //connect to host
-    c.conn(host , 9998);
+    c.conn(host , 9991);
+
+         
+    //send some data
+//    string o_str = dir_str + " " + boost::lexical_cast<std::string>(angle);
+		string o_str = "1";
+    c.send_data(o_str);
 */
 	while(ros::ok())
 	{
@@ -56,18 +62,14 @@ int main (int argc, char **argv)
 
 /*		
 		mode = 2;
-         
-    //send some data
-//    string o_str = dir_str + " " + boost::lexical_cast<std::string>(angle);
-		string o_str = "1";
-    c.send_data(o_str);
            
     //receive and echo reply
     cout<<"----------------------------\n\n";
 //    cout << c.receive(1024);
 		string res = c.receive(1024);
+		cout << res << endl;
     dir = boost::lexical_cast<int>(res[0]);
-		cmd_freq = boost::lexical_cast<int>(res[1]);
+		cmd_freq = boost::lexical_cast<int>(res[2]);
 
 //    res.angle = boost::lexical_cast<float>(c.receive(1024));
     cout << dir;
@@ -75,9 +77,10 @@ int main (int argc, char **argv)
 
 		if(dir==4 || dir == 5)
 			break;
+		my_node.fin = 3;
 */	
-    my_node.doStuff(p,mode,angle*3.141592/180,dir,cmd_freq);
-		cin >> my_node.fin;
+   my_node.doStuff(p,mode,angle,dir,cmd_freq);
+//		cin >> my_node.fin;
   	while(my_node.fin<3)
   	{
   	}
