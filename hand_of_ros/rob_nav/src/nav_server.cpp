@@ -60,8 +60,18 @@ public:
 
     as_.start();
 //		dist_per_enc = 0.4446; //72*PI/508.8;
-		dist_per_enc = 0.003451*48/100; //72*PI/65536;
-		dist_per_enc_ang = 0.003451*54/100;
+		dist_per_enc = 0.003451*54/100; //72*PI/65536;
+		dist_per_enc_ang = 0.003451*53/100;
+		reset();
+		sleep(5);
+		start();
+		r.sleep();
+		safe();
+		r.sleep();
+		serial_port_.flushInput();	
+		r.sleep();
+		serial_port_.flushOutput();
+		r.sleep();
 
   }
 
@@ -76,6 +86,13 @@ public:
       std::cerr<<e.what()<<std::endl;
     }
   }
+
+	void reset()
+	{
+		cmd[0] = 7;
+		serial_port_.write(cmd, sizeof(cmd));
+		rw.sleep();
+	}
 
 	void start()
 	{
@@ -157,7 +174,7 @@ public:
 		}
 	}
 
-	void move_controlled_straight(double dist, double &dist_final)
+	void move_controlled_straight(double dist, double &dist_final, double &x_diff, double &y_diff, double &angle_diff_final)
 	{
 		uint32_t sum_l=0,sum_r=0;
 		uint16_t n=0,left=0,right=0;
@@ -175,7 +192,8 @@ public:
 		int vel_r=vel, vel_l=vel;
 		long ddiff = 0;
 
-		double dist_step = 0, angle_diff = 0, angle_diff_final = 0;
+		double dist_step = 0, cur_diff = 0, angle_diff = 0;
+//		double angle_diff_final = 0;
 		cout << "Dist target:" << dist << "Dist final" << dist_final << endl;
 
 		//dist_final = 0;
@@ -233,15 +251,33 @@ public:
 
 			move_straight(vel_r,vel_l);
 
+/* MODIFIED CODE */ 
+
+			cur_diff = diff_r - diff_l; 
+			dist_step = get_distance(diff_r,diff_l);
+			angle_diff = (cur_diff)*dist_per_enc_ang/axle_length;
+
+			double min_diff = ((diff_l<diff_r)?diff_l:diff_r);
+			double x_diff_term = (cur_diff!=0)?((min_diff*axle_length/cur_diff)*sin(angle_diff)):0;
+			x_diff += x_diff_term;
+			double y_diff_term = (cur_diff!=0)?((min_diff*axle_length/cur_diff)*(1-cos(angle_diff))):0;
+			y_diff += y_diff_term;
+			angle_diff_final += angle_diff;
+			dist_final += x_diff_term;
+			cout << "\nDist final:" << dist_final << " Dist step:" << x_diff_term << endl;
+			cout << "Angle diff total:" << angle_diff_final << " Angle diff step:" << angle_diff << endl;
+
+
+/* ORIGINAL CODE  
 			dist_step = get_distance(diff_r,diff_l);
 			angle_diff = (diff_r - diff_l)*dist_per_enc/axle_length;
 
 			angle_diff_final += angle_diff;
-//				double cos_term = dist_step*cos(angle_diff_final); 
-
 			dist_final += dist_step;
+
 			cout << "\nDist final:" << dist_final << " Dist step:" << dist_step << endl;
 			cout << "Angle diff total:" << angle_diff_final << " Angle diff step:" << angle_diff << endl;
+*/
 			r.sleep();
 		}
 
@@ -252,7 +288,7 @@ public:
 
 	}
 	
-	void move_controlled_turn(double angle_diff_est, double &angle_diff_final)
+	void move_controlled_turn(double angle_diff_est, double &angle_diff_final, double &x_diff, double &y_diff)
 	{
 
 		uint32_t sum_l=0,sum_r=0;
@@ -306,11 +342,14 @@ public:
 			sum_r += diff_r;
 			cout << j << endl; 
 
+			double sign = (angle_diff_est>=0)?1:-1;
+			double cur_diff = diff_r + diff_l;
+			double x_diff_term = (cur_diff!=0)?(((diff_r-diff_l)*axle_length/(2*cur_diff))*sin(angle_diff)):0;
+			x_diff += sign*x_diff_term;
+			double y_diff_term = (cur_diff!=0)?(((diff_r-diff_l)*axle_length/(2*cur_diff))*(1-cos(angle_diff))):0;
+			y_diff += sign*y_diff_term;
 			angle_diff = (diff_r + diff_l)*dist_per_enc_ang/axle_length;
-			if(angle_diff_est>=0)
-				angle_diff_final +=angle_diff;
-			else
-				angle_diff_final -=angle_diff;
+			angle_diff_final += sign*angle_diff;
 
 //		feedback_.cur_loc
 				if(j>=3)
@@ -354,7 +393,8 @@ public:
 		{
 			vel_l = 25;
 			vel_r = -vel_l;
-		}			}
+		}	
+		}
 
 			move_turn(vel_r,vel_l);
 			cout << "Angle diff total:" << angle_diff_final << " Angle diff step:" << angle_diff << endl;
@@ -460,6 +500,11 @@ public:
 		double dist_est = 10*pow(pow(x_del,2) +	pow(y_del,2),0.5), dist_final = 0;
 //		double angle_diff_est = (x_del==0)?(y_del>=0?PI/2:-PI/2):atan2(y_del,x_del) - stationary_loc.pose.orientation.z;
 		double angle_diff_est = (x_del==0)?(y_del>=0?PI/2:-PI/2):atan2(y_del,x_del);
+		if(goal->type==3)
+		{
+			angle_diff_est -= (PI/180)*stationary_loc.pose.orientation.z;
+		}
+
 	
 //		cout << "Init calc D:" << dist_est << " A:" << angle_diff_est << endl;
 		force_angle_range(angle_diff_est);
@@ -471,14 +516,14 @@ public:
 		{
 			angle_diff_est = (PI/180)*goal->angle;
 			force_angle_range(angle_diff_est);
-			move_controlled_turn(angle_diff_est,angle_diff_final);
+			move_controlled_turn(angle_diff_est,angle_diff_final,x_diff,y_diff);
 		}
 		else	
 		if(goal->type == 1 || goal->type == 3)
 		{
-			move_controlled_turn(angle_diff_est,angle_diff_final);
+			move_controlled_turn(angle_diff_est,angle_diff_final,x_diff,y_diff);
 			rw.sleep();
-			move_controlled_straight(dist_est, dist_final);
+			move_controlled_straight(dist_est, dist_final, x_diff, y_diff, angle_diff_final);
 		}
 		else
 		if(goal->type == 2)
@@ -502,8 +547,10 @@ public:
 		rw.sleep();
 
 		//Correct the expected goal position using calculated differences
-		stationary_loc.pose.position.x += dist_final*cos(angle_diff_final)/10;
-		stationary_loc.pose.position.x += dist_final*sin(angle_diff_final)/10;
+/*  	stationary_loc.pose.position.x += dist_final*cos(angle_diff_final)/10;
+		stationary_loc.pose.position.y += dist_final*sin(angle_diff_final)/10;*/
+		stationary_loc.pose.position.x += x_diff/10;
+		stationary_loc.pose.position.y += y_diff/10;
 		stationary_loc.pose.orientation.z += (180/PI)*angle_diff_final;
 		force_angle_range(stationary_loc.pose.orientation.z);
 
