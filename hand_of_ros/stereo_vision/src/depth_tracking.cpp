@@ -111,6 +111,13 @@ public:
 		Moments moments = cv::moments(masked, false);
 		// Moments gmoments = cv::moments(gmasked, false);
 
+		SimpleBlobDetector detector;
+		std::vector<KeyPoint> points;
+		detector.detect(masked, points);
+
+		drawKeypoints( fin, points, fin, Scalar(255, 0, 255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
+
+
 		if(moments.m00 > 0) {
 			prev_left_pos[0] = moments.m10/moments.m00;
 			prev_left_pos[1] = moments.m01/moments.m00;
@@ -120,7 +127,7 @@ public:
 			left_pt.at<cv::Vec2d>(0,0)[0] = cx;
 			left_pt.at<cv::Vec2d>(0,0)[1] = cy;
 
-			cv::circle(fin, cv::Point(cx, cy), 10, Scalar(0, 0, 255), 2);
+			// cv::circle(fin, cv::Point(cx, cy), 10, Scalar(0, 0, 255), 2);
 			// draw(fin, balls);
 			// if (balls.size() != 0)
 			// 	cout << "count: " << balls.size() << endl;
