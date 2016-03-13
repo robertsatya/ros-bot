@@ -10,7 +10,7 @@
 #include <sensor_msgs/image_encodings.h>
 #include <sensor_msgs/Image.h>
 #include <geometry_msgs/PointStamped.h>
-#include <control_node/BroadSearch.h>
+// #include <control_node/BroadSearch.h>
 
 #include <opencv2/opencv.hpp>
 #include <opencv2/features2d/features2d.hpp>
@@ -39,13 +39,10 @@ class DisparityTrack
 
 public:
 	DisparityTrack() {
-		left_point_pub = n.advertise<geometry_msgs::PointStamped>("left_point", 5);
 		image_sub1 = n.subscribe("/left_cam/image_raw", 100, &DisparityTrack::left_cb, this);
 		image_sub2 = n.subscribe("/right_cam/image_raw", 100, &DisparityTrack::right_cb, this);
-		lower_thresh[0] = 3; lower_thresh[1] = 134; lower_thresh[2] = 130;
-		upper_thresh[0] = 18; upper_thresh[1] = 222; upper_thresh[2] = 255;
-		glower_thresh[0] = 37; glower_thresh[1] = 160; glower_thresh[2] = 44;
-		gupper_thresh[0] = 52; gupper_thresh[1] = 215; gupper_thresh[2] = 255;
+		lower_thresh[0] = 110; lower_thresh[1] = 87; lower_thresh[2] = 47;
+		upper_thresh[0] = 121; upper_thresh[1] = 175; upper_thresh[2] = 95;
 		x_pos = 0; y_pos = 0; depth = 0;
 
 		Pjl[0][0] = 870.1896695734192; Pjl[0][1] = 0; Pjl[0][2] = 345.4360542297363; Pjl[0][3] = 0;
@@ -95,8 +92,6 @@ public:
 
 		GaussianBlur( masked, masked, Size(9, 9), 2, 2 );
 		// GaussianBlur( gmasked, gmasked, Size(9, 9), 2, 2 );
-
-
 		int erosion_size = 7;
 		erode(masked, masked, getStructuringElement(MORPH_ERODE,
 													Size( 2*erosion_size + 1, 2*erosion_size+1 ),
@@ -210,12 +205,12 @@ public:
 		left_point_pub.publish(point);
 	}
 
-	bool send_loc(control_node::BroadSearch::Request &req, control_node::BroadSearch::Response &res) {
-		res.x = x_pos;
-		res.y = y_pos;
-		res.depth = depth;
-		return true;
-	}
+	// bool send_loc(control_node::BroadSearch::Request &req, control_node::BroadSearch::Response &res) {
+	// 	res.x = x_pos;
+	// 	res.y = y_pos;
+	// 	res.depth = depth;
+	// 	return true;
+	// }
 
 	 void draw(cv::Mat& mat, const std::vector<cv::Vec3f>& container)
 	{
@@ -229,12 +224,12 @@ public:
 
 int main(int argc, char *argv[])
 {
-	ros::init(argc, argv, "depth_tracking");
+	ros::init(argc, argv, "goal_search");
 	signal(SIGINT, sigHandle);
 	signal(SIGTERM, sigHandle);
 	DisparityTrack dt = DisparityTrack();
 	ros::NodeHandle nh;
-	ros::ServiceServer service = nh.advertiseService("broad_search_service", &DisparityTrack::send_loc, &dt);
+	// ros::ServiceServer service = nh.advertiseService("goal_search_service", &DisparityTrack::send_loc, &dt);
 	ros::spin();
 	return 0;
 }
