@@ -1,0 +1,74 @@
+Left: 0
+Right: 0
+Dist target:1000Dist final0Angle turned1.57X diff0Y diff0Angle diff final1.57
+Left: 20Prev: 0 Diff: 20
+Right: 20Prev: 0 Diff: 20
+0
+Moving forward at L:10 R:10 mm/s
+X_diff:0 Y_diff:0
+Dist final:0 Dist step:0 Y offset final:0 Offset step:0 rdist:0
+Angle diff total:1.57 Angle diff step:0 Theta diff final:0 Theta diff term:0
+
+Left: 40Prev: 20 Diff: 20
+Right: 40Prev: 20 Diff: 20
+1
+Moving forward at L:10 R:10 mm/s
+X_diff:0 Y_diff:0
+Dist final:0 Dist step:0 Y offset final:0 Offset step:0 rdist:0
+Angle diff total:1.57 Angle diff step:0 Theta diff final:0 Theta diff term:0
+
+Left: 12700Prev: 40 Diff: 12660
+Right: 14000Prev: 40 Diff: 13960
+2
+Moving forward at L:10 R:10 mm/s
+X_diff:0 Y_diff:0
+Dist final:0 Dist step:-0.0953839 Y offset final:0 Offset step:23.4254 rdist:23.4256
+Angle diff total:1.57 Angle diff step:0.00973623 Theta diff final:0 Theta diff term:0.00486811
+
+Left: 28000Prev: 12700 Diff: 15300
+Right: 25700Prev: 14000 Diff: 11700
+3
+Diff L:15300 R:11700 Diff diff:3600
+Moving forward at L:20 R:56 mm/s
+X_diff:-23.7567 Y_diff:0.358126
+Dist final:23.7573 Dist step:0.339208 Y offset final:-0.320289 Offset step:23.757 rdist:23.7594
+Angle diff total:1.54304 Angle diff step:0.0269619 Theta diff final:-0.0134809 Theta diff term:-0.0134809
+
+Left: 39000Prev: 28000 Diff: 11000
+Right: 42000Prev: 25700 Diff: 16300
+4
+Diff L:11000 R:16300 Diff diff:-1700
+Moving forward at L:47 R:30 mm/s
+X_diff:-47.7784 Y_diff:0.567302
+Dist final:47.7747 Dist step:0.190047 Y offset final:-0.81502 Offset step:24.0218 rdist:24.0226
+Angle diff total:1.58273 Angle diff step:0.0396938 Theta diff final:-0.0205959 Theta diff term:-0.00711493
+
+Left: 52600Prev: 39000 Diff: 13600
+Right: 56000Prev: 42000 Diff: 14000
+5
+Diff L:13600 R:14000 Diff diff:-2100
+Moving forward at L:61 R:40 mm/s
+X_diff:-72.0646 Y_diff:0.260376
+Dist final:72.0624 Dist step:-0.326266 Y offset final:-0.969637 Offset step:24.2859 rdist:24.2881
+Angle diff total:1.58573 Angle diff step:0.00299576 Theta diff final:-0.00636599 Theta diff term:0.0142299
+
+Left: 65900Prev: 52600 Diff: 13300
+Right: 64000Prev: 56000 Diff: 8000
+6
+Diff L:13300 R:8000 Diff diff:3200
+Moving forward at L:50 R:82 mm/s
+X_diff:-90.8071 Y_diff:0.367431
+Dist final:90.8042 Dist step:0.0921302 Y offset final:-1.16616 Offset step:18.7426 rdist:18.7429
+Angle diff total:1.54603 Angle diff step:0.0396938 Theta diff final:-0.0104852 Theta diff term:-0.00411917
+
+Left: 65900Prev: 65900 Diff: 0
+Right: 64000Prev: 64000 Diff: 0
+7
+Diff L:0 R:0 Diff diff:3200
+Moving forward at L:60 R:92 mm/s
+X_diff:-90.8071 Y_diff:0.367431
+Dist final:90.8042 Dist step:0 Y offset final:-1.16616 Offset step:0 rdist:0
+Angle diff total:1.54603 Angle diff step:0 Theta diff final:-0.0104852 Theta diff term:0
+
+Total Left: 65900Total Right: 64000
+Left: 8237 Right: 8000

@@ -18,20 +18,18 @@ int main (int argc, char **argv)
 	int i=1,mode=0,dir=0,cmd_freq=1;
 	double angle=0;
 
+
 /*    tcp_client c;
 
 //    string host="192.168.0.17";
     string host="192.168.43.97";
-         
-    //connect to host
-    c.conn(host , 9991);
+//    string host="192.168.43.129";
 
          
-    //send some data
-//    string o_str = dir_str + " " + boost::lexical_cast<std::string>(angle);
-		string o_str = "1";
-    c.send_data(o_str);
+    //connect to host
+    c.conn(host , 9998);
 */
+         
 	while(ros::ok())
 	{
   	p.header.seq = i;
@@ -65,6 +63,11 @@ int main (int argc, char **argv)
   	p.point.z = 0;
 
 /*		
+    //send some data
+//    string o_str = dir_str + " " + boost::lexical_cast<std::string>(angle);
+		string o_str = "1";
+    c.send_data(o_str);
+
 		mode = 2;
            
     //receive and echo reply
@@ -79,10 +82,32 @@ int main (int argc, char **argv)
     cout << dir;
     cout<<"\n\n----------------------------\n\n";
 
+// TODO: add counter for dir 5
 		if(dir==4 || dir == 5)
-			break;
-		my_node.fin = 3;
-*/	
+		{
+			cout << "dir" << dir;
+			if(dir==4)
+			{	
+				cout << "before sending ;";
+				sleep(1);
+				o_str = "3";
+				cout << "data prepared ;";
+				sleep(1);
+  			 c.send_data(o_str);
+				cout << "data sent ;";
+				sleep(1);
+			
+			string res1 = c.receive(1024);
+				cout << "data received ;";
+				sleep(1);
+			cout << res1 << endl;
+//				while(true)
+//				{}
+			}
+		
+		}
+//		my_node.fin = 3;
+	*/
    my_node.doStuff(p,mode,angle,dir,cmd_freq);
 //		cin >> my_node.fin;
   	while(my_node.fin<3)
