@@ -101,7 +101,7 @@ public:
 		GaussianBlur( gmasked, gmasked, Size(9, 9), 2, 2 );
 
 
-		int erosion_size = 7;
+		int erosion_size = 9;
 		erode(masked, masked, getStructuringElement(MORPH_ERODE,
 													Size( 2*erosion_size + 1, 2*erosion_size+1 ),
 													Point(erosion_size, erosion_size)) );
@@ -141,21 +141,27 @@ public:
 			left_pt.at<cv::Vec2d>(0,0)[0] = cx;
 			left_pt.at<cv::Vec2d>(0,0)[1] = cy;
 
-			// cv::circle(fin, cv::Point(cx, cy), 10, Scalar(0, 0, 255), 2);
+			cv::circle(fin, cv::Point(cx, cy), 10, Scalar(0, 0, 255), 2);
 			// draw(fin, balls);
 			// if (balls.size() != 0)
 			// 	cout << "count: " << balls.size() << endl;
+		} else {
+			prev_left_pos[0] = 0;			
+			prev_left_pos[1] = 0;			
 		}
 
 		if(gmoments.m00 > 0) {
 			int cx = gmoments.m10/gmoments.m00;
 			int cy = gmoments.m01/gmoments.m00;
 
-			// cv::circle(fin, cv::Point(cx, cy), 10, Scalar(0, 0, 255), 2);
+			cv::circle(fin, cv::Point(cx, cy), 10, Scalar(0, 255, 0), 2);
 			// draw(fin, balls);
 			// if (balls.size() != 0)
 			// 	cout << "count: " << balls.size() << endl;
-		}
+		} else {
+			// left_pt.at<cv::Vec2d>(0,0)[0] = 0;
+			// left_pt.at<cv::Vec2d>(0,0)[1] = 0;
+		}  
 
 		imshow("Thresh Image", fin);
 
@@ -184,7 +190,7 @@ public:
 
 		Moments moments = cv::moments(masked, false);
 
-		if(moments.m00 > 0) {
+		if(moments.m00 > 0 && (prev_left_pos[0] > 0 && prev_left_pos[1] > 0)) {
 			double cx = moments.m10/moments.m00;
 			double cy = moments.m01/moments.m00;
 
