@@ -36,6 +36,8 @@ class DisparityTrack
 	Mat Pj_left, Pj_right, left_pt, right_pt;
 	double Pjl[3][4], Pjr[3][4];
 	double x_pos, y_pos, depth;
+	vector<vector<Point> > contours;
+	vector<Vec4i> hierarchy;
 
 public:
 	DisparityTrack() {
@@ -100,9 +102,18 @@ public:
 
 		thr_img = masked;
 
+		findContours(thr_img, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+
 		// HoughCircles( masked, balls, CV_HOUGH_GRADIENT, 1, 10, 50, 30, 0, 0 );
 
 		cv::bitwise_and(img, img, fin, thr_img);
+
+		int idx = 0;
+		for( ; idx >= 0; idx = hierarchy[idx][0] )
+		{
+			Scalar color( rand()&255, rand()&255, rand()&255 );
+			drawContours( fin, contours, -1, color );
+		}
 
 		// erode(gmasked, gmasked, getStructuringElement(MORPH_ERODE, Point(3,3)) );
 		// dilate(gmasked, gmasked, getStructuringElement(MORPH_DILATE, Point(3,3)) );

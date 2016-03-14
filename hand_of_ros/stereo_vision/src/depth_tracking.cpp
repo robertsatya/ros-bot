@@ -42,10 +42,14 @@ public:
 		left_point_pub = n.advertise<geometry_msgs::PointStamped>("left_point", 5);
 		image_sub1 = n.subscribe("/left_cam/image_raw", 100, &DisparityTrack::left_cb, this);
 		image_sub2 = n.subscribe("/right_cam/image_raw", 100, &DisparityTrack::right_cb, this);
-		lower_thresh[0] = 3; lower_thresh[1] = 134; lower_thresh[2] = 130;
-		upper_thresh[0] = 18; upper_thresh[1] = 222; upper_thresh[2] = 255;
-		glower_thresh[0] = 37; glower_thresh[1] = 160; glower_thresh[2] = 44;
-		gupper_thresh[0] = 52; gupper_thresh[1] = 215; gupper_thresh[2] = 255;
+		lower_thresh[0] = 4; lower_thresh[1] = 75; lower_thresh[2] = 60;
+		upper_thresh[0] = 18; upper_thresh[1] = 184; upper_thresh[2] = 196;
+		glower_thresh[0] = 37; glower_thresh[1] = 108; glower_thresh[2] = 44;
+		gupper_thresh[0] = 54; gupper_thresh[1] = 215; gupper_thresh[2] = 255;
+		// glower_thresh[0] = 4; glower_thresh[1] = 75; glower_thresh[2] = 60;
+		// gupper_thresh[0] = 18; gupper_thresh[1] = 184; gupper_thresh[2] = 196;
+		// lower_thresh[0] = 37; lower_thresh[1] = 160; lower_thresh[2] = 44;
+		// upper_thresh[0] = 52; upper_thresh[1] = 215; upper_thresh[2] = 255;
 		x_pos = 0; y_pos = 0; depth = 0;
 
 		Pjl[0][0] = 870.1896695734192; Pjl[0][1] = 0; Pjl[0][2] = 345.4360542297363; Pjl[0][3] = 0;
@@ -90,11 +94,11 @@ public:
 		inRange(hsv, Scalar(lower_thresh[0], lower_thresh[1], lower_thresh[2]),
 			Scalar(upper_thresh[0], upper_thresh[1], upper_thresh[2]), masked);
 
-		// inRange(hsv, Scalar(glower_thresh[0], glower_thresh[1], glower_thresh[2]),
-		// 	Scalar(gupper_thresh[0], gupper_thresh[1], gupper_thresh[2]), gmasked);
+		inRange(hsv, Scalar(glower_thresh[0], glower_thresh[1], glower_thresh[2]),
+			Scalar(gupper_thresh[0], gupper_thresh[1], gupper_thresh[2]), gmasked);
 
 		GaussianBlur( masked, masked, Size(9, 9), 2, 2 );
-		// GaussianBlur( gmasked, gmasked, Size(9, 9), 2, 2 );
+		GaussianBlur( gmasked, gmasked, Size(9, 9), 2, 2 );
 
 
 		int erosion_size = 7;
@@ -103,23 +107,29 @@ public:
 													Point(erosion_size, erosion_size)) );
 		dilate(masked, masked, getStructuringElement(MORPH_DILATE, Point(3,3)) );
 
+		erosion_size = 5;
+		erode(gmasked, gmasked, getStructuringElement(MORPH_ERODE,
+													Size( 2*erosion_size + 1, 2*erosion_size+1 ),
+													Point(erosion_size, erosion_size)) );
+		dilate(gmasked, gmasked, getStructuringElement(MORPH_DILATE, Point(3,3)) );
+
 		thr_img = masked;
 
 		// HoughCircles( masked, balls, CV_HOUGH_GRADIENT, 1, 10, 50, 30, 0, 0 );
 
 		cv::bitwise_and(img, img, fin, thr_img);
 
-		// erode(gmasked, gmasked, getStructuringElement(MORPH_ERODE, Point(3,3)) );
-		// dilate(gmasked, gmasked, getStructuringElement(MORPH_DILATE, Point(3,3)) );
+		erode(gmasked, gmasked, getStructuringElement(MORPH_ERODE, Point(3,3)) );
+		dilate(gmasked, gmasked, getStructuringElement(MORPH_DILATE, Point(3,3)) );
 
 		Moments moments = cv::moments(masked, false);
-		// Moments gmoments = cv::moments(gmasked, false);
+		Moments gmoments = cv::moments(gmasked, false);
 
-		SimpleBlobDetector detector;
-		std::vector<KeyPoint> points;
-		detector.detect(masked, points);
+		// SimpleBlobDetector detector;
+		// std::vector<KeyPoint> points;
+		// detector.detect(masked, points);
 
-		drawKeypoints( fin, points, fin, Scalar(255, 0, 255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
+		// drawKeypoints( fin, points, fin, Scalar(255, 0, 255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
 
 
 		if(moments.m00 > 0) {
@@ -137,15 +147,15 @@ public:
 			// 	cout << "count: " << balls.size() << endl;
 		}
 
-		// if(gmoments.m00 > 0) {
-		// 	int cx = gmoments.m10/gmoments.m00;
-		// 	int cy = gmoments.m01/gmoments.m00;
+		if(gmoments.m00 > 0) {
+			int cx = gmoments.m10/gmoments.m00;
+			int cy = gmoments.m01/gmoments.m00;
 
-		// 	cv::circle(fin, cv::Point(cx, cy), 10, Scalar(0, 0, 255), 2);
-		// 	// draw(fin, balls);
-		// 	// if (balls.size() != 0)
-		// 	// 	cout << "count: " << balls.size() << endl;
-		// }
+			// cv::circle(fin, cv::Point(cx, cy), 10, Scalar(0, 0, 255), 2);
+			// draw(fin, balls);
+			// if (balls.size() != 0)
+			// 	cout << "count: " << balls.size() << endl;
+		}
 
 		imshow("Thresh Image", fin);
 
