@@ -79,6 +79,12 @@ public:
 		prev_right_pos[0] = 0; prev_right_pos[1] = 0;
 		left_pt = cv::Mat(1,1,CV_64FC2);
 		right_pt = cv::Mat(1,1,CV_64FC2);
+		
+		gprev_left_pos[0] = 0; gprev_left_pos[1] = 0;
+		gprev_right_pos[0] = 0; gprev_right_pos[1] = 0;
+		gleft_pt = cv::Mat(1,1,CV_64FC2);
+		gright_pt = cv::Mat(1,1,CV_64FC2);
+
 	}
 
 	void left_cb(const sensor_msgs::Image& msg) {
@@ -159,9 +165,9 @@ public:
 			int cx = gmoments.m10/gmoments.m00;
 			int cy = gmoments.m01/gmoments.m00;
 			
-			gleft_pt.at<cv::Vec2D>(0,0)[0] = cx;
-			gpreb_left_pos[0] = cx;
-			gleft_pt.at<cv::Vec2D>(0,0)[1] = cy;
+			gleft_pt.at<cv::Vec2d>(0,0)[0] = cx;
+			gprev_left_pos[0] = cx;
+			gleft_pt.at<cv::Vec2d>(0,0)[1] = cy;
 			gprev_left_pos[1] = cy;
 
 			cv::circle(fin, cv::Point(cx, cy), 10, Scalar(0, 255, 0), 2);
@@ -208,7 +214,6 @@ public:
 		erode(gmasked, gmasked, getStructuringElement(MORPH_ERODE, Point(3,3)) );
 		dilate(gmasked, gmasked, getStructuringElement(MORPH_DILATE, Point(3,3)) );
 
-		Moments moments = cv::moments(masked, false);
 		Moments gmoments = cv::moments(gmasked, false);
 
 
