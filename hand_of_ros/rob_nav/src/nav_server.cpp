@@ -30,6 +30,10 @@ protected:
 	uint8_t byte[5],sense[2],cmd[1];
 	double dist_per_enc;
 	double dist_per_enc_ang;
+	double dist_per_enc_ang_min;
+	double dist_per_enc_ang_max;
+	double dist_per_enc_ang_90;
+
 	double dist_scale;
 	double axle_length;
 	int vel;
@@ -62,7 +66,10 @@ public:
     as_.start();
 //		dist_per_enc = 0.4446; //72*PI/508.8;
 		dist_per_enc = 0.003451*56.5/100; //72*PI/65536;
-		dist_per_enc_ang = 0.003451*50.5/100;
+		dist_per_enc_ang_min = 0.003451*75.5/100;
+		dist_per_enc_ang_90 = 0.003451*58.5/100;
+		dist_per_enc_ang_max = 0.003451*50.5/100;
+		dist_per_enc_ang = 0.003451*73.5/100;
 		dist_scale = 1;
 		reset();
 		sleep(5);
@@ -171,6 +178,7 @@ public:
 		int vel_r=vel, vel_l=vel;
 		long ddiff = 0;
 
+		double angle1= 0 , angle2 = 0, angle_diff_final_init = angle_diff_final, dist_final = 0, y_offset_final = 0;
 		double dist_step = 0, cur_diff = 0, angle_diff = 0, angle_diff_dist = 0, theta_diff_term = 0, theta_diff_final = 0;
 
 		for(int i=0; i<freq; i++)
@@ -190,26 +198,67 @@ public:
 			cout << "Right: " << n << "Prev: " << right << " Diff: " << diff_r << endl; 
 			right = n;
 
-			double sign = (dir>=0)?1:-1;
-			cur_diff = diff_r - diff_l; 
-			dist_step = get_distance(diff_r,diff_l);
-			angle_diff = sign*(cur_diff)*dist_per_enc_ang/axle_length;
-			angle_diff_dist = sign*(cur_diff)*dist_per_enc/axle_length;
+			double sign = (diff_r-diff_l>=0)?1:-1;
+			double sign1 = (dir>=0)?1:-1;
 
-			double x_diff_term = (cur_diff!=0)?(((diff_r + diff_l)*axle_length/(2*cur_diff))*sin(angle_diff_dist)):0;
-			double y_diff_term = (cur_diff!=0)?(((diff_r + diff_l)*axle_length/(2*cur_diff))*(1-cos(angle_diff_dist))):0;
+			double cur_diff = diff_r - diff_l;
+			angle_diff = (diff_r - diff_l)*dist_per_enc/axle_length;
+//			angle_diff_dist = (cur_diff)*dist_per_enc/axle_length;
+			double R = (cur_diff!=0)?(diff_r+diff_l)*axle_length/(2*cur_diff):0;
+			R = (R>=0)?R:-R;
+			double sign_angle = (angle_diff>=0)?1:-1;
+			angle_diff = (angle_diff>=0)?angle_diff:-angle_diff;
+
+			if(sign == -1)
+			{
+				if(sign1 == -1)
+				{
+					angle1 = angle_diff_final;
+					angle2 = angle1 + angle_diff;
+				}
+				else
+				{
+					angle1 = angle_diff_final;
+					angle2 = angle1 - angle_diff;
+					R = -R;
+				}
+			}
+			else
+			{
+				if(sign1 == -1)
+				{
+					angle1 = angle_diff_final;
+					angle2 = angle1 - angle_diff;
+					R = -R;
+				}
+				else
+				{
+					angle1 = angle_diff_final;
+					angle2 = angle1 + angle_diff;
+				}
+			}
+
+			double x_diff_term = R*(sin(angle2)-sin(angle1));
+			double y_diff_term = R*(cos(angle1)-cos(angle2));
 			double r_dist = dist_scale*pow(pow(x_diff_term,2) + pow(y_diff_term,2),0.5);
+
+
+				theta_diff_term = (x_diff_term==0)?(y_diff_term>=0?(y_diff_term>0?PI/2:0):-PI/2):atan2(y_diff_term,x_diff_term) - angle_diff_final_init;
+					angle_diff_final = angle2;
+
+
+					theta_diff_final += sign*theta_diff_term;
+					dist_final += r_dist*cos(theta_diff_final);
+					y_offset_final += r_dist*sin(theta_diff_final);
+					x_diff += r_dist*cos(theta_diff_final+angle_turned+angle_diff_final_init);
+					y_diff += r_dist*sin(theta_diff_final+angle_turned+angle_diff_final_init);
+				force_angle_range(angle_diff_final);
+				force_angle_range(theta_diff_final);
+
+
+			cout << "\nDist final:" << dist_final << " Dist step:" << x_diff_term << "Y offset final" << y_offset_final << "Offset step:" << y_diff_term << " rdist:" << r_dist << endl;
+			cout << "Angle diff total:" << angle_diff_final << " Angle diff step:" << angle_diff << " Theta diff final:" << theta_diff_final << " Theta diff term:" << theta_diff_term << endl;
 			
-			theta_diff_term = (x_diff_term==0)?(y_diff_term>=0?(y_diff_term>0?PI/2:0):-PI/2):atan2(y_diff_term,x_diff_term);
-			theta_diff_final += theta_diff_term;
-
-			x_diff += r_dist*cos(theta_diff_final+angle_turned);
-			y_diff += r_dist*sin(theta_diff_final+angle_turned);
-			angle_diff_final += angle_diff;
-			force_angle_range(angle_diff_final);
-
-			cout << "\nDist final:" << x_diff << " Dist step:" << x_diff_term << endl;
-			cout << "Angle diff total:" << angle_diff_final << " Angle diff step:" << angle_diff << endl;
 
 			usleep(4*time_burst_sleep);
 		}
@@ -221,6 +270,7 @@ public:
 		long diff_l=0,diff_r=0;
 
 		double angle_diff = 0, angle_diff_dist = 0, theta_diff_term = 0, theta_diff_final = 0;
+		double angle1= 0 , angle2 = 0, angle_diff_final_init = angle_diff_final, dist_final = 0, y_offset_final = 0;
 
 		int vel_r = 25*dir, vel_l = -25*dir; 
 		n = read_left_enc();
@@ -250,25 +300,65 @@ public:
 			cout << "Right: " << n << "Prev: " << right << " Diff: " << diff_r << endl; 
 			right = n;
 
-			double sign = (dir>=0)?1:-1;
+			double sign = (diff_r-diff_l>=0)?1:-1;
+			double sign1 = (dir>=0)?1:-1;
+
 			double cur_diff = diff_r + diff_l;
 			angle_diff = (diff_r + diff_l)*dist_per_enc_ang/axle_length;
-			angle_diff_dist = (cur_diff)*dist_per_enc/axle_length;
+//			angle_diff_dist = (cur_diff)*dist_per_enc/axle_length;
+			double R = (cur_diff!=0)?(diff_r-diff_l)*axle_length/(2*cur_diff):0;
+			R = (R>=0)?R:-R;
 
-			double x_diff_term = (cur_diff!=0)?((sign*(diff_r-diff_l)*axle_length/(2*cur_diff))*sin(angle_diff_dist)):0;
-			double y_diff_term = (cur_diff!=0)?(((diff_r-diff_l)*axle_length/(2*cur_diff))*(1-cos(angle_diff_dist))):0;
+			if(sign == -1)
+			{
+				if(sign1 == -1)
+				{
+					angle1 = angle_diff_final;
+					angle2 = angle1 + angle_diff;
+				}
+				else
+				{
+					angle1 = angle_diff_final;
+					angle2 = angle1 - angle_diff;
+//					R = -R;
+				}
+			}
+			else
+			{
+				if(sign1 == -1)
+				{
+					angle1 = angle_diff_final;
+					angle2 = angle1 - angle_diff;
+//					R = -R;
+				}
+				else
+				{
+					angle1 = angle_diff_final;
+					angle2 = angle1 + angle_diff;
+				}
+			}
+
+			double x_diff_term = R*(sin(angle2)-sin(angle1));
+			double y_diff_term = R*(cos(angle1)-cos(angle2));
 			double r_dist = dist_scale*pow(pow(x_diff_term,2) + pow(y_diff_term,2),0.5);
 
 
-			theta_diff_term = (x_diff_term==0)?(y_diff_term>=0?(y_diff_term>0?PI/2:0):-PI/2):atan2(y_diff_term,x_diff_term);
-			theta_diff_final += theta_diff_term;
+				theta_diff_term = (x_diff_term==0)?(y_diff_term>=0?(y_diff_term>0?PI/2:0):-PI/2):atan2(y_diff_term,x_diff_term) - angle_diff_final_init;
 
-			x_diff += r_dist*cos(theta_diff_final+angle_turned);
-			y_diff += r_dist*sin(theta_diff_final+angle_turned);
 
-			angle_diff_final += angle_diff;
-			cout << "Angle diff total:" << angle_diff_final << " Angle diff step:" << angle_diff << endl;
-			force_angle_range(angle_diff_final);
+					angle_diff_final = angle2;
+				
+						theta_diff_final += theta_diff_term;
+						dist_final += r_dist*cos(theta_diff_final);
+						y_offset_final += r_dist*sin(theta_diff_final);
+					x_diff += r_dist*cos(theta_diff_final+angle_turned+angle_diff_final_init);
+					y_diff += r_dist*sin(theta_diff_final+angle_turned+angle_diff_final_init);
+				force_angle_range(angle_diff_final);
+				force_angle_range(theta_diff_final);
+
+
+				cout << "\nX:" << x_diff << " Dist step:" << x_diff_term << "Y:" << y_diff << "Offset step:" << y_diff_term << " rdist:" << r_dist << endl;
+			cout << "Angle diff total:" << angle_diff_final << " Angle diff step:" << angle_diff << " Theta diff final:" << theta_diff_final << " Theta diff term:" << theta_diff_term << endl;
 
 			usleep(4*time_burst_sleep);
 		}
@@ -419,46 +509,23 @@ public:
 			if(j>2)
 			{
 				theta_diff_term = (x_diff_term==0)?(y_diff_term>=0?(y_diff_term>0?PI/2:0):-PI/2):atan2(y_diff_term,x_diff_term) - angle_diff_final_init;
-/*				double temp = theta_diff_term;
-				if(sign == -1)
-				{
-					if(sign1 == -1)
-					{
-						theta_diff_term = PI + theta_diff_term;
-					}
-					else
-					{
-						theta_diff_term = -theta_diff_term;
-					}
-				}
-				else
-				{
-					if(sign1 == -1)
-					{
-						theta_diff_term= -(-PI + theta_diff_term);
-					}
-					else
-					{
-						theta_diff_term = theta_diff_term;
-					}
-				}
-*/
-					x_diff += R*(sin(angle2 + angle_turned)-sin(angle1 + angle_turned));
-					y_diff += R*(cos(angle1 + angle_turned)-cos(angle2 + angle_turned));
+					angle_diff_final = angle2;
 
 
-					theta_diff_final += theta_diff_term;
+					theta_diff_final += sign*theta_diff_term;
 					dist_final += r_dist*cos(theta_diff_final);
 					y_offset_final += r_dist*sin(theta_diff_final);
+					x_diff += r_dist*cos(theta_diff_final+angle_turned+angle_diff_final_init);
+					y_diff += r_dist*sin(theta_diff_final+angle_turned+angle_diff_final_init);
 
-				angle_diff_final = angle2;
+
 				force_angle_range(angle_diff_final);
 				force_angle_range(theta_diff_final);
 
 			}
 
-			cout << "\nDist final:" << dist_final << " Dist step:" << x_diff_term << "Y offset final" << y_offset_final << "Offset step:" << y_diff_term << " rdist:" << r_dist << endl;
-			cout << "Angle diff total:" << angle_diff_final << " Angle diff step:" << angle_diff << " Theta diff final:" << theta_diff_final << " Theta diff term:" << theta_diff_term << endl;
+			cout << "\nDist final:" << dist_final << " Dist step:" << x_diff << "Y offset final" << y_offset_final << "Offset step:" << y_diff << " rdist:" << r_dist << endl;
+			cout << "Angle diff total:" << angle_diff_final << " Angle diff step:" << angle_diff << " Theta diff final:" << theta_diff_final << " Theta diff term:" << theta_diff_term << "angle init" << angle_turned << endl;
 			
 			
 /* ORIGINAL CODE  
@@ -561,7 +628,19 @@ public:
 			double sign1 = (angle_diff_est>=0)?1:-1;
 
 			double cur_diff = diff_r + diff_l;
-			angle_diff = (diff_r + diff_l)*dist_per_enc_ang/axle_length;
+			double angle_diff_est_calc = 0;
+		/*	if(abs(angle_diff_est)>=90)
+			{
+				angle_diff_est_calc = dist_per_enc_ang_90 + (((abs(angle_diff_est)-PI/2)/(PI/2))*(dist_per_enc_ang_max-dist_per_enc_ang_90));
+			}
+			else
+			{
+				angle_diff_est_calc = dist_per_enc_ang_min + ((abs(angle_diff_est)/(PI/2))*(dist_per_enc_ang_90-dist_per_enc_ang_min));
+			}*/
+//			angle_diff_est_calc = dist_per_enc_ang_min + ((abs(angle_diff_est)/PI)*(dist_per_enc_ang_max-dist_per_enc_ang_90));
+			angle_diff_est_calc = dist_per_enc_ang_max;
+
+			angle_diff = (diff_r + diff_l)*(angle_diff_est_calc)/axle_length;
 //			angle_diff_dist = (cur_diff)*dist_per_enc/axle_length;
 			double R = (cur_diff!=0)?(diff_r-diff_l)*axle_length/(2*cur_diff):0;
 			R = (R>=0)?R:-R;
@@ -635,14 +714,16 @@ public:
 					}
 				}
 */
-					x_diff += R*(sin(angle2 + angle_turned)-sin(angle1 + angle_turned));
-					y_diff += R*(cos(angle1 + angle_turned)-cos(angle2 + angle_turned));
+
+					angle_diff_final = angle2;
 				
 						theta_diff_final += theta_diff_term;
 						dist_final += r_dist*cos(theta_diff_final);
 						y_offset_final += r_dist*sin(theta_diff_final);
+					x_diff += r_dist*cos(theta_diff_final+angle_turned+angle_diff_final_init);
+					y_diff += r_dist*sin(theta_diff_final+angle_turned+angle_diff_final_init);
 
-				angle_diff_final = angle2;
+
 				force_angle_range(angle_diff_final);
 				force_angle_range(theta_diff_final);
 
@@ -771,19 +852,22 @@ public:
 
 		double x_del = goal->dest.point.x;
 		double y_del = goal->dest.point.y;
+		double angle_diff_est = (x_del==0)?(y_del>=0?(y_del>0?PI/2:0):-PI/2):atan2(y_del,x_del);
+		double dist_est = pow(pow(x_del,2) +	pow(y_del,2),0.5), dist_final = 0;
+
+		x_del = dist_est*cos(angle_diff_est);
+		y_del = dist_est*sin(angle_diff_est);
 		if(goal->type==3)
 		{
 			x_del -= stationary_loc.pose.position.x;
 			y_del -= stationary_loc.pose.position.y;
 		}
-
-
+		angle_diff_est = (x_del==0)?(y_del>=0?(y_del>0?PI/2:0):-PI/2):atan2(y_del,x_del);
+		dist_est = pow(pow(x_del,2) +	pow(y_del,2),0.5);
 
 //		cout << "x_del:" << x_del << " y_del:" << y_del << "Init angle:" << stationary_loc.pose.orientation.z << endl;
 
-		double dist_est = 10*pow(pow(x_del,2) +	pow(y_del,2),0.5), dist_final = 0;
-//		double angle_diff_est = (x_del==0)?(y_del>=0?PI/2:-PI/2):atan2(y_del,x_del) - stationary_loc.pose.orientation.z;
-		double angle_diff_est = (x_del==0)?(y_del>=0?(y_del>0?PI/2:0):-PI/2):atan2(y_del,x_del);
+		//		double angle_diff_est = (x_del==0)?(y_del>=0?PI/2:-PI/2):atan2(y_del,x_del) - stationary_loc.pose.orientation.z;
 		double cur_angle_rad = (PI/180)*stationary_loc.pose.orientation.z;
 		double angle_diff_est_rel = angle_diff_est - cur_angle_rad;
 
@@ -814,10 +898,12 @@ public:
 		else	
 		if(goal->type == 1 || goal->type == 3)
 		{
-			move_controlled_turn(angle_diff_est_rel,cur_angle_rad,angle_diff_final,x_diff,y_diff);
+			move_controlled_turn(goal->type==3?angle_diff_est_rel:angle_diff_est,cur_angle_rad,angle_diff_final,x_diff,y_diff);
+//				move_controlled_turn(angle_diff_est_rel,cur_angle_rad,angle_diff_final,x_diff,y_diff);
+
 			x_del -= x_diff;
 			y_del -= y_diff;
-			dist_est = 10*pow(pow(x_del,2) +	pow(y_del,2),0.5);
+			dist_est = pow(pow(x_del,2) +	pow(y_del,2),0.5);
 			freq = 1;
 			for(int l=0;l<max;l++)
 			{
@@ -827,7 +913,7 @@ public:
 					move_timed_turn(-1,freq,cur_angle_rad,x_diff,y_diff,angle_diff_final);
 			}
 			rw.sleep();
-			move_controlled_straight(dist_est, cur_angle_rad, dist_final, x_diff, y_diff, angle_diff_final);
+			move_controlled_straight(10*dist_est, cur_angle_rad, dist_final, x_diff, y_diff, angle_diff_final);
 		}
 		else
 		if(goal->type == 2)
