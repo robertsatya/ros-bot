@@ -107,7 +107,7 @@ int main (int argc, char **argv)
 		
 		}
 //		my_node.fin = 3;
-	*/
+*/
    my_node.doStuff(p,mode,angle,dir,cmd_freq);
 //		cin >> my_node.fin;
   	while(my_node.fin<3)
