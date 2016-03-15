@@ -10,7 +10,7 @@
 #include <sensor_msgs/image_encodings.h>
 #include <sensor_msgs/Image.h>
 #include <geometry_msgs/PointStamped.h>
-#include <control_node/BroadSearch.h>
+// #include <control_node/BroadSearch.h>
 
 #include <opencv2/opencv.hpp>
 #include <opencv2/features2d/features2d.hpp>
@@ -36,20 +36,15 @@ class DisparityTrack
 	Mat Pj_left, Pj_right, left_pt, right_pt;
 	double Pjl[3][4], Pjr[3][4];
 	double x_pos, y_pos, depth;
+	vector<vector<Point> > contours;
+	vector<Vec4i> hierarchy;
 
 public:
 	DisparityTrack() {
-		left_point_pub = n.advertise<geometry_msgs::PointStamped>("left_point", 5);
 		image_sub1 = n.subscribe("/left_cam/image_raw", 100, &DisparityTrack::left_cb, this);
 		image_sub2 = n.subscribe("/right_cam/image_raw", 100, &DisparityTrack::right_cb, this);
-		lower_thresh[0] = 4; lower_thresh[1] = 75; lower_thresh[2] = 60;
-		upper_thresh[0] = 18; upper_thresh[1] = 184; upper_thresh[2] = 196;
-		glower_thresh[0] = 37; glower_thresh[1] = 108; glower_thresh[2] = 44;
-		gupper_thresh[0] = 54; gupper_thresh[1] = 215; gupper_thresh[2] = 255;
-		// glower_thresh[0] = 4; glower_thresh[1] = 75; glower_thresh[2] = 60;
-		// gupper_thresh[0] = 18; gupper_thresh[1] = 184; gupper_thresh[2] = 196;
-		// lower_thresh[0] = 37; lower_thresh[1] = 160; lower_thresh[2] = 44;
-		// upper_thresh[0] = 52; upper_thresh[1] = 215; upper_thresh[2] = 255;
+		lower_thresh[0] = 110; lower_thresh[1] = 87; lower_thresh[2] = 47;
+		upper_thresh[0] = 121; upper_thresh[1] = 175; upper_thresh[2] = 95;
 		x_pos = 0; y_pos = 0; depth = 0;
 
 		Pjl[0][0] = 870.1896695734192; Pjl[0][1] = 0; Pjl[0][2] = 345.4360542297363; Pjl[0][3] = 0;
@@ -94,42 +89,43 @@ public:
 		inRange(hsv, Scalar(lower_thresh[0], lower_thresh[1], lower_thresh[2]),
 			Scalar(upper_thresh[0], upper_thresh[1], upper_thresh[2]), masked);
 
-		inRange(hsv, Scalar(glower_thresh[0], glower_thresh[1], glower_thresh[2]),
-			Scalar(gupper_thresh[0], gupper_thresh[1], gupper_thresh[2]), gmasked);
+		// inRange(hsv, Scalar(glower_thresh[0], glower_thresh[1], glower_thresh[2]),
+		// 	Scalar(gupper_thresh[0], gupper_thresh[1], gupper_thresh[2]), gmasked);
 
 		GaussianBlur( masked, masked, Size(9, 9), 2, 2 );
-		GaussianBlur( gmasked, gmasked, Size(9, 9), 2, 2 );
-
-
-		int erosion_size = 9;
+		// GaussianBlur( gmasked, gmasked, Size(9, 9), 2, 2 );
+		int erosion_size = 7;
 		erode(masked, masked, getStructuringElement(MORPH_ERODE,
 													Size( 2*erosion_size + 1, 2*erosion_size+1 ),
 													Point(erosion_size, erosion_size)) );
 		dilate(masked, masked, getStructuringElement(MORPH_DILATE, Point(3,3)) );
 
-		erosion_size = 5;
-		erode(gmasked, gmasked, getStructuringElement(MORPH_ERODE,
-													Size( 2*erosion_size + 1, 2*erosion_size+1 ),
-													Point(erosion_size, erosion_size)) );
-		dilate(gmasked, gmasked, getStructuringElement(MORPH_DILATE, Point(3,3)) );
-
 		thr_img = masked;
+
+		findContours(thr_img, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 
 		// HoughCircles( masked, balls, CV_HOUGH_GRADIENT, 1, 10, 50, 30, 0, 0 );
 
 		cv::bitwise_and(img, img, fin, thr_img);
 
-		erode(gmasked, gmasked, getStructuringElement(MORPH_ERODE, Point(3,3)) );
-		dilate(gmasked, gmasked, getStructuringElement(MORPH_DILATE, Point(3,3)) );
+		int idx = 0;
+		for( ; idx >= 0; idx = hierarchy[idx][0] )
+		{
+			Scalar color( rand()&255, rand()&255, rand()&255 );
+			drawContours( fin, contours, -1, color );
+		}
+
+		// erode(gmasked, gmasked, getStructuringElement(MORPH_ERODE, Point(3,3)) );
+		// dilate(gmasked, gmasked, getStructuringElement(MORPH_DILATE, Point(3,3)) );
 
 		Moments moments = cv::moments(masked, false);
-		Moments gmoments = cv::moments(gmasked, false);
+		// Moments gmoments = cv::moments(gmasked, false);
 
-		// SimpleBlobDetector detector;
-		// std::vector<KeyPoint> points;
-		// detector.detect(masked, points);
+		SimpleBlobDetector detector;
+		std::vector<KeyPoint> points;
+		detector.detect(masked, points);
 
-		// drawKeypoints( fin, points, fin, Scalar(255, 0, 255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
+		drawKeypoints( fin, points, fin, Scalar(255, 0, 255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
 
 
 		if(moments.m00 > 0) {
@@ -141,27 +137,21 @@ public:
 			left_pt.at<cv::Vec2d>(0,0)[0] = cx;
 			left_pt.at<cv::Vec2d>(0,0)[1] = cy;
 
-			cv::circle(fin, cv::Point(cx, cy), 10, Scalar(0, 0, 255), 2);
+			// cv::circle(fin, cv::Point(cx, cy), 10, Scalar(0, 0, 255), 2);
 			// draw(fin, balls);
 			// if (balls.size() != 0)
 			// 	cout << "count: " << balls.size() << endl;
-		} else {
-			prev_left_pos[0] = 0;			
-			prev_left_pos[1] = 0;			
 		}
 
-		if(gmoments.m00 > 0) {
-			int cx = gmoments.m10/gmoments.m00;
-			int cy = gmoments.m01/gmoments.m00;
+		// if(gmoments.m00 > 0) {
+		// 	int cx = gmoments.m10/gmoments.m00;
+		// 	int cy = gmoments.m01/gmoments.m00;
 
-			cv::circle(fin, cv::Point(cx, cy), 10, Scalar(0, 255, 0), 2);
-			// draw(fin, balls);
-			// if (balls.size() != 0)
-			// 	cout << "count: " << balls.size() << endl;
-		} else {
-			// left_pt.at<cv::Vec2d>(0,0)[0] = 0;
-			// left_pt.at<cv::Vec2d>(0,0)[1] = 0;
-		}  
+		// 	cv::circle(fin, cv::Point(cx, cy), 10, Scalar(0, 0, 255), 2);
+		// 	// draw(fin, balls);
+		// 	// if (balls.size() != 0)
+		// 	// 	cout << "count: " << balls.size() << endl;
+		// }
 
 		imshow("Thresh Image", fin);
 
@@ -190,7 +180,7 @@ public:
 
 		Moments moments = cv::moments(masked, false);
 
-		if(moments.m00 > 0 && (prev_left_pos[0] > 0 && prev_left_pos[1] > 0)) {
+		if(moments.m00 > 0) {
 			double cx = moments.m10/moments.m00;
 			double cy = moments.m01/moments.m00;
 
@@ -226,12 +216,12 @@ public:
 		left_point_pub.publish(point);
 	}
 
-	bool send_loc(control_node::BroadSearch::Request &req, control_node::BroadSearch::Response &res) {
-		res.x = x_pos;
-		res.y = y_pos;
-		res.depth = depth;
-		return true;
-	}
+	// bool send_loc(control_node::BroadSearch::Request &req, control_node::BroadSearch::Response &res) {
+	// 	res.x = x_pos;
+	// 	res.y = y_pos;
+	// 	res.depth = depth;
+	// 	return true;
+	// }
 
 	 void draw(cv::Mat& mat, const std::vector<cv::Vec3f>& container)
 	{
@@ -245,12 +235,12 @@ public:
 
 int main(int argc, char *argv[])
 {
-	ros::init(argc, argv, "depth_tracking");
+	ros::init(argc, argv, "goal_search");
 	signal(SIGINT, sigHandle);
 	signal(SIGTERM, sigHandle);
 	DisparityTrack dt = DisparityTrack();
 	ros::NodeHandle nh;
-	ros::ServiceServer service = nh.advertiseService("broad_search_service", &DisparityTrack::send_loc, &dt);
+	// ros::ServiceServer service = nh.advertiseService("goal_search_service", &DisparityTrack::send_loc, &dt);
 	ros::spin();
 	return 0;
 }

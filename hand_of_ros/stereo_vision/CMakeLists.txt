@@ -144,6 +144,10 @@ add_executable(depth_tracking src/depth_tracking.cpp)
 target_link_libraries(depth_tracking ${OpenCV_LIBRARIES} ${OpenCV_LIBS} ${catkin_LIBRARIES} )
 add_dependencies(depth_tracking depth_tracking_gencpp)
 
+add_executable(goal_search src/goal_search.cpp)
+target_link_libraries(goal_search ${OpenCV_LIBRARIES} ${OpenCV_LIBS} ${catkin_LIBRARIES} )
+add_dependencies(goal_search goal_search_gencpp)
+
 add_executable(thresh_manager src/thresh_manager.cpp)
 target_link_libraries(thresh_manager ${OpenCV_LIBRARIES} ${OpenCV_LIBS} ${catkin_LIBRARIES} )
 add_dependencies(thresh_manager thresh_manager_gencpp)
