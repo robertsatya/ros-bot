@@ -149,21 +149,30 @@ public:
 			// if (balls.size() != 0)
 			// 	cout << "count: " << balls.size() << endl;
 		} else {
+			left_pt.at<cv::Vec2d>(0,0)[0] = 0;
 			prev_left_pos[0] = 0;
+			left_pt.at<cv::Vec2d>(0,0)[1] = 0;
 			prev_left_pos[1] = 0;
 		}
 
 		if(gmoments.m00 > 0) {
 			int cx = gmoments.m10/gmoments.m00;
 			int cy = gmoments.m01/gmoments.m00;
+			
+			gleft_pt.at<cv::Vec2D>(0,0)[0] = cx;
+			gpreb_left_pos[0] = cx;
+			gleft_pt.at<cv::Vec2D>(0,0)[1] = cy;
+			gprev_left_pos[1] = cy;
 
 			cv::circle(fin, cv::Point(cx, cy), 10, Scalar(0, 255, 0), 2);
 			// draw(fin, balls);
 			// if (balls.size() != 0)
 			// 	cout << "count: " << balls.size() << endl;
 		} else {
-			// left_pt.at<cv::Vec2d>(0,0)[0] = 0;
-			// left_pt.at<cv::Vec2d>(0,0)[1] = 0;
+			gleft_pt.at<cv::Vec2d>(0,0)[0] = 0;
+			gprev_left_pos[0] = 0;
+			gleft_pt.at<cv::Vec2d>(0,0)[1] = 0;
+			gprev_left_pos[1] = 0;
 		}
 
 		imshow("Thresh Image", fin);
@@ -179,7 +188,7 @@ public:
 			ROS_ERROR("cv_bridge exception: %s", e.what());
 			return;
 		}
-		Mat hsv, masked;
+		Mat hsv, masked, gmasked;
 		Mat img = cv_ptr->image;
 		cvtColor(img, hsv, CV_BGR2HSV);
 
@@ -192,6 +201,16 @@ public:
 		dilate(masked, masked, getStructuringElement(MORPH_DILATE, Point(3,3)) );
 
 		Moments moments = cv::moments(masked, false);
+
+		inRange(hsv, Scalar(lower_thresh[0], lower_thresh[1], lower_thresh[2]),
+			Scalar(upper_thresh[0], upper_thresh[1], upper_thresh[2]), gmasked);
+
+		erode(gmasked, gmasked, getStructuringElement(MORPH_ERODE, Point(3,3)) );
+		dilate(gmasked, gmasked, getStructuringElement(MORPH_DILATE, Point(3,3)) );
+
+		Moments moments = cv::moments(masked, false);
+		Moments gmoments = cv::moments(gmasked, false);
+
 
 		if(moments.m00 > 0 && (prev_left_pos[0] > 0 && prev_left_pos[1] > 0)) {
 			double cx = moments.m10/moments.m00;
