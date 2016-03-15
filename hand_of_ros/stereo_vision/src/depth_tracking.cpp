@@ -33,9 +33,12 @@ class DisparityTrack
 	int lower_thresh[3], upper_thresh[3];
 	int glower_thresh[3], gupper_thresh[3];
 	double prev_left_pos[2], prev_right_pos[2];
-	Mat Pj_left, Pj_right, left_pt, right_pt;
+	double gprev_left_pos[2], gprev_right_pos[2];
+	Mat Pj_left, Pj_right, left_pt, right_pt, gleft_pt, gright_pt;
 	double Pjl[3][4], Pjr[3][4];
 	double x_pos, y_pos, depth;
+	double gx_pos, gy_pos, gdepth;
+	bool isConsistent;
 
 public:
 	DisparityTrack() {
@@ -52,14 +55,14 @@ public:
 		// upper_thresh[0] = 52; upper_thresh[1] = 215; upper_thresh[2] = 255;
 		x_pos = 0; y_pos = 0; depth = 0;
 
-		Pjl[0][0] = 870.1896695734192; Pjl[0][1] = 0; Pjl[0][2] = 345.4360542297363; Pjl[0][3] = 0;
-		Pjl[1][0] = 0; Pjl[1][1] = 870.1896695734192; Pjl[1][2] = 260.3978462219238; Pjl[1][3] = 0;
+		Pjl[0][0] = 864.071360; Pjl[0][1] = 0; Pjl[0][2] = 271.838741; Pjl[0][3] = 0;
+		Pjl[1][0] = 0; Pjl[1][1] = 864.071360; Pjl[1][2] = 235.457853; Pjl[1][3] = 0;
 		Pjl[2][0] =	0; Pjl[2][1] = 0; Pjl[2][2] = 1; Pjl[2][3] = 0;
 
 		Pj_left = Mat(3, 4, DataType<double>::type, &Pjl);
 
-		Pjr[0][0] = 870.1896695734192; Pjr[0][1] = 0; Pjr[0][2] = 345.4360542297363; Pjr[0][3] = 13321.68894098538;
-		Pjr[1][0] = 0; Pjr[1][1] = 870.1896695734192; Pjr[1][2] = 260.3978462219238; Pjr[1][3] = 0;
+		Pjr[0][0] = 864.071360; Pjr[0][1] = 0; Pjr[0][2] = 271.838741; Pjr[0][3] = 15693.883800;
+		Pjr[1][0] = 0; Pjr[1][1] = 864.071360; Pjr[1][2] = 235.457853; Pjr[1][3] = 0;
 		Pjr[2][0] =	0; Pjr[2][1] = 0; Pjr[2][2] = 1; Pjr[2][3] = 0;
 
 		Pj_right = Mat(3, 4, DataType<double>::type, &Pjr);
@@ -146,8 +149,8 @@ public:
 			// if (balls.size() != 0)
 			// 	cout << "count: " << balls.size() << endl;
 		} else {
-			prev_left_pos[0] = 0;			
-			prev_left_pos[1] = 0;			
+			prev_left_pos[0] = 0;
+			prev_left_pos[1] = 0;
 		}
 
 		if(gmoments.m00 > 0) {
@@ -161,7 +164,7 @@ public:
 		} else {
 			// left_pt.at<cv::Vec2d>(0,0)[0] = 0;
 			// left_pt.at<cv::Vec2d>(0,0)[1] = 0;
-		}  
+		}
 
 		imshow("Thresh Image", fin);
 
@@ -227,6 +230,12 @@ public:
 	}
 
 	bool send_loc(control_node::BroadSearch::Request &req, control_node::BroadSearch::Response &res) {
+		isConsistent = false;
+		int count = 0;
+		while(!isConsistent) {
+			int prev = depth;
+
+		}
 		res.x = x_pos;
 		res.y = y_pos;
 		res.depth = depth;
