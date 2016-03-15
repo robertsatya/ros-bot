@@ -17,7 +17,7 @@ int main (int argc, char **argv)
 	geometry_msgs::PointStamped p;
 	int i=1,mode=0,dir=0,cmd_freq=1;
 	double angle=0;
-
+	int m_success = 1;
 
 /*    tcp_client c;
 
@@ -108,7 +108,8 @@ int main (int argc, char **argv)
 		}
 //		my_node.fin = 3;
 */
-   my_node.doStuff(p,mode,angle,dir,cmd_freq);
+		m_success = 1;
+   my_node.doStuff(p,mode,angle,dir,cmd_freq,m_success);
 //		cin >> my_node.fin;
   	while(my_node.fin<3)
   	{

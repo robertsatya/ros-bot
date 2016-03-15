@@ -22,7 +22,7 @@ public:
 	
 
 
-  void doStuff(geometry_msgs::PointStamped point, int mode, double angle, int dir, int cmd_freq)
+  void doStuff(geometry_msgs::PointStamped point, int mode, double angle, int dir, int cmd_freq, int &success)
   {
     navigationGoal goal;
     goal.dest = point;
