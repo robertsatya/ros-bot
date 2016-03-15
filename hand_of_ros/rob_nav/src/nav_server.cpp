@@ -7,6 +7,7 @@
 #include <termios.h>
 #include <math.h>
 #include <serial/serial.h>
+#include <rob_nav/tcp_client.h>
 
 #define PI 3.141592
 
@@ -24,6 +25,7 @@ protected:
   rob_nav::navigationFeedback feedback_;
   rob_nav::navigationResult result_;
   geometry_msgs::PoseStamped stationary_loc;
+	geometry_msgs::Point target;
 	int fd;
 	serial::Serial serial_port_;
 	ros::Rate rw,r;
@@ -39,6 +41,9 @@ protected:
 	int vel;
 	int turn_dir; // 0-No turn, 1-Left, 2-Right
 	int time_burst_sleep;
+  string host;
+	tcp_client c;
+	int success;
 public:
 
   navigationAction(std::string name) :
@@ -62,7 +67,7 @@ public:
   	stationary_loc.pose.orientation.y = 0;
   	stationary_loc.pose.orientation.z = 0;
   	stationary_loc.pose.orientation.w = 1;
-
+		success = 1;
     as_.start();
 //		dist_per_enc = 0.4446; //72*PI/508.8;
 		dist_per_enc = 0.003451*56.5/100; //72*PI/65536;
@@ -81,6 +86,8 @@ public:
 		r.sleep();
 		serial_port_.flushOutput();
 		r.sleep();
+		host="192.168.43.97";
+    c.conn(host , 9990);
   }
 
   ~navigationAction(void)
@@ -457,7 +464,6 @@ public:
 	
 //		feedback_.cur_loc
 
-			move_straight(vel_r,vel_l);
 
 /* MODIFIED CODE */ 
 
@@ -526,7 +532,50 @@ public:
 
 			cout << "\nDist final:" << dist_final << " Dist step:" << x_diff << "Y offset final" << y_offset_final << "Offset step:" << y_diff << " rdist:" << r_dist << endl;
 			cout << "Angle diff total:" << angle_diff_final << " Angle diff step:" << angle_diff << " Theta diff final:" << theta_diff_final << " Theta diff term:" << theta_diff_term << "angle init" << angle_turned << endl;
+			string ultra = c.receive(1024);
+			int ultra_l=0, ultra_r=0, ultra_b=0, ultra_t=0; // Left 1 Right 2 Bottom 3 Top 4
+	   	ultra_l = boost::lexical_cast<int>(ultra[0]);
+	   	ultra_r = boost::lexical_cast<int>(ultra[1]);
+	   	ultra_b = boost::lexical_cast<int>(ultra[2]);
+			ultra_t = boost::lexical_cast<int>(ultra[3]);
+			double cur_ultra_angle = angle_diff_final;
+			if(ultra_l == 1)
+			{
+				// Turn right
+				double d = 0;
+				move_controlled_turn(-45,cur_ultra_angle,angle_diff_final,x_diff,y_diff);
+				move_controlled_straight(100, cur_ultra_angle, d, x_diff, y_diff, angle_diff_final);
+				success = 0;
+				move_straight(0,0);
+				return;	
+			}
+			if(ultra_r == 1)
+			{
+				// Turn left
+				double d = 0;
+				move_controlled_turn(45,cur_ultra_angle,angle_diff_final,x_diff,y_diff);
+				move_controlled_straight(100, cur_ultra_angle, d, x_diff, y_diff, angle_diff_final);
+				success = 0;
+				move_straight(0,0);
+				return;	
+			}
+			if(ultra_b == 1)
+			{
+				// For bucket
+			}
+			if(ultra_t == 1)
+			{
+				// Turn left
+				double d = 0;
+				move_controlled_turn(45,cur_ultra_angle,angle_diff_final,x_diff,y_diff);
+				move_controlled_straight(100, cur_ultra_angle, d, x_diff, y_diff, angle_diff_final);
+				success = 0;
+				move_straight(0,0);
+				return;	
+
+			}
 			
+			move_straight(vel_r,vel_l);
 			
 /* ORIGINAL CODE  
 			dist_step = get_distance(diff_r,diff_l);
@@ -850,6 +899,8 @@ public:
 		start();
 		safe();
 
+		success = 1;
+		target = goal->dest.point;
 		double x_del = goal->dest.point.x;
 		double y_del = goal->dest.point.y;
 		double angle_diff_est = (x_del==0)?(y_del>=0?(y_del>0?PI/2:0):-PI/2):atan2(y_del,x_del);
@@ -953,6 +1004,7 @@ public:
 
 		result_.final_loc.point = stationary_loc.pose.position;
 		result_.angle = stationary_loc.pose.orientation.z;
+		result_.success = success;
 		as_.setSucceeded(result_);
 
   }

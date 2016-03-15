@@ -54,6 +54,7 @@ int main(int argc, char *argv[])
 	int mode=1,dir=0,cmd_freq=1;
 	double angle=0;
 	geometry_msgs::PointStamped p;
+	int m_success = 1;
 
 	// BROAD_SEARCH related
 	int broad_search_rotate_angle = 0;
@@ -65,6 +66,7 @@ int main(int argc, char *argv[])
 	c.conn(host , 9991);
 	string o_str = "";
 	string res = "";
+	int count_5 = 0;
 
 	// TODO: Try postion tracking while moving for simple mapping
 	while(control_state != STATE_ERROR) {
@@ -106,7 +108,8 @@ int main(int argc, char *argv[])
 				broad_search_rotate_angle += angle_step;
 				mode = 0;
 				angle = 45;
-				motion_node.doStuff(p,mode,angle,dir,cmd_freq);
+				m_success = 1;
+				motion_node.doStuff(p,mode,angle,dir,cmd_freq,m_success);
 				while(motion_node.fin < 3)
 				{
 				}
@@ -123,13 +126,15 @@ int main(int argc, char *argv[])
 				p.point.y = -pos[0];
 				p.point.z = -pos[1];
 				mode = 1;
-				motion_node.doStuff(p,mode,angle,dir,cmd_freq);
+				m_success = 1;
+				motion_node.doStuff(p,mode,angle,dir,cmd_freq,m_success);
 				while(motion_node.fin<3)
 				{
 				}
 				control_state = STATE_BROAD_SEARCH;
 				break;
 			case STATE_MOVE_TO_BALL:
+				m_success = 1;
 				cout << "Going to ball" << endl;
 				p.header.seq = frame_seq++;
 				p.header.stamp = ros::Time::now();
@@ -138,17 +143,20 @@ int main(int argc, char *argv[])
 				p.point.y = -pos[0];
 				p.point.z = -pos[1];
 				mode = 1;
-				motion_node.doStuff(p,mode,angle,dir,cmd_freq);
+				motion_node.doStuff(p,mode,angle,dir,cmd_freq,m_success);
 				while(motion_node.fin<3)
 				{
 				}
-				control_state = STATE_REFINE_POSITION;
+				if(m_success == 1)
+					control_state = STATE_REFINE_POSITION;
+				else
+					control_state = STATE_BROAD_SEARCH;
 				break;
 			case STATE_REFINE_POSITION:
 				o_str = "1";
 				mode = 2;
 				c.send_data(o_str);
-
+				count_5 = 0;
 				while(true)
 				{
 					// TODO: Ignore first 2-3 commands
@@ -161,24 +169,31 @@ int main(int argc, char *argv[])
 
 					// res.angle = boost::lexical_cast<float>(c.receive(1024));
 					cout << dir << endl;
-					if(dir==4 || dir == 5)
+					if(dir==4 || (dir == 5 && count_5 == 1))
 						break;
-
-					motion_node.doStuff(p,mode,angle,dir,cmd_freq);
-
+					if(count_5 == 1)
+						count_5 = 0;
+					if(dir == 5)
+						count_5++;
+					else
+					{	
+					m_success = 1;					
+						motion_node.doStuff(p,mode,angle,dir,cmd_freq,m_success);
+					}
 				}
 
 				if(dir == 4)
 				{
-					control_state = STATE_BALL_READY_TO_PICK;
+					control_state = STATE_GRAB_BALL;
 				}
 				else
 				{
 					control_state = STATE_BROAD_SEARCH;
 				}
+				//TODO: Turn around to see if ball in vicinity
 				break;
 			case STATE_BALL_READY_TO_PICK:
-				o_str = "2";
+/*				o_str = "2";
 				c.send_data(o_str);
 				res = c.receive(1024);
 				cout << res << endl;
@@ -190,7 +205,7 @@ int main(int argc, char *argv[])
 				else
 				{
 					control_state = STATE_REFINE_POSITION;
-				}
+				}*/
 				break;
 			case STATE_GRAB_BALL:
 				mode = 3;
@@ -200,7 +215,8 @@ int main(int argc, char *argv[])
 				p.point.x = 0;
 				p.point.y = 0;
 				p.point.z = 0;
-				motion_node.doStuff(p,mode,angle,dir,cmd_freq);
+				m_success = 1;
+				motion_node.doStuff(p,mode,angle,dir,cmd_freq,m_success);
 				while(motion_node.fin<3)
 				{
 				}
@@ -229,16 +245,29 @@ int main(int argc, char *argv[])
 				p.point.x = -30;
 				p.point.y = 0;
 				p.point.z = 0;
-				motion_node.doStuff(p,mode,angle,dir,cmd_freq);
+				m_success = 1;
+				motion_node.doStuff(p,mode,angle,dir,cmd_freq,m_success);
+				while(motion_node.fin<3)
+				{
+				}
 				mode = 0;
 				angle = 30;
-				motion_node.doStuff(p,mode,angle,dir,cmd_freq);
+				m_success = 1;
+				motion_node.doStuff(p,mode,angle,dir,cmd_freq,m_success);
+				while(motion_node.fin<3)
+				{
+				}
 				mode = 0;
 				angle = -60;
-				motion_node.doStuff(p,mode,angle,dir,cmd_freq);
+				m_success = 1;
+				motion_node.doStuff(p,mode,angle,dir,cmd_freq,m_success);
+				while(motion_node.fin<3)
+				{
+				}
 				mode = 0;
 				angle = 30;
-				motion_node.doStuff(p,mode,angle,dir,cmd_freq);
+				m_success = 1;
+				motion_node.doStuff(p,mode,angle,dir,cmd_freq,m_success);
 				while(motion_node.fin<3)
 				{
 				}

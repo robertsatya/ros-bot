@@ -8,6 +8,7 @@ uint8 cmd_freq
 #result definition
 geometry_msgs/PointStamped final_loc
 float64 angle
+uint8 success
 ---
 #feedback
 geometry_msgs/PointStamped cur_loc
