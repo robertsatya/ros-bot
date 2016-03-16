@@ -532,7 +532,7 @@ public:
 
 			cout << "\nDist final:" << dist_final << " Dist step:" << x_diff << "Y offset final" << y_offset_final << "Offset step:" << y_diff << " rdist:" << r_dist << endl;
 			cout << "Angle diff total:" << angle_diff_final << " Angle diff step:" << angle_diff << " Theta diff final:" << theta_diff_final << " Theta diff term:" << theta_diff_term << "angle init" << angle_turned << endl;
-			string ultra = c.receive(1024);
+/*			string ultra = c.receive(1024);
 			int ultra_l=0, ultra_r=0, ultra_b=0, ultra_t=0; // Left 1 Right 2 Bottom 3 Top 4
 	   	ultra_l = boost::lexical_cast<int>(ultra[0]);
 	   	ultra_r = boost::lexical_cast<int>(ultra[1]);
@@ -574,7 +574,7 @@ public:
 				return;	
 
 			}
-			
+*/			
 			move_straight(vel_r,vel_l);
 			
 /* ORIGINAL CODE  

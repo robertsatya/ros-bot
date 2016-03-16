@@ -45,8 +45,8 @@ public:
 		left_point_pub = n.advertise<geometry_msgs::PointStamped>("left_point", 5);
 		image_sub1 = n.subscribe("/left_cam/image_raw", 100, &DisparityTrack::left_cb, this);
 		image_sub2 = n.subscribe("/right_cam/image_raw", 100, &DisparityTrack::right_cb, this);
-		lower_thresh[0] = 4; lower_thresh[1] = 75; lower_thresh[2] = 60;
-		upper_thresh[0] = 18; upper_thresh[1] = 184; upper_thresh[2] = 196;
+		lower_thresh[0] = 4; lower_thresh[1] = 113; lower_thresh[2] = 51;
+		upper_thresh[0] = 18; upper_thresh[1] = 203; upper_thresh[2] = 250;
 		glower_thresh[0] = 37; glower_thresh[1] = 108; glower_thresh[2] = 44;
 		gupper_thresh[0] = 54; gupper_thresh[1] = 215; gupper_thresh[2] = 255;
 		// glower_thresh[0] = 4; glower_thresh[1] = 75; glower_thresh[2] = 60;
@@ -256,10 +256,12 @@ public:
 	bool send_loc(control_node::BroadSearch::Request &req, control_node::BroadSearch::Response &res) {
 		isConsistent = false;
 		int count = 0;
-		while(!isConsistent) {
-			int prev = depth;
+		//while(!isConsistent) {
+		//	int prev = depth;
 
-		}
+		//}
+		cout << "Info about ball sent" << endl;
+		printf("%f %f %f\n", x_pos, y_pos, depth);
 		res.x = x_pos;
 		res.y = y_pos;
 		res.depth = depth;

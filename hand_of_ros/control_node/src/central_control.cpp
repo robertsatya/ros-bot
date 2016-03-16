@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
 	// R_PI socket related
 	tcp_client c;
 	string host="192.168.43.97";
-	c.conn(host , 9991);
+	c.conn(host , 9997);
 	string o_str = "";
 	string res = "";
 	int count_5 = 0;
@@ -84,9 +84,10 @@ int main(int argc, char *argv[])
 						pos[0] = searchsrv.response.x;
 						pos[1] = searchsrv.response.y;
 						pos[2] = searchsrv.response.depth;
-						if(pos[2] < 0)
-						{
+
 							printf("Received %f %f %f\n", pos[0], pos[1], pos[2]);
+						if(pos[2] > 0)
+						{
 							control_state = STATE_MOVE_TO_BALL;
 							broad_search_rotate_angle = 0;
 						}
@@ -103,6 +104,7 @@ int main(int argc, char *argv[])
 					control_state = STATE_MOVE_TO_SEARCH;
 					printf("Moving to search again");
 				}
+				
 				break;
 			case STATE_ROTATE_SEARCH:
 				broad_search_rotate_angle += angle_step;
@@ -151,6 +153,8 @@ int main(int argc, char *argv[])
 					control_state = STATE_REFINE_POSITION;
 				else
 					control_state = STATE_BROAD_SEARCH;
+
+//				control_state = STATE_ERROR; // TODO: Move to different states to block
 				break;
 			case STATE_REFINE_POSITION:
 				o_str = "1";
