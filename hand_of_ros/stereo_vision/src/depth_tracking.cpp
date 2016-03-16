@@ -44,9 +44,9 @@ public:
 	DisparityTrack() {
 		left_point_pub = n.advertise<geometry_msgs::PointStamped>("left_point", 5);
 		image_sub1 = n.subscribe("/left_cam/image_raw", 100, &DisparityTrack::left_cb, this);
-		image_sub2 = n.subscribe("/right_cam/image_raw", 100, &DisparityTrack::right_cb, this);
-		lower_thresh[0] = 4; lower_thresh[1] = 113; lower_thresh[2] = 51;
-		upper_thresh[0] = 18; upper_thresh[1] = 203; upper_thresh[2] = 250;
+		//image_sub2 = n.subscribe("/right_cam/image_raw", 100, &DisparityTrack::right_cb, this);
+		lower_thresh[0] = 7; lower_thresh[1] = 80; lower_thresh[2] = 80;
+		upper_thresh[0] = 24; upper_thresh[1] = 232; upper_thresh[2] = 255;
 		glower_thresh[0] = 37; glower_thresh[1] = 108; glower_thresh[2] = 44;
 		gupper_thresh[0] = 54; gupper_thresh[1] = 215; gupper_thresh[2] = 255;
 		// glower_thresh[0] = 4; glower_thresh[1] = 75; glower_thresh[2] = 60;
@@ -67,19 +67,27 @@ public:
 
 		Pj_right = Mat(3, 4, DataType<double>::type, &Pjr);
 
-		namedWindow("Control Window", WINDOW_AUTOSIZE);
-		createTrackbar("H_min", "Control Window", &lower_thresh[0], 255);
-		createTrackbar("S_min", "Control Window", &lower_thresh[1], 255);
-		createTrackbar("V_min", "Control Window", &lower_thresh[2], 255);
-		createTrackbar("H_max", "Control Window", &upper_thresh[0], 255);
-		createTrackbar("S_max", "Control Window", &upper_thresh[1], 255);
-		createTrackbar("V_max", "Control Window", &upper_thresh[2], 255);
+		namedWindow("Control Window - Green", WINDOW_AUTOSIZE);
+		createTrackbar("H_min", "Control Window - Green", &glower_thresh[0], 255);
+		createTrackbar("S_min", "Control Window - Green", &glower_thresh[1], 255);
+		createTrackbar("V_min", "Control Window - Green", &glower_thresh[2], 255);
+		createTrackbar("H_max", "Control Window - Green", &gupper_thresh[0], 255);
+		createTrackbar("S_max", "Control Window - Green", &gupper_thresh[1], 255);
+		createTrackbar("V_max", "Control Window - Green", &gupper_thresh[2], 255);
+
+		namedWindow("Control Window - Orange", WINDOW_AUTOSIZE);
+		createTrackbar("H_min", "Control Window - Orange", &lower_thresh[0], 255);
+		createTrackbar("S_min", "Control Window - Orange", &lower_thresh[1], 255);
+		createTrackbar("V_min", "Control Window - Orange", &lower_thresh[2], 255);
+		createTrackbar("H_max", "Control Window - Orange", &upper_thresh[0], 255);
+		createTrackbar("S_max", "Control Window - Orange", &upper_thresh[1], 255);
+		createTrackbar("V_max", "Control Window - Orange", &upper_thresh[2], 255);
 
 		prev_left_pos[0] = 0; prev_left_pos[1] = 0;
 		prev_right_pos[0] = 0; prev_right_pos[1] = 0;
 		left_pt = cv::Mat(1,1,CV_64FC2);
 		right_pt = cv::Mat(1,1,CV_64FC2);
-		
+
 		gprev_left_pos[0] = 0; gprev_left_pos[1] = 0;
 		gprev_right_pos[0] = 0; gprev_right_pos[1] = 0;
 		gleft_pt = cv::Mat(1,1,CV_64FC2);
@@ -95,10 +103,12 @@ public:
 			ROS_ERROR("cv_bridge exception: %s", e.what());
 			return;
 		}
-		Mat hsv, masked, gmasked, thr_img, fin;
+		Mat hsv, masked, gmasked, thr_img, gthr_img, fin, gfin;
 		vector<Vec3f> balls;
+		int64 t = getTickCount();
 		Mat img = cv_ptr->image;
 		cvtColor(img, hsv, CV_BGR2HSV);
+
 
 		inRange(hsv, Scalar(lower_thresh[0], lower_thresh[1], lower_thresh[2]),
 			Scalar(upper_thresh[0], upper_thresh[1], upper_thresh[2]), masked);
@@ -106,30 +116,28 @@ public:
 		inRange(hsv, Scalar(glower_thresh[0], glower_thresh[1], glower_thresh[2]),
 			Scalar(gupper_thresh[0], gupper_thresh[1], gupper_thresh[2]), gmasked);
 
-		GaussianBlur( masked, masked, Size(9, 9), 2, 2 );
-		GaussianBlur( gmasked, gmasked, Size(9, 9), 2, 2 );
 
-
-		int erosion_size = 9;
+		int erosion_size = 3;
 		erode(masked, masked, getStructuringElement(MORPH_ERODE,
 													Size( 2*erosion_size + 1, 2*erosion_size+1 ),
 													Point(erosion_size, erosion_size)) );
+		GaussianBlur( masked, masked, Size(5, 5), 2, 2 );
 		dilate(masked, masked, getStructuringElement(MORPH_DILATE, Point(3,3)) );
 
-		erosion_size = 5;
+		erosion_size = 3;
 		erode(gmasked, gmasked, getStructuringElement(MORPH_ERODE,
 													Size( 2*erosion_size + 1, 2*erosion_size+1 ),
 													Point(erosion_size, erosion_size)) );
+		GaussianBlur( gmasked, gmasked, Size(5, 5), 2, 2 );
 		dilate(gmasked, gmasked, getStructuringElement(MORPH_DILATE, Point(3,3)) );
 
+		gthr_img = gmasked;
 		thr_img = masked;
 
 		// HoughCircles( masked, balls, CV_HOUGH_GRADIENT, 1, 10, 50, 30, 0, 0 );
 
 		cv::bitwise_and(img, img, fin, thr_img);
-
-		erode(gmasked, gmasked, getStructuringElement(MORPH_ERODE, Point(3,3)) );
-		dilate(gmasked, gmasked, getStructuringElement(MORPH_DILATE, Point(3,3)) );
+		cv::bitwise_and(img, img, gfin, gthr_img);
 
 		Moments moments = cv::moments(masked, false);
 		Moments gmoments = cv::moments(gmasked, false);
@@ -150,6 +158,8 @@ public:
 			left_pt.at<cv::Vec2d>(0,0)[0] = cx;
 			left_pt.at<cv::Vec2d>(0,0)[1] = cy;
 
+			printf("Point: %d %d\n", cx, cy);
+
 			cv::circle(fin, cv::Point(cx, cy), 10, Scalar(0, 0, 255), 2);
 			// draw(fin, balls);
 			// if (balls.size() != 0)
@@ -164,13 +174,13 @@ public:
 		if(gmoments.m00 > 0) {
 			int cx = gmoments.m10/gmoments.m00;
 			int cy = gmoments.m01/gmoments.m00;
-			
+
 			gleft_pt.at<cv::Vec2d>(0,0)[0] = cx;
 			gprev_left_pos[0] = cx;
 			gleft_pt.at<cv::Vec2d>(0,0)[1] = cy;
 			gprev_left_pos[1] = cy;
 
-			cv::circle(fin, cv::Point(cx, cy), 10, Scalar(0, 255, 0), 2);
+			cv::circle(gfin, cv::Point(cx, cy), 10, Scalar(0, 255, 0), 2);
 			// draw(fin, balls);
 			// if (balls.size() != 0)
 			// 	cout << "count: " << balls.size() << endl;
@@ -180,67 +190,70 @@ public:
 			gleft_pt.at<cv::Vec2d>(0,0)[1] = 0;
 			gprev_left_pos[1] = 0;
 		}
+		t = getTickCount() - t;
+	    printf("Time elapsed: %fms\n", t*1000/getTickFrequency());
 
-		imshow("Thresh Image", fin);
-
-		waitKey(3);
-	}
-
-	void right_cb(const sensor_msgs::Image& msg) {
-		cv_bridge::CvImagePtr cv_ptr;
-		try {
-			cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
-		} catch (cv_bridge::Exception& e) {
-			ROS_ERROR("cv_bridge exception: %s", e.what());
-			return;
-		}
-		Mat hsv, masked, gmasked;
-		Mat img = cv_ptr->image;
-		cvtColor(img, hsv, CV_BGR2HSV);
-
-		inRange(hsv, Scalar(lower_thresh[0], lower_thresh[1], lower_thresh[2]),
-			Scalar(upper_thresh[0], upper_thresh[1], upper_thresh[2]), masked);
-
-		GaussianBlur( hsv, hsv, Size(9, 9), 2, 2 );
-
-		erode(masked, masked, getStructuringElement(MORPH_ERODE, Point(3,3)) );
-		dilate(masked, masked, getStructuringElement(MORPH_DILATE, Point(3,3)) );
-
-		Moments moments = cv::moments(masked, false);
-
-		inRange(hsv, Scalar(lower_thresh[0], lower_thresh[1], lower_thresh[2]),
-			Scalar(upper_thresh[0], upper_thresh[1], upper_thresh[2]), gmasked);
-
-		erode(gmasked, gmasked, getStructuringElement(MORPH_ERODE, Point(3,3)) );
-		dilate(gmasked, gmasked, getStructuringElement(MORPH_DILATE, Point(3,3)) );
-
-		Moments gmoments = cv::moments(gmasked, false);
-
-
-		if(moments.m00 > 0 && (prev_left_pos[0] > 0 && prev_left_pos[1] > 0)) {
-			double cx = moments.m10/moments.m00;
-			double cy = moments.m01/moments.m00;
-
-			prev_right_pos[0] = cx;
-			prev_right_pos[1] = cy;
-
-			right_pt.at<cv::Vec2d>(0,0)[0] = cx;
-			right_pt.at<cv::Vec2d>(0,0)[1] = cy;
-
-			Mat out = Mat(4, 1, DataType<double>::type);
-			cv::triangulatePoints(Pj_left, Pj_right, left_pt, right_pt, out);
-
-			out = out / out.at<double>(0,3);
-
-			x_pos = out.at<double>(0,0) + 9.0;
-			y_pos = out.at<double>(0,1);
-			depth = out.at<double>(0,2);
-
-			postLeftPoint(x_pos, y_pos, depth);
-		}
+		imshow("Thresh Image - Orange", fin);
+		imshow("Thresh Image - Green", gfin);
 
 		waitKey(3);
 	}
+
+	// void right_cb(const sensor_msgs::Image& msg) {
+	// 	cv_bridge::CvImagePtr cv_ptr;
+	// 	try {
+	// 		cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+	// 	} catch (cv_bridge::Exception& e) {
+	// 		ROS_ERROR("cv_bridge exception: %s", e.what());
+	// 		return;
+	// 	}
+	// 	Mat hsv, masked, gmasked;
+	// 	Mat img = cv_ptr->image;
+	// 	cvtColor(img, hsv, CV_BGR2HSV);
+
+	// 	inRange(hsv, Scalar(lower_thresh[0], lower_thresh[1], lower_thresh[2]),
+	// 		Scalar(upper_thresh[0], upper_thresh[1], upper_thresh[2]), masked);
+
+	// 	GaussianBlur( hsv, hsv, Size(9, 9), 2, 2 );
+
+	// 	erode(masked, masked, getStructuringElement(MORPH_ERODE, Point(3,3)) );
+	// 	dilate(masked, masked, getStructuringElement(MORPH_DILATE, Point(3,3)) );
+
+	// 	Moments moments = cv::moments(masked, false);
+
+	// 	inRange(hsv, Scalar(lower_thresh[0], lower_thresh[1], lower_thresh[2]),
+	// 		Scalar(upper_thresh[0], upper_thresh[1], upper_thresh[2]), gmasked);
+
+	// 	erode(gmasked, gmasked, getStructuringElement(MORPH_ERODE, Point(3,3)) );
+	// 	dilate(gmasked, gmasked, getStructuringElement(MORPH_DILATE, Point(3,3)) );
+
+	// 	Moments gmoments = cv::moments(gmasked, false);
+
+
+	// 	if(moments.m00 > 0 && (prev_left_pos[0] > 0 && prev_left_pos[1] > 0)) {
+	// 		double cx = moments.m10/moments.m00;
+	// 		double cy = moments.m01/moments.m00;
+
+	// 		prev_right_pos[0] = cx;
+	// 		prev_right_pos[1] = cy;
+
+	// 		right_pt.at<cv::Vec2d>(0,0)[0] = cx;
+	// 		right_pt.at<cv::Vec2d>(0,0)[1] = cy;
+
+	// 		Mat out = Mat(4, 1, DataType<double>::type);
+	// 		cv::triangulatePoints(Pj_left, Pj_right, left_pt, right_pt, out);
+
+	// 		out = out / out.at<double>(0,3);
+
+	// 		x_pos = out.at<double>(0,0) + 9.0;
+	// 		y_pos = out.at<double>(0,1);
+	// 		depth = out.at<double>(0,2);
+
+	// 		postLeftPoint(x_pos, y_pos, depth);
+	// 	}
+
+	// 	waitKey(3);
+	// }
 
 	void postLeftPoint (double x, double y, double depth) {
 		geometry_msgs::PointStamped point;

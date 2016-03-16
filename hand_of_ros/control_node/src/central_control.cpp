@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
 	state_labels.push_back("STATE_DROP_BALL_AT_GOAL");
 	state_labels.push_back("STATE_SEARCH_MISSED_BALLS");
 	ros::NodeHandle n;
-	ros::ServiceClient broadSearchClient = n.serviceClient<control_node::BroadSearch>("broad_search_service");
+	ros::ServiceClient broadSearchClient = n.serviceClient<control_node::BroadSearch>("broad_search_service", true);
 	control_node::BroadSearch searchsrv;
 	float pos[3] = {0};
 	MyNode motion_node;
@@ -180,8 +180,8 @@ int main(int argc, char *argv[])
 					if(dir == 5)
 						count_5++;
 					else
-					{	
-					m_success = 1;					
+					{
+					m_success = 1;
 						motion_node.doStuff(p,mode,angle,dir,cmd_freq,m_success);
 					}
 				}
