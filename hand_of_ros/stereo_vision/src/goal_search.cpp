@@ -22,6 +22,7 @@
 using namespace std;
 using namespace cv;
 
+static double x_pos, y_pos, depth;
 
 void sigHandle(int sig_id);
 
@@ -41,6 +42,7 @@ class DisparityTrack
 
 public:
 	DisparityTrack() {
+		left_point_pub = n.advertise<geometry_msgs::PointStamped>("buck_point", 5);
 		image_sub1 = n.subscribe("/left_cam/image_raw", 100, &DisparityTrack::left_cb, this);
 		image_sub2 = n.subscribe("/right_cam/image_raw", 100, &DisparityTrack::right_cb, this);
 		lower_thresh[0] = 110; lower_thresh[1] = 87; lower_thresh[2] = 47;
@@ -142,17 +144,6 @@ public:
 			// if (balls.size() != 0)
 			// 	cout << "count: " << balls.size() << endl;
 		}
-
-		// if(gmoments.m00 > 0) {
-		// 	int cx = gmoments.m10/gmoments.m00;
-		// 	int cy = gmoments.m01/gmoments.m00;
-
-		// 	cv::circle(fin, cv::Point(cx, cy), 10, Scalar(0, 0, 255), 2);
-		// 	// draw(fin, balls);
-		// 	// if (balls.size() != 0)
-		// 	// 	cout << "count: " << balls.size() << endl;
-		// }
-
 		imshow("Thresh Image", fin);
 
 		waitKey(3);
@@ -200,7 +191,40 @@ public:
 			depth = out.at<double>(0,2);
 		}
 
+		postLeftPoint(0, 0, 0);
+
 		waitKey(3);
+	}
+
+
+	void postLeftPoint (double x, double y, double depth) {
+
+		geometry_msgs::PointStamped point;
+		point.header.frame_id = "/left_camera";
+		point.header.stamp = ros::Time().now();
+
+		int color = 0;
+
+		cout << "Info about ball" << endl;
+		printf("%f %f %f\n", x_pos, y_pos, depth);
+
+		if (depth > 0) {
+			// cout << "Info about ball sent" << endl;
+			// printf("%f %f %f\n", x_pos, y_pos, depth);
+			point.point.x = x_pos;
+			point.point.y = y_pos;
+			point.point.z = depth;
+		} else {
+			point.point.x = 0;
+			point.point.y = 0;
+			point.point.z = -1;
+		}
+
+		// point.point.x = x_pos;
+		// point.point.y = y_pos;
+		// point.point.z = depth;
+
+		left_point_pub.publish(point);
 	}
 
 	// bool send_loc(control_node::BroadSearch::Request &req, control_node::BroadSearch::Response &res) {

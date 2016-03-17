@@ -25,12 +25,14 @@ using namespace cv;
 int  prev_state;
 std::vector<string> state_labels;
 
-static bool isPointFound = false;
+static bool isPointFound = false, isBucketFound = false;
 static float x_pos=0, y_pos=0, depth_pos=0;
+static float gposx = 0, gposy = 0, gposz = 0;
 
 void sigHandle(int sig_id);
 
 void locCallback(const geometry_msgs::PointStamped &loc);
+void buckCallback(const geometry_msgs::PointStamped &loc);
 
 int main(int argc, char *argv[])
 {
@@ -56,6 +58,7 @@ int main(int argc, char *argv[])
 	// ros::service::waitForService("broad_search_service",-1);
 	// ros::ServiceClient broadSearchClient = n.serviceClient<control_node::BroadSearch>("broad_search_service", true);
 	ros::Subscriber sub = n.subscribe("/left_point", 10, locCallback);
+	ros::Subscriber gsub = n.subscribe("/buck_point", 10, buckCallback);
 	control_node::BroadSearch searchsrv;
 	float pos[3] = {0};
 	MyNode motion_node;
@@ -245,6 +248,54 @@ int main(int argc, char *argv[])
 				while(motion_node.fin<3)
 				{
 				}
+				control_state = STATE_LOCATE_GOAL;
+				break;
+			case STATE_LOCATE_GOAL:
+				if (isBucketFound) {
+					p.header.seq = frame_seq++;
+					p.header.stamp = ros::Time::now();
+					p.header.frame_id = "/robot";
+					p.point.x = gposx;
+					p.point.y = gposy;
+					p.point.z = gposz;
+					mode = 1;
+					motion_node.doStuff(p,mode,angle,dir,cmd_freq,m_success);
+					while(motion_node.fin<3)
+					{
+					}
+					control_state = STATE_REFINE_GOAL_POS;
+				}
+				break;
+			case STATE_REFINE_GOAL_POS:
+				o_str = "3";
+				mode = 2;
+				count_5 = 0;
+				while(true)
+				{
+					// TODO: Ignore first 2-3 commands
+					// receive and echo reply
+					// cout << c.receive(1024);
+					c.send_data(o_str);
+					cout << "sent 1 to rpi" << endl;
+					res = c.receive(3);
+					cout << res << endl;
+					dir = boost::lexical_cast<int>(res[0]);
+					cmd_freq = boost::lexical_cast<int>(res[2]);
+
+					// res.angle = boost::lexical_cast<float>(c.receive(1024));
+					cout << dir << endl;
+					if(dir==4 || (dir == 5 && count_5 == 1))
+						break;
+					if(count_5 == 1)
+						count_5 = 0;
+					if(dir == 5)
+						count_5++;
+					else
+					{
+						m_success = 1;
+						motion_node.doStuff(p,mode,angle,dir,cmd_freq,m_success);
+					}
+				}
 				control_state = STATE_DROP_BALL_AT_GOAL;
 				break;
 			case STATE_DROP_BALL_AT_GOAL:
@@ -319,3 +370,16 @@ void locCallback(const geometry_msgs::PointStamped &loc) {
 
 	printf("Point Published : %f %f %f\n", x_pos, y_pos, depth_pos);
 }
+
+void buckCallback(const geometry_msgs::PointStamped &loc) {
+
+	gposx = loc.point.x;
+	gposy = loc.point.y;
+	gposz = loc.point.z;
+	isBucketFound = true;
+
+	printf("Point Published : %f %f %f\n", x_pos, y_pos, depth_pos);
+}
+
+
+
