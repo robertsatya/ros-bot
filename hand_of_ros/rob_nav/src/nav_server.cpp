@@ -19,7 +19,7 @@ protected:
 
   ros::NodeHandle nh_;
   // NodeHandle instance must be created before this line. Otherwise strange error may occur.
-  actionlib::SimpleActionServer<rob_nav::navigationAction> as_; 
+  actionlib::SimpleActionServer<rob_nav::navigationAction> as_;
   std::string action_name_;
   // create messages that are used to published feedback/result
   rob_nav::navigationFeedback feedback_;
@@ -68,7 +68,7 @@ public:
   	stationary_loc.pose.orientation.z = 0;
   	stationary_loc.pose.orientation.w = 1;
 		success = 1;
-    as_.start();
+    	as_.start();
 //		dist_per_enc = 0.4446; //72*PI/508.8;
 		dist_per_enc = 0.003451*56.5/100; //72*PI/65536;
 		dist_per_enc_ang_min = 0.003451*75.5/100;
@@ -82,18 +82,18 @@ public:
 		r.sleep();
 		safe();
 		r.sleep();
-		serial_port_.flushInput();	
+		serial_port_.flushInput();
 		r.sleep();
 		serial_port_.flushOutput();
 		r.sleep();
 		host="192.168.43.97";
-    c.conn(host , 9990);
+    	c.conn(host , 1111);
   }
 
   ~navigationAction(void)
   {
 		try
-		{ 
+		{
       serial_port_.close();
 		}
     catch(std::exception& e)
@@ -144,7 +144,7 @@ public:
 	void move_turn(uint16_t right_vel,uint16_t left_vel)
 	{
  		cout << "Turning at L:" << left_vel << " R:" << right_vel << " mm/s\n";
-//		uint16_t left_vel1 = (65535 - left_vel) + 1; 
+//		uint16_t left_vel1 = (65535 - left_vel) + 1;
  		byte[0] = 145;
  		byte[1] = right_vel >> 8;
  		byte[2] = right_vel & 0x00ff;
@@ -157,7 +157,7 @@ public:
 /*	void move_right(long right_vel,long left_vel)
 	{
 		cout << "Moving forward at L:" << left_vel << " R:" << right_vel << " mm/s\n";
-//		uint16_t right_vel1 = (65535 - right_vel) + 1; 
+//		uint16_t right_vel1 = (65535 - right_vel) + 1;
  		byte[0] = 145;
  		byte[1] = right_vel >> 8;
  		byte[2] = right_vel & 0x00ff;
@@ -174,12 +174,12 @@ public:
 		long diff_l=0,diff_r=0;
 
 		n = read_left_enc();
-		cout << "Left: " << n << endl; 
+		cout << "Left: " << n << endl;
 		left = n;
 		rw.sleep();
 
 		n = read_right_enc();
-		cout << "Right: " << n << endl; 
+		cout << "Right: " << n << endl;
 		right = n;
 
 		int vel_r=vel, vel_l=vel;
@@ -196,13 +196,13 @@ public:
   		n = read_left_enc();
 			diff_l = (vel_l>=0)?(n - left):(left - n); // Left diff will negative for left vel negative
 			diff_l = (diff_l<0)?(diff_l+65535):(diff_l);
-			cout << "Left: " << n << "Prev: " << left << " Diff: " << diff_l << endl; 
+			cout << "Left: " << n << "Prev: " << left << " Diff: " << diff_l << endl;
 			left = n;
 
 			n = read_right_enc();
 			diff_r = (vel_r>=0)?(n - right):(right - n); // Right diff will negative for right vel negative
 			diff_r = (diff_r<0)?(diff_r+65535):(diff_r);
-			cout << "Right: " << n << "Prev: " << right << " Diff: " << diff_r << endl; 
+			cout << "Right: " << n << "Prev: " << right << " Diff: " << diff_r << endl;
 			right = n;
 
 			double sign = (diff_r-diff_l>=0)?1:-1;
@@ -265,7 +265,7 @@ public:
 
 			cout << "\nDist final:" << dist_final << " Dist step:" << x_diff_term << "Y offset final" << y_offset_final << "Offset step:" << y_diff_term << " rdist:" << r_dist << endl;
 			cout << "Angle diff total:" << angle_diff_final << " Angle diff step:" << angle_diff << " Theta diff final:" << theta_diff_final << " Theta diff term:" << theta_diff_term << endl;
-			
+
 
 			usleep(4*time_burst_sleep);
 		}
@@ -279,14 +279,14 @@ public:
 		double angle_diff = 0, angle_diff_dist = 0, theta_diff_term = 0, theta_diff_final = 0;
 		double angle1= 0 , angle2 = 0, angle_diff_final_init = angle_diff_final, dist_final = 0, y_offset_final = 0;
 
-		int vel_r = 25*dir, vel_l = -25*dir; 
+		int vel_r = 25*dir, vel_l = -25*dir;
 		n = read_left_enc();
-		cout << "Left: " << n << endl; 
+		cout << "Left: " << n << endl;
 		left = n;
 		rw.sleep();
 
 		n = read_right_enc();
-		cout << "Right: " << n << endl; 
+		cout << "Right: " << n << endl;
 		right = n;
 
 		for(int i=0; i<freq; i++)
@@ -298,13 +298,13 @@ public:
 			n = read_left_enc();
 			diff_l = (vel_l>=0)?(n - left):(left - n); // Left diff will negative for left vel negative
 			diff_l = (diff_l<0)?(diff_l+65535):(diff_l);
-			cout << "Left: " << n << "Prev: " << left << " Diff: " << diff_l << endl; 
+			cout << "Left: " << n << "Prev: " << left << " Diff: " << diff_l << endl;
 			left = n;
 
 			n = read_right_enc();
 			diff_r = (vel_r>=0)?(n - right):(right - n); // Right diff will negative for right vel negative
 			diff_r = (diff_r<0)?(diff_r+65535):(diff_r);
-			cout << "Right: " << n << "Prev: " << right << " Diff: " << diff_r << endl; 
+			cout << "Right: " << n << "Prev: " << right << " Diff: " << diff_r << endl;
 			right = n;
 
 			double sign = (diff_r-diff_l>=0)?1:-1;
@@ -354,7 +354,7 @@ public:
 
 
 					angle_diff_final = angle2;
-				
+
 						theta_diff_final += theta_diff_term;
 						dist_final += r_dist*cos(theta_diff_final);
 						y_offset_final += r_dist*sin(theta_diff_final);
@@ -378,12 +378,12 @@ public:
 		long diff_l=0,diff_r=0;
 
 		n = read_left_enc();
-		cout << "Left: " << n << endl; 
+		cout << "Left: " << n << endl;
 		left = n;
 		rw.sleep();
 
 		n = read_right_enc();
-		cout << "Right: " << n << endl; 
+		cout << "Right: " << n << endl;
 		right = n;
 
 		int vel_r=25, vel_l=25, vel_cur = 0, vel_step = 10;
@@ -392,7 +392,7 @@ public:
 
 		double dist_step = 0, cur_diff = 0, angle_diff = 0, angle_diff_dist = 0, theta_diff_term = 0, theta_diff_final = 0, y_offset_final = 0, dist_crit = 370;
 		double angle_diff_final_init = angle_diff_final;
-		double dist_err = dist/15;
+		double dist_err = 300;
 		double angle1 = 0, angle2=0;
 //		double angle_diff_final = 0;
 		cout << "Dist target:" << dist << "Dist final" << dist_final << "Angle turned" << angle_turned << "X diff" << x_diff << "Y diff" << y_diff << "Angle diff final" << angle_diff_final << endl;
@@ -401,25 +401,26 @@ public:
 		//dist_final = 0;
 		int j = 0;
 		//Coordinate in mm
-		for(j=0; dist_final<=(dist)/dist_scale; j++)
+		// int
+		for(j=0; dist_final<=dist-dist_err; j++)
 		{
 
   		n = read_left_enc();
 			diff_l = n - left;
 			diff_l = (diff_l<0)?(diff_l+65535):(diff_l);
-			cout << "Left: " << n << "Prev: " << left << " Diff: " << diff_l << endl; 
+			cout << "Left: " << n << "Prev: " << left << " Diff: " << diff_l << endl;
 			left = n;
 
 			n = read_right_enc();
 			diff_r = n - right;
 			diff_r = (diff_r<0)?(diff_r+65535):(diff_r);
-			cout << "Right: " << n << "Prev: " << right << " Diff: " << diff_r << endl; 
+			cout << "Right: " << n << "Prev: " << right << " Diff: " << diff_r << endl;
 			right = n;
-			
+
 			sum_l += diff_l;
 			sum_r += diff_r;
-			cout << j << endl; 
-			
+			cout << j << endl;
+
 			if(j>=3)
 			{
 				if(vel_cur < vel && dist_final < dist/2)
@@ -431,9 +432,9 @@ public:
 				{
 					vel_cur -= vel_step;
 				}
-			
-			
-				
+
+
+
   			ddiff += diff_l - diff_r;
   			int vel_change = ddiff/100;
 				vel_change = (vel_change>0)?vel_change:-vel_change;
@@ -461,11 +462,11 @@ public:
 				vel_r = vel_step;
 				vel_l = vel_step;
 			}
-	
+
 //		feedback_.cur_loc
 
 
-/* MODIFIED CODE */ 
+/* MODIFIED CODE */
 
 			double sign = (diff_r-diff_l>=0)?1:-1;
 			double sign1 = 1;
@@ -532,11 +533,13 @@ public:
 
 			cout << "\nDist final:" << dist_final << " Dist step:" << x_diff << "Y offset final" << y_offset_final << "Offset step:" << y_diff << " rdist:" << r_dist << endl;
 			cout << "Angle diff total:" << angle_diff_final << " Angle diff step:" << angle_diff << " Theta diff final:" << theta_diff_final << " Theta diff term:" << theta_diff_term << "angle init" << angle_turned << endl;
-/*			string ultra = c.receive(1024);
+			c.send_data("5");
+			string ultra = c.receive(4);
+			cout << "Ultra: " << ultra << endl;
 			int ultra_l=0, ultra_r=0, ultra_b=0, ultra_t=0; // Left 1 Right 2 Bottom 3 Top 4
-	   	ultra_l = boost::lexical_cast<int>(ultra[0]);
-	   	ultra_r = boost::lexical_cast<int>(ultra[1]);
-	   	ultra_b = boost::lexical_cast<int>(ultra[2]);
+	   		ultra_l = boost::lexical_cast<int>(ultra[0]);
+	   		ultra_r = boost::lexical_cast<int>(ultra[1]);
+	   		ultra_b = boost::lexical_cast<int>(ultra[2]);
 			ultra_t = boost::lexical_cast<int>(ultra[3]);
 			double cur_ultra_angle = angle_diff_final;
 			if(ultra_l == 1)
@@ -547,7 +550,7 @@ public:
 				move_controlled_straight(100, cur_ultra_angle, d, x_diff, y_diff, angle_diff_final);
 				success = 0;
 				move_straight(0,0);
-				return;	
+				return;
 			}
 			if(ultra_r == 1)
 			{
@@ -557,7 +560,7 @@ public:
 				move_controlled_straight(100, cur_ultra_angle, d, x_diff, y_diff, angle_diff_final);
 				success = 0;
 				move_straight(0,0);
-				return;	
+				return;
 			}
 			if(ultra_b == 1)
 			{
@@ -571,36 +574,27 @@ public:
 				move_controlled_straight(100, cur_ultra_angle, d, x_diff, y_diff, angle_diff_final);
 				success = 0;
 				move_straight(0,0);
-				return;	
+				return;
 
 			}
-*/			
+
 			move_straight(vel_r,vel_l);
-			
-/* ORIGINAL CODE  
-			dist_step = get_distance(diff_r,diff_l);
-			angle_diff = (diff_r - diff_l)*dist_per_enc/axle_length;
 
-			angle_diff_final += angle_diff;
-			dist_final += dist_step;
 
-			cout << "\nDist final:" << dist_final << " Dist step:" << dist_step << endl;
-			cout << "Angle diff total:" << angle_diff_final << " Angle diff step:" << angle_diff << endl;
-*/
 			r.sleep();
 			if(vel_cur == 0)
 			{
-				break;	
+				break;
 			}
 		}
 
-			
+
 		cout << "Total Left: " << sum_l << "Total Right: " << sum_r << endl;
 		if(j!=0)
 			cout << "Left: " << sum_l/j << " Right: " << sum_r/j << endl;
 
 	}
-	
+
 	void move_controlled_turn(double angle_diff_est, double angle_turned, double &angle_diff_final, double &x_diff, double &y_diff)
 	{
 
@@ -609,12 +603,12 @@ public:
 		long diff_l=0,diff_r=0;
 
 		n = read_left_enc();
-		cout << "Left: " << n << endl; 
+		cout << "Left: " << n << endl;
 		left = n;
 		rw.sleep();
 
 		n = read_right_enc();
-		cout << "Right: " << n << endl; 
+		cout << "Right: " << n << endl;
 		right = n;
 
 		int vel_r=vel, vel_l=vel;
@@ -625,7 +619,7 @@ public:
 		double angle_diff_final_init = angle_diff_final;
 
 
-		double y_offset_final = 0, dist_final = 0; 
+		double y_offset_final = 0, dist_final = 0;
 		if(angle_diff_est >= 0)
 		{
 			vel_r = 100;
@@ -648,7 +642,7 @@ public:
 			{
 				lim_del = 0.05;
 				vel_turn = 25;
-			}	
+			}
 			else
 			{
 				lim_del = 0.05;
@@ -660,18 +654,18 @@ public:
 			n = read_left_enc();
 			diff_l = (vel_l>=0)?(n - left):(left - n); // Left diff will negative for left vel negative
 			diff_l = (diff_l<0)?(diff_l+65535):(diff_l);
-			cout << "Left: " << n << "Prev: " << left << " Diff: " << diff_l << endl; 
+			cout << "Left: " << n << "Prev: " << left << " Diff: " << diff_l << endl;
 			left = n;
 
 			n = read_right_enc();
 			diff_r = (vel_r>=0)?(n - right):(right - n); // Right diff will negative for right vel negative
 			diff_r = (diff_r<0)?(diff_r+65535):(diff_r);
-			cout << "Right: " << n << "Prev: " << right << " Diff: " << diff_r << endl; 
+			cout << "Right: " << n << "Prev: " << right << " Diff: " << diff_r << endl;
 			right = n;
-			
+
 			sum_l += diff_l;
 			sum_r += diff_r;
-			cout << j << endl; 
+			cout << j << endl;
 
 			double sign = (diff_r-diff_l>=0)?1:-1;
 			double sign1 = (angle_diff_est>=0)?1:-1;
@@ -694,7 +688,7 @@ public:
 			double R = (cur_diff!=0)?(diff_r-diff_l)*axle_length/(2*cur_diff):0;
 			R = (R>=0)?R:-R;
 
-			if(sign == -1)
+/*			if(sign == -1)
 			{
 				if(sign1 == -1)
 				{
@@ -721,6 +715,18 @@ public:
 					angle1 = angle_diff_final;
 					angle2 = angle1 + angle_diff;
 				}
+			}
+*/
+			if(sign1 == -1)
+			{
+				angle1 = angle_diff_final;
+				angle2 = angle1 - angle_diff;
+//				R = -R;
+			}
+			else
+			{
+				angle1 = angle_diff_final;
+				angle2 = angle1 + angle_diff;
 			}
 
 			double x_diff_term = R*(sin(angle2)-sin(angle1));
@@ -765,7 +771,7 @@ public:
 */
 
 					angle_diff_final = angle2;
-				
+
 						theta_diff_final += theta_diff_term;
 						dist_final += r_dist*cos(theta_diff_final);
 						y_offset_final += r_dist*sin(theta_diff_final);
@@ -796,7 +802,7 @@ public:
   			}
   			else
   			{*/
-			
+
 			vel_r = sign1*vel_turn;
 			vel_l = -vel_r;
 		  			/*}
@@ -922,13 +928,13 @@ public:
 		double cur_angle_rad = (PI/180)*stationary_loc.pose.orientation.z;
 		double angle_diff_est_rel = angle_diff_est - cur_angle_rad;
 
-	
+
 //		cout << "Init calc D:" << dist_est << " A:" << angle_diff_est << endl;
 		force_angle_range(angle_diff_est_rel);
 		cout << "Init calc D:" << dist_est << " A:" << angle_diff_est <<  " A-rel:" << angle_diff_est_rel <<endl;
 
 			int freq = 1;
-//			int max = ((int)(abs(angle_diff_est_rel)*3/PI)); 
+//			int max = ((int)(abs(angle_diff_est_rel)*3/PI));
 				int max = 0;
 
 		// Set turn_dir from goal->turn_dir
@@ -946,7 +952,7 @@ public:
 					move_timed_turn(-1,freq,cur_angle_rad,x_diff,y_diff,angle_diff_final);
 			}
 		}
-		else	
+		else
 		if(goal->type == 1 || goal->type == 3)
 		{
 			move_controlled_turn(goal->type==3?angle_diff_est_rel:angle_diff_est,cur_angle_rad,angle_diff_final,x_diff,y_diff);

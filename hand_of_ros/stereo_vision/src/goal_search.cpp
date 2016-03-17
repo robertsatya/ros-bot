@@ -198,22 +198,9 @@ public:
 			x_pos = out.at<double>(0,0) + 9.0;
 			y_pos = out.at<double>(0,1);
 			depth = out.at<double>(0,2);
-
-			postLeftPoint(x_pos, y_pos, depth);
 		}
 
 		waitKey(3);
-	}
-
-	void postLeftPoint (double x, double y, double depth) {
-		geometry_msgs::PointStamped point;
-		point.header.frame_id = "/left_camera";
-		point.header.stamp = ros::Time().now();
-		point.point.x = x_pos;
-		point.point.y = y_pos;
-		point.point.z = depth;
-
-		left_point_pub.publish(point);
 	}
 
 	// bool send_loc(control_node::BroadSearch::Request &req, control_node::BroadSearch::Response &res) {

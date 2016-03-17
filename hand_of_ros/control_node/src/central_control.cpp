@@ -9,6 +9,7 @@
 
 #include <ros/ros.h>
 #include <std_msgs/String.h>
+#include <cv_bridge/cv_bridge.h>
 
 #include <control_node/states.h>
 #include <control_node/BroadSearch.h>
@@ -18,6 +19,7 @@
 #include <rob_nav/tcp_client.h>
 
 using namespace std;
+using namespace cv;
 
 int control_state, prev_state;
 std::vector<string> state_labels;
@@ -44,6 +46,8 @@ int main(int argc, char *argv[])
 	state_labels.push_back("STATE_DROP_BALL_AT_GOAL");
 	state_labels.push_back("STATE_SEARCH_MISSED_BALLS");
 	ros::NodeHandle n;
+	printf("Waiting for BroadSearchService\n");
+	ros::service::waitForService("broad_search_service",-1);
 	ros::ServiceClient broadSearchClient = n.serviceClient<control_node::BroadSearch>("broad_search_service", true);
 	control_node::BroadSearch searchsrv;
 	float pos[3] = {0};
@@ -63,11 +67,10 @@ int main(int argc, char *argv[])
 	// R_PI socket related
 	tcp_client c;
 	string host="192.168.43.97";
-	c.conn(host , 9997);
+	c.conn(host , 9999);
 	string o_str = "";
 	string res = "";
 	int count_5 = 0;
-
 	// TODO: Try postion tracking while moving for simple mapping
 	while(control_state != STATE_ERROR) {
 		cout << "Current State : " << control_state << " - " << state_labels[control_state] << endl;
@@ -79,13 +82,19 @@ int main(int argc, char *argv[])
 			case STATE_BROAD_SEARCH:
 				if(broad_search_rotate_angle<360)
 				{
+					//cout << "waiting here" << endl;
+					sleep(2);
+					int64 t = getTickCount();
 					if (broadSearchClient.call(searchsrv))
 					{
 						pos[0] = searchsrv.response.x;
 						pos[1] = searchsrv.response.y;
 						pos[2] = searchsrv.response.depth;
 
-							printf("Received %f %f %f\n", pos[0], pos[1], pos[2]);
+						printf("Received %f %f %f\n", pos[0], pos[1], pos[2]);
+						t = getTickCount() - t;
+						printf("Time elapsed: %fms\n", t*1000/getTickFrequency());
+						//break;
 						if(pos[2] > 0)
 						{
 							control_state = STATE_MOVE_TO_BALL;
@@ -104,12 +113,12 @@ int main(int argc, char *argv[])
 					control_state = STATE_MOVE_TO_SEARCH;
 					printf("Moving to search again");
 				}
-				
+
 				break;
 			case STATE_ROTATE_SEARCH:
 				broad_search_rotate_angle += angle_step;
 				mode = 0;
-				angle = 45;
+				angle = 20;
 				m_success = 1;
 				motion_node.doStuff(p,mode,angle,dir,cmd_freq,m_success);
 				while(motion_node.fin < 3)
@@ -159,14 +168,15 @@ int main(int argc, char *argv[])
 			case STATE_REFINE_POSITION:
 				o_str = "1";
 				mode = 2;
-				c.send_data(o_str);
 				count_5 = 0;
 				while(true)
 				{
 					// TODO: Ignore first 2-3 commands
 					// receive and echo reply
 					// cout << c.receive(1024);
-					res = c.receive(1024);
+					c.send_data(o_str);
+					cout << "sent 1 to rpi" << endl;
+					res = c.receive(3);
 					cout << res << endl;
 					dir = boost::lexical_cast<int>(res[0]);
 					cmd_freq = boost::lexical_cast<int>(res[2]);
@@ -181,7 +191,7 @@ int main(int argc, char *argv[])
 						count_5++;
 					else
 					{
-					m_success = 1;
+						m_success = 1;
 						motion_node.doStuff(p,mode,angle,dir,cmd_freq,m_success);
 					}
 				}
@@ -189,6 +199,7 @@ int main(int argc, char *argv[])
 				if(dir == 4)
 				{
 					control_state = STATE_GRAB_BALL;
+					res = c.receive(3);
 				}
 				else
 				{
@@ -225,6 +236,7 @@ int main(int argc, char *argv[])
 				{
 				}
 				control_state = STATE_DROP_BALL_AT_GOAL;
+				break;
 			case STATE_DROP_BALL_AT_GOAL:
 				o_str = "3";
 				c.send_data(o_str);

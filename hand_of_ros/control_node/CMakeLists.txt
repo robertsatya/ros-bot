@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   message_generation
 	rob_nav
+  cv_bridge
 )
 
 ## System dependencies are found with CMake's conventions
@@ -103,7 +104,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES control_node
-  CATKIN_DEPENDS roscpp rospy std_msgs message_runtime rob_nav
+  CATKIN_DEPENDS roscpp rospy std_msgs message_runtime rob_nav cv_bridge
 #  DEPENDS system_lib
 )
 
@@ -134,6 +135,10 @@ include_directories(
 add_executable(central_control src/central_control.cpp)
 target_link_libraries(central_control ${OpenCV_LIBRARIES} ${OpenCV_LIBS} ${catkin_LIBRARIES} )
 add_dependencies(central_control central_control_gencpp)
+
+add_executable(alt_control src/alt_control.cpp)
+target_link_libraries(alt_control ${OpenCV_LIBRARIES} ${OpenCV_LIBS} ${catkin_LIBRARIES} )
+add_dependencies(alt_control alt_control_gencpp)
 
 add_executable(state_interrupt src/state_interrupt.cpp)
 target_link_libraries(state_interrupt ${OpenCV_LIBRARIES} ${OpenCV_LIBS} ${catkin_LIBRARIES} )
