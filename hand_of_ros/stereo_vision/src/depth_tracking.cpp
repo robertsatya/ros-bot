@@ -354,6 +354,11 @@ public:
 
 		int color = 0;
 
+		cout << "Info about ball" << endl;
+				printf("%f %f %f\n", x_pos, y_pos, depth);
+						cout << "Info about Green ball" << endl;
+								printf("%f %f %f\n", gx_pos, gy_pos, gdepth);
+
 		if (depth > 0 && gdepth == 0)
 			color = 1;
 		else if (gdepth > 0 && depth == 0)

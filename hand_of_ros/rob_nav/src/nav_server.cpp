@@ -533,20 +533,20 @@ public:
 
 			cout << "\nDist final:" << dist_final << " Dist step:" << x_diff << "Y offset final" << y_offset_final << "Offset step:" << y_diff << " rdist:" << r_dist << endl;
 			cout << "Angle diff total:" << angle_diff_final << " Angle diff step:" << angle_diff << " Theta diff final:" << theta_diff_final << " Theta diff term:" << theta_diff_term << "angle init" << angle_turned << endl;
-			c.send_data("5");
-			string ultra = c.receive(4);
-			cout << "Ultra: " << ultra << endl;
+			//c.send_data("5");
+			//string ultra = c.receive(4);
+			//cout << "Ultra: " << ultra << endl;
 			int ultra_l=0, ultra_r=0, ultra_b=0, ultra_t=0; // Left 1 Right 2 Bottom 3 Top 4
-	   		ultra_l = boost::lexical_cast<int>(ultra[0]);
-	   		ultra_r = boost::lexical_cast<int>(ultra[1]);
-	   		ultra_b = boost::lexical_cast<int>(ultra[2]);
-			ultra_t = boost::lexical_cast<int>(ultra[3]);
+	   		//ultra_l = boost::lexical_cast<int>(ultra[0]);
+	   		//ultra_r = boost::lexical_cast<int>(ultra[1]);
+	   		//ultra_b = boost::lexical_cast<int>(ultra[2]);
+			//ultra_t = boost::lexical_cast<int>(ultra[3]);
 			double cur_ultra_angle = angle_diff_final;
 			if(ultra_l == 1)
 			{
 				// Turn right
 				double d = 0;
-				move_controlled_turn(-45,cur_ultra_angle,angle_diff_final,x_diff,y_diff);
+				move_controlled_turn(-0.78,cur_ultra_angle,angle_diff_final,x_diff,y_diff);
 				move_controlled_straight(100, cur_ultra_angle, d, x_diff, y_diff, angle_diff_final);
 				success = 0;
 				move_straight(0,0);
@@ -556,7 +556,7 @@ public:
 			{
 				// Turn left
 				double d = 0;
-				move_controlled_turn(45,cur_ultra_angle,angle_diff_final,x_diff,y_diff);
+				move_controlled_turn(0.78,cur_ultra_angle,angle_diff_final,x_diff,y_diff);
 				move_controlled_straight(100, cur_ultra_angle, d, x_diff, y_diff, angle_diff_final);
 				success = 0;
 				move_straight(0,0);

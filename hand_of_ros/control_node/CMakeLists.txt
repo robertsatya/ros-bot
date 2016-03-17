@@ -136,9 +136,9 @@ add_executable(central_control src/central_control.cpp)
 target_link_libraries(central_control ${OpenCV_LIBRARIES} ${OpenCV_LIBS} ${catkin_LIBRARIES} )
 add_dependencies(central_control central_control_gencpp)
 
-add_executable(alt_control src/alt_control.cpp)
-target_link_libraries(alt_control ${OpenCV_LIBRARIES} ${OpenCV_LIBS} ${catkin_LIBRARIES} )
-add_dependencies(alt_control alt_control_gencpp)
+#add_executable(alt_control src/alt_control.cpp)
+#target_link_libraries(alt_control ${OpenCV_LIBRARIES} ${OpenCV_LIBS} ${catkin_LIBRARIES} )
+#add_dependencies(alt_control alt_control_gencpp)
 
 add_executable(state_interrupt src/state_interrupt.cpp)
 target_link_libraries(state_interrupt ${OpenCV_LIBRARIES} ${OpenCV_LIBS} ${catkin_LIBRARIES} )
