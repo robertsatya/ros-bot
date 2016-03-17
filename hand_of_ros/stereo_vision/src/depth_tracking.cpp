@@ -341,20 +341,51 @@ public:
 
 			// printf("Green Total: %f %f %f\n", gx_pos, gy_pos, gdepth);
 		}
+		postLeftPoint(0, 0, 0);
 
 		waitKey(3);
 	}
 
-	// void postLeftPoint (double x, double y, double depth) {
-	// 	geometry_msgs::PointStamped point;
-	// 	point.header.frame_id = "/left_camera";
-	// 	point.header.stamp = ros::Time().now();
-	// 	point.point.x = x_pos;
-	// 	point.point.y = y_pos;
-	// 	point.point.z = depth;
+	void postLeftPoint (double x, double y, double depth) {
 
-	// 	left_point_pub.publish(point);
-	// }
+		geometry_msgs::PointStamped point;
+		point.header.frame_id = "/left_camera";
+		point.header.stamp = ros::Time().now();
+
+		int color = 0;
+
+		if (depth > 0 && gdepth == 0)
+			color = 1;
+		else if (gdepth > 0 && depth == 0)
+			color = 2;
+		else if (gdepth > 0 && depth > 0 && gdepth < depth)
+			color = 2;
+		else if (gdepth > 0 && depth > 0 && depth < gdepth)
+			color = 1;
+		if (color == 1) {
+			// cout << "Info about ball sent" << endl;
+			// printf("%f %f %f\n", x_pos, y_pos, depth);
+			point.point.x = x_pos;
+			point.point.y = y_pos;
+			point.point.z = depth;
+		} else if (color == 2) {
+			// cout << "Info about ball sent" << endl;
+			// printf("%f %f %f\n", gx_pos, gy_pos, gdepth);
+			point.point.x = gx_pos;
+			point.point.y = gy_pos;
+			point.point.z = gdepth;
+		} else {
+			point.point.x = 0;
+			point.point.y = 0;
+			point.point.z = -1;
+		}
+
+		// point.point.x = x_pos;
+		// point.point.y = y_pos;
+		// point.point.z = depth;
+
+		left_point_pub.publish(point);
+	}
 
 	float getDepth() {
 		return depth;
@@ -409,7 +440,7 @@ int main(int argc, char *argv[])
 	signal(SIGTERM, sigHandle);
 	DisparityTrack dt = DisparityTrack();
 	ros::NodeHandle nh;
-	ros::ServiceServer service = nh.advertiseService("broad_search_service", &DisparityTrack::send_loc, &dt);
+	// ros::ServiceServer service = nh.advertiseService("broad_search_service", &DisparityTrack::send_loc, &dt);
 	ros::spin();
 	return 0;
 }

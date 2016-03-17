@@ -16,6 +16,6 @@
 #define STATE_SEARCH_MISSED_BALLS 13
 #define STATE_ERROR 0
 
-extern int control_state;
+static int control_state;
 
 #endif

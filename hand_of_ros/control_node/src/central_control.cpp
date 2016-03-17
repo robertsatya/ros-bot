@@ -10,6 +10,7 @@
 #include <ros/ros.h>
 #include <std_msgs/String.h>
 #include <cv_bridge/cv_bridge.h>
+#include <geometry_msgs/PointStamped.h>
 
 #include <control_node/states.h>
 #include <control_node/BroadSearch.h>
@@ -21,10 +22,15 @@
 using namespace std;
 using namespace cv;
 
-int control_state, prev_state;
+int  prev_state;
 std::vector<string> state_labels;
 
+static bool isPointFound = false;
+static float x_pos=0, y_pos=0, depth_pos=0;
+
 void sigHandle(int sig_id);
+
+void locCallback(const geometry_msgs::PointStamped &loc);
 
 int main(int argc, char *argv[])
 {
@@ -46,15 +52,17 @@ int main(int argc, char *argv[])
 	state_labels.push_back("STATE_DROP_BALL_AT_GOAL");
 	state_labels.push_back("STATE_SEARCH_MISSED_BALLS");
 	ros::NodeHandle n;
-	printf("Waiting for BroadSearchService\n");
-	ros::service::waitForService("broad_search_service",-1);
-	ros::ServiceClient broadSearchClient = n.serviceClient<control_node::BroadSearch>("broad_search_service", true);
+	// printf("Waiting for BroadSearchService\n");
+	// ros::service::waitForService("broad_search_service",-1);
+	// ros::ServiceClient broadSearchClient = n.serviceClient<control_node::BroadSearch>("broad_search_service", true);
+	ros::Subscriber sub = n.subscribe("/left_point", 10, locCallback);
 	control_node::BroadSearch searchsrv;
 	float pos[3] = {0};
 	MyNode motion_node;
 	int frame_seq = 0;
 
 	// MOVE related
+	ros::AsyncSpinner spinner(4);
 	int mode=1,dir=0,cmd_freq=1;
 	double angle=0;
 	geometry_msgs::PointStamped p;
@@ -82,15 +90,17 @@ int main(int argc, char *argv[])
 			case STATE_BROAD_SEARCH:
 				if(broad_search_rotate_angle<360)
 				{
+					spinner.start();
 					//cout << "waiting here" << endl;
-					sleep(2);
+					sleep(3);
+					cout << isPointFound << endl;
 					int64 t = getTickCount();
-					if (broadSearchClient.call(searchsrv))
+					if (isPointFound)
 					{
-						pos[0] = searchsrv.response.x;
-						pos[1] = searchsrv.response.y;
-						pos[2] = searchsrv.response.depth;
-
+						pos[0] = x_pos;
+						pos[1] = y_pos;
+						pos[2] = depth_pos;
+						spinner.stop();
 						printf("Received %f %f %f\n", pos[0], pos[1], pos[2]);
 						t = getTickCount() - t;
 						printf("Time elapsed: %fms\n", t*1000/getTickFrequency());
@@ -298,4 +308,14 @@ int main(int argc, char *argv[])
 void sigHandle(int sig_id) {
 	cerr << "Error occured. Stopping state: " << control_state << endl;
 	control_state = STATE_ERROR;
+}
+
+void locCallback(const geometry_msgs::PointStamped &loc) {
+
+	x_pos = loc.point.x;
+	y_pos = loc.point.y;
+	depth_pos = loc.point.z;
+	isPointFound = true;
+
+	printf("Point Published : %f %f %f\n", x_pos, y_pos, depth_pos);
 }
