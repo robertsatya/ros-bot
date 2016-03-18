@@ -1,0 +1,22 @@
+#include<ros/ros.h>
+#include<rob_nav/tcp_client.h>
+#include<std_msgs/String.h>
+
+int main(int argc, char *argv[])
+{
+	ros::init(argc,argv,"nav_ultra");
+	tcp_client c;
+	string host="192.168.43.97";
+  c.conn(host , 9990);
+	ros::NodeHandle n;
+	ros::Publisher ultra = n.advertise<std_msgs::String>("ultra", 5);
+	while(true)
+	{
+		std_msgs::String ultra_sts;
+		ultra_sts.data = c.receive(1024);
+		ultra.publish(ultra_sts);
+		ros::spinOnce();
+	}
+	return 0;
+}
+

@@ -196,6 +196,18 @@ add_dependencies(
   nav_arm
   ${rob_nav_EXPORTED_TARGETS}
 )
+
+add_executable(nav_ultra src/nav_ultra.cpp)
+
+target_link_libraries( 
+  nav_ultra
+  ${catkin_LIBRARIES}
+)
+
+add_dependencies(
+  nav_ultra
+  ${rob_nav_EXPORTED_TARGETS}
+)
 #############
 ## Install ##
 #############
