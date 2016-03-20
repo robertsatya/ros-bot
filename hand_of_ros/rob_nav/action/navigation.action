@@ -1,6 +1,6 @@
 #goal definition
 geometry_msgs/PointStamped dest
-uint8 type # 0-Rotate 1-Relative Goal 2-Close Search 3-Absolute Goal
+uint8 type # 0-Rotate 1-Relative Goal 2-Close Search 3-Absolute Goal 4-Reset Odometry 5-Roomba Reset
 float64 angle #in radians
 uint8 dir # 0-Forward 1-Backward 2-Left 3-Right 4-Successful 5-Unsuccessful
 uint8 cmd_freq 

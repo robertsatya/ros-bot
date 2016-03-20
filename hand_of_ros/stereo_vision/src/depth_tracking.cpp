@@ -51,10 +51,10 @@ public:
 		left_point_pub = n.advertise<geometry_msgs::PointStamped>("left_point", 5);
 		image_sub1 = n.subscribe("/left_cam/image_raw", 100, &DisparityTrack::left_cb, this);
 		image_sub2 = n.subscribe("/right_cam/image_raw", 100, &DisparityTrack::right_cb, this);
-		lower_thresh[0] = 7; lower_thresh[1] = 58; lower_thresh[2] = 167;
-		upper_thresh[0] = 24; upper_thresh[1] = 232; upper_thresh[2] = 255;
-		glower_thresh[0] = 37; glower_thresh[1] = 108; glower_thresh[2] = 44;
-		gupper_thresh[0] = 54; gupper_thresh[1] = 215; gupper_thresh[2] = 255;
+		lower_thresh[0] = 7; lower_thresh[1] = 58; lower_thresh[2] = 156;
+		upper_thresh[0] = 24; upper_thresh[1] = 255; upper_thresh[2] = 255;
+		glower_thresh[0] = 36; glower_thresh[1] = 92; glower_thresh[2] = 46;
+		gupper_thresh[0] = 57; gupper_thresh[1] = 255; gupper_thresh[2] = 255;
 		// glower_thresh[0] = 4; glower_thresh[1] = 75; glower_thresh[2] = 60;
 		// gupper_thresh[0] = 18; gupper_thresh[1] = 184; gupper_thresh[2] = 196;
 		// lower_thresh[0] = 37; lower_thresh[1] = 160; lower_thresh[2] = 44;
@@ -354,10 +354,10 @@ public:
 
 		int color = 0;
 
-		cout << "Info about ball" << endl;
-		printf("%f %f %f\n", x_pos, y_pos, depth);
-		cout << "Info about Green ball" << endl;
-		printf("%f %f %f\n", gx_pos, gy_pos, gdepth);
+		// cout << "Info about ball" << endl;
+		// printf("%f %f %f\n", x_pos, y_pos, depth);
+		// cout << "Info about Green ball" << endl;
+		// printf("%f %f %f\n", gx_pos, gy_pos, gdepth);
 
 		if (depth > 0 && gdepth == 0)
 			color = 1;
@@ -368,14 +368,14 @@ public:
 		else if (gdepth > 0 && depth > 0 && depth < gdepth)
 			color = 1;
 		if (color == 1) {
-			// cout << "Info about ball sent" << endl;
-			// printf("%f %f %f\n", x_pos, y_pos, depth);
+			cout << "Info about ball sent" << endl;
+			printf("%f %f %f\n", x_pos, y_pos, depth);
 			point.point.x = x_pos;
 			point.point.y = y_pos;
 			point.point.z = depth;
 		} else if (color == 2) {
-			// cout << "Info about ball sent" << endl;
-			// printf("%f %f %f\n", gx_pos, gy_pos, gdepth);
+			cout << "Info about Green ball sent" << endl;
+			printf("%f %f %f\n", gx_pos, gy_pos, gdepth);
 			point.point.x = gx_pos;
 			point.point.y = gy_pos;
 			point.point.z = gdepth;

@@ -7,13 +7,16 @@ int main(int argc, char *argv[])
 	ros::init(argc,argv,"nav_ultra");
 	tcp_client c;
 	string host="192.168.43.97";
-  c.conn(host , 9990);
+	c.conn(host , 1112);
 	ros::NodeHandle n;
 	ros::Publisher ultra = n.advertise<std_msgs::String>("ultra", 5);
 	while(true)
 	{
+		c.send_data("5");
+
 		std_msgs::String ultra_sts;
-		ultra_sts.data = c.receive(1024);
+		ultra_sts.data = c.receive(4);
+//		cout << "Ultra: " << ultra << endl;
 		ultra.publish(ultra_sts);
 		ros::spinOnce();
 	}

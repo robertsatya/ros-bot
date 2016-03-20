@@ -26,7 +26,7 @@ static double x_pos, y_pos, depth;
 
 void sigHandle(int sig_id);
 
-class DisparityTrack
+class DisparTrack
 {
 	ros::NodeHandle n;
 	ros::Subscriber image_sub1, image_sub2;
@@ -41,10 +41,10 @@ class DisparityTrack
 	vector<Vec4i> hierarchy;
 
 public:
-	DisparityTrack() {
+	DisparTrack() {
 		left_point_pub = n.advertise<geometry_msgs::PointStamped>("buck_point", 5);
-		image_sub1 = n.subscribe("/left_cam/image_raw", 100, &DisparityTrack::left_cb, this);
-		image_sub2 = n.subscribe("/right_cam/image_raw", 100, &DisparityTrack::right_cb, this);
+		image_sub1 = n.subscribe("/left_cam/image_raw", 100, &DisparTrack::left_cb, this);
+		image_sub2 = n.subscribe("/right_cam/image_raw", 100, &DisparTrack::right_cb, this);
 		lower_thresh[0] = 110; lower_thresh[1] = 87; lower_thresh[2] = 47;
 		upper_thresh[0] = 121; upper_thresh[1] = 175; upper_thresh[2] = 95;
 		x_pos = 0; y_pos = 0; depth = 0;
@@ -104,18 +104,18 @@ public:
 
 		thr_img = masked;
 
-		findContours(thr_img, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+		//findContours(thr_img, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 
 		// HoughCircles( masked, balls, CV_HOUGH_GRADIENT, 1, 10, 50, 30, 0, 0 );
 
 		cv::bitwise_and(img, img, fin, thr_img);
 
 		int idx = 0;
-		for( ; idx >= 0; idx = hierarchy[idx][0] )
-		{
-			Scalar color( rand()&255, rand()&255, rand()&255 );
-			drawContours( fin, contours, -1, color );
-		}
+		//for( ; idx >= 0; idx = hierarchy[idx][0] )
+		//{
+		//	Scalar color( rand()&255, rand()&255, rand()&255 );
+		//	drawContours( fin, contours, -1, color );
+		//}
 
 		// erode(gmasked, gmasked, getStructuringElement(MORPH_ERODE, Point(3,3)) );
 		// dilate(gmasked, gmasked, getStructuringElement(MORPH_DILATE, Point(3,3)) );
@@ -123,11 +123,11 @@ public:
 		Moments moments = cv::moments(masked, false);
 		// Moments gmoments = cv::moments(gmasked, false);
 
-		SimpleBlobDetector detector;
-		std::vector<KeyPoint> points;
-		detector.detect(masked, points);
+		//SimpleBlobDetector detector;
+		//std::vector<KeyPoint> points;
+		//detector.detect(masked, points);
 
-		drawKeypoints( fin, points, fin, Scalar(255, 0, 255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
+		//drawKeypoints( fin, points, fin, Scalar(255, 0, 255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
 
 
 		if(moments.m00 > 0) {
@@ -139,7 +139,7 @@ public:
 			left_pt.at<cv::Vec2d>(0,0)[0] = cx;
 			left_pt.at<cv::Vec2d>(0,0)[1] = cy;
 
-			// cv::circle(fin, cv::Point(cx, cy), 10, Scalar(0, 0, 255), 2);
+			cv::circle(fin, cv::Point(cx, cy), 10, Scalar(0, 0, 255), 2);
 			// draw(fin, balls);
 			// if (balls.size() != 0)
 			// 	cout << "count: " << balls.size() << endl;
@@ -249,9 +249,9 @@ int main(int argc, char *argv[])
 	ros::init(argc, argv, "goal_search");
 	signal(SIGINT, sigHandle);
 	signal(SIGTERM, sigHandle);
-	DisparityTrack dt = DisparityTrack();
+	DisparTrack dt = DisparTrack();
 	ros::NodeHandle nh;
-	// ros::ServiceServer service = nh.advertiseService("goal_search_service", &DisparityTrack::send_loc, &dt);
+	// ros::ServiceServer service = nh.advertiseService("goal_search_service", &DisparTrack::send_loc, &dt);
 	ros::spin();
 	return 0;
 }

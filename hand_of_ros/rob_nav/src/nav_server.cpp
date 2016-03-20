@@ -7,7 +7,7 @@
 #include <termios.h>
 #include <math.h>
 #include <serial/serial.h>
-#include <rob_nav/tcp_client.h>
+#include <std_msgs/String.h>
 
 #define PI 3.141592
 
@@ -17,7 +17,7 @@ class navigationAction
 {
 protected:
 
-  ros::NodeHandle nh_;
+  ros::NodeHandle nh_,n_;
   // NodeHandle instance must be created before this line. Otherwise strange error may occur.
   actionlib::SimpleActionServer<rob_nav::navigationAction> as_;
   std::string action_name_;
@@ -41,9 +41,9 @@ protected:
 	int vel;
 	int turn_dir; // 0-No turn, 1-Left, 2-Right
 	int time_burst_sleep;
-  string host;
-	tcp_client c;
 	int success;
+	string ultra_sts;
+	ros::Subscriber ultra_sub;
 public:
 
   navigationAction(std::string name) :
@@ -86,8 +86,9 @@ public:
 		r.sleep();
 		serial_port_.flushOutput();
 		r.sleep();
-		host="192.168.43.97";
-    	c.conn(host , 1111);
+		ultra_sts = "0000";
+		ultra_sub = n_.subscribe("ultra", 1, &navigationAction::ultraCB, this);
+
   }
 
   ~navigationAction(void)
@@ -129,6 +130,12 @@ public:
 		return d;
 	}
 
+	void ultraCB(const std_msgs::String::ConstPtr& sts)
+	{
+		ultra_sts = sts->data;
+		cout << "Received " << ultra_sts << endl;
+	}
+
 	void move_straight(uint16_t right_vel,uint16_t left_vel)
 	{
  		cout << "Moving forward at L:" << left_vel << " R:" << right_vel << " mm/s\n";
@@ -153,19 +160,6 @@ public:
 		serial_port_.write(byte, 5);
 		rw.sleep();
 	}
-
-/*	void move_right(long right_vel,long left_vel)
-	{
-		cout << "Moving forward at L:" << left_vel << " R:" << right_vel << " mm/s\n";
-//		uint16_t right_vel1 = (65535 - right_vel) + 1;
- 		byte[0] = 145;
- 		byte[1] = right_vel >> 8;
- 		byte[2] = right_vel & 0x00ff;
- 		byte[3] = left_vel >> 8;
- 		byte[4] = left_vel & 0x00ff;
-		serial_port_.write(byte, 5);
-		rw.sleep();
-	}*/
 
 	void move_timed_straight(int dir, int freq, double angle_turned, double &x_diff, double &y_diff, double &angle_diff_final)
 	{
@@ -392,7 +386,7 @@ public:
 
 		double dist_step = 0, cur_diff = 0, angle_diff = 0, angle_diff_dist = 0, theta_diff_term = 0, theta_diff_final = 0, y_offset_final = 0, dist_crit = 370;
 		double angle_diff_final_init = angle_diff_final;
-		double dist_err = 300;
+		double dist_err = 150;
 		double angle1 = 0, angle2=0;
 //		double angle_diff_final = 0;
 		cout << "Dist target:" << dist << "Dist final" << dist_final << "Angle turned" << angle_turned << "X diff" << x_diff << "Y diff" << y_diff << "Angle diff final" << angle_diff_final << endl;
@@ -438,6 +432,14 @@ public:
   			ddiff += diff_l - diff_r;
   			int vel_change = ddiff/100;
 				vel_change = (vel_change>0)?vel_change:-vel_change;
+
+			if(vel_change >= 50)
+			{
+				success = 2;
+				move_straight(0,0);
+				cout << "DIFFERENCE BIG!!" << endl;
+				return;
+			}
   			if(ddiff>50)
   			{
   				vel_r = vel_cur + vel_change;
@@ -533,45 +535,57 @@ public:
 
 			cout << "\nDist final:" << dist_final << " Dist step:" << x_diff << "Y offset final" << y_offset_final << "Offset step:" << y_diff << " rdist:" << r_dist << endl;
 			cout << "Angle diff total:" << angle_diff_final << " Angle diff step:" << angle_diff << " Theta diff final:" << theta_diff_final << " Theta diff term:" << theta_diff_term << "angle init" << angle_turned << endl;
-			//c.send_data("5");
-			//string ultra = c.receive(4);
-			//cout << "Ultra: " << ultra << endl;
 			int ultra_l=0, ultra_r=0, ultra_b=0, ultra_t=0; // Left 1 Right 2 Bottom 3 Top 4
-	   		//ultra_l = boost::lexical_cast<int>(ultra[0]);
-	   		//ultra_r = boost::lexical_cast<int>(ultra[1]);
-	   		//ultra_b = boost::lexical_cast<int>(ultra[2]);
-			//ultra_t = boost::lexical_cast<int>(ultra[3]);
+			double d=0;
+			cout << "Ultra in action " << ultra_sts << endl;
+	   		ultra_l = boost::lexical_cast<int>(ultra_sts[0]);
+	   		ultra_r = boost::lexical_cast<int>(ultra_sts[1]);
+	   		ultra_b = boost::lexical_cast<int>(ultra_sts[2]);
+			ultra_t = boost::lexical_cast<int>(ultra_sts[3]);
 			double cur_ultra_angle = angle_diff_final;
 			if(ultra_l == 1)
 			{
 				// Turn right
-				double d = 0;
-				move_controlled_turn(-0.78,cur_ultra_angle,angle_diff_final,x_diff,y_diff);
-				move_controlled_straight(100, cur_ultra_angle, d, x_diff, y_diff, angle_diff_final);
+//				move_controlled_turn(-0.78,cur_ultra_angle,angle_diff_final,x_diff,y_diff);
+				move_timed_straight(-1,6,cur_ultra_angle,x_diff,y_diff,angle_diff_final);
+
+//				move_controlled_straight(100, cur_ultra_angle, d, x_diff, y_diff, angle_diff_final);
 				success = 0;
 				move_straight(0,0);
 				return;
 			}
+			else
 			if(ultra_r == 1)
 			{
 				// Turn left
-				double d = 0;
-				move_controlled_turn(0.78,cur_ultra_angle,angle_diff_final,x_diff,y_diff);
-				move_controlled_straight(100, cur_ultra_angle, d, x_diff, y_diff, angle_diff_final);
+//				move_controlled_turn(0.78,cur_ultra_angle,angle_diff_final,x_diff,y_diff);
+				move_timed_straight(-1,6,cur_ultra_angle,x_diff,y_diff,angle_diff_final);
+
+//				move_controlled_straight(100, cur_ultra_angle, d, x_diff, y_diff, angle_diff_final);
 				success = 0;
 				move_straight(0,0);
 				return;
 			}
+			else
 			if(ultra_b == 1)
 			{
 				// For bucket
+//				move_controlled_turn(0.78,cur_ultra_angle,angle_diff_final,x_diff,y_diff);
+				move_timed_straight(-1,6,cur_ultra_angle,x_diff,y_diff,angle_diff_final);
+
+//				move_controlled_straight(100, cur_ultra_angle, d, x_diff, y_diff, angle_diff_final);
+				success = 0;
+				move_straight(0,0);
+				return;
 			}
+			else
 			if(ultra_t == 1)
 			{
 				// Turn left
-				double d = 0;
-				move_controlled_turn(45,cur_ultra_angle,angle_diff_final,x_diff,y_diff);
-				move_controlled_straight(100, cur_ultra_angle, d, x_diff, y_diff, angle_diff_final);
+//				move_controlled_turn(0.78,cur_ultra_angle,angle_diff_final,x_diff,y_diff);
+				move_timed_straight(-1,6,cur_ultra_angle,x_diff,y_diff,angle_diff_final);
+
+//				move_controlled_straight(100, cur_ultra_angle, d, x_diff, y_diff, angle_diff_final);
 				success = 0;
 				move_straight(0,0);
 				return;
@@ -579,8 +593,8 @@ public:
 			}
 
 			move_straight(vel_r,vel_l);
-
-
+			
+//			sleep(1);
 			r.sleep();
 			if(vel_cur == 0)
 			{
@@ -903,7 +917,14 @@ public:
 		double angle_diff_final = 0;
 
 		start();
+		r.sleep();
 		safe();
+		r.sleep();
+		serial_port_.flushInput();
+		r.sleep();
+		serial_port_.flushOutput();
+		r.sleep();
+
 
 		success = 1;
 		target = goal->dest.point;
@@ -1004,6 +1025,18 @@ public:
 		force_angle_range(temp);
 		stationary_loc.pose.orientation.z = (180/PI)*temp;
 
+		if(goal->type==4)
+		{
+			stationary_loc.pose.position.x = 0;
+			stationary_loc.pose.position.y = 0;
+			stationary_loc.pose.position.z = 0;
+			stationary_loc.pose.orientation.z = 0;
+			cout << "Odometry reset";
+		}
+		else if(goal->type==5)
+		{
+			reset();
+		}
 
 		stationary_loc.header = goal->dest.header;
   	stationary_loc.header.stamp = ros::Time::now();
