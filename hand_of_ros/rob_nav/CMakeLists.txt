@@ -208,6 +208,52 @@ add_dependencies(
   nav_ultra
   ${rob_nav_EXPORTED_TARGETS}
 )
+
+add_executable(nav_ultra1 src/nav_ultra1.cpp)
+add_executable(nav_ultra2 src/nav_ultra2.cpp)
+add_executable(nav_ultra3 src/nav_ultra3.cpp)
+add_executable(nav_ultra4 src/nav_ultra4.cpp)
+
+
+target_link_libraries( 
+  nav_ultra1
+  ${catkin_LIBRARIES}
+)
+
+add_dependencies(
+  nav_ultra1
+  ${rob_nav_EXPORTED_TARGETS}
+)
+
+target_link_libraries( 
+  nav_ultra2
+  ${catkin_LIBRARIES}
+)
+
+add_dependencies(
+  nav_ultra2
+  ${rob_nav_EXPORTED_TARGETS}
+)
+
+target_link_libraries( 
+  nav_ultra3
+  ${catkin_LIBRARIES}
+)
+
+add_dependencies(
+  nav_ultra3
+  ${rob_nav_EXPORTED_TARGETS}
+)
+
+target_link_libraries( 
+  nav_ultra4
+  ${catkin_LIBRARIES}
+)
+
+add_dependencies(
+  nav_ultra4
+  ${rob_nav_EXPORTED_TARGETS}
+)
 #############
 ## Install ##
 #############
