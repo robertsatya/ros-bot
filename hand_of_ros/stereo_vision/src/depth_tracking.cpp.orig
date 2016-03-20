@@ -52,10 +52,20 @@ class DisparityTrack
 
 public:
 	DisparityTrack() {
+<<<<<<< HEAD
 		left_point_pub = n.advertise<geometry_msgs::PointStamped>("left_point", 1);
 		image_sub1 = n.subscribe("/left_cam/image_raw", 100, &DisparityTrack::left_cb, this);
 		image_sub2 = n.subscribe("/right_cam/image_raw", 100, &DisparityTrack::right_cb, this);
+		lower_thresh[0] = 7; lower_thresh[1] = 58; lower_thresh[2] = 128;
+=======
+		host = "192.168.43.34";
+		port = 32715;
+		// pubber.conn(host, port);
+		left_point_pub = n.advertise<geometry_msgs::PointStamped>("left_point", 5);
+		image_sub1 = n.subscribe("/left_cam/image_raw", 100, &DisparityTrack::left_cb, this);
+		image_sub2 = n.subscribe("/right_cam/image_raw", 100, &DisparityTrack::right_cb, this);
 		lower_thresh[0] = 7; lower_thresh[1] = 58; lower_thresh[2] = 156;
+>>>>>>> Recalibrate cameras
 		upper_thresh[0] = 17; upper_thresh[1] = 255; upper_thresh[2] = 255;
 		glower_thresh[0] = 36; glower_thresh[1] = 92; glower_thresh[2] = 100;
 		gupper_thresh[0] = 57; gupper_thresh[1] = 255; gupper_thresh[2] = 255;
@@ -72,7 +82,11 @@ public:
 
 		Pj_left = Mat(3, 4, DataType<double>::type, &Pjl);
 
+<<<<<<< HEAD
+		pjx = 24683;
+=======
 		pjx = 158.559269;
+>>>>>>> Recalibrate cameras
 
 		Pjr[0][0] = 896.544552; Pjr[0][1] = 0; Pjr[0][2] = 329.618134; Pjr[0][3] = pjx;
 		Pjr[1][0] = 0; Pjr[1][1] = 896.544552; Pjr[1][2] = 283.202940; Pjr[1][3] = 0;
@@ -336,9 +350,15 @@ public:
 
 			out = out / out.at<double>(0,3);
 
+<<<<<<< HEAD
+			gx_pos = out.at<double>(0,0)/2.54 + 3;
+			gy_pos = out.at<double>(0,1)/2.54;
+			gdepth = out.at<double>(0,2)/2.54;
+=======
 			gx_pos = out.at<double>(0,0)*100 + 9; // + 12;
 			gy_pos = out.at<double>(0,1)*100;
 			gdepth = out.at<double>(0,2)*100;
+>>>>>>> Recalibrate cameras
 
 			// s_depth = std::make_shared<float> (depth);
 
