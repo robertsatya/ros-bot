@@ -48,12 +48,12 @@ class DisparityTrack
 
 public:
 	DisparityTrack() {
-		left_point_pub = n.advertise<geometry_msgs::PointStamped>("left_point", 5);
+		left_point_pub = n.advertise<geometry_msgs::PointStamped>("left_point", 1);
 		image_sub1 = n.subscribe("/left_cam/image_raw", 100, &DisparityTrack::left_cb, this);
 		image_sub2 = n.subscribe("/right_cam/image_raw", 100, &DisparityTrack::right_cb, this);
-		lower_thresh[0] = 7; lower_thresh[1] = 58; lower_thresh[2] = 156;
-		upper_thresh[0] = 24; upper_thresh[1] = 255; upper_thresh[2] = 255;
-		glower_thresh[0] = 36; glower_thresh[1] = 92; glower_thresh[2] = 46;
+		lower_thresh[0] = 7; lower_thresh[1] = 58; lower_thresh[2] = 128;
+		upper_thresh[0] = 17; upper_thresh[1] = 255; upper_thresh[2] = 255;
+		glower_thresh[0] = 36; glower_thresh[1] = 92; glower_thresh[2] = 100;
 		gupper_thresh[0] = 57; gupper_thresh[1] = 255; gupper_thresh[2] = 255;
 		// glower_thresh[0] = 4; glower_thresh[1] = 75; glower_thresh[2] = 60;
 		// gupper_thresh[0] = 18; gupper_thresh[1] = 184; gupper_thresh[2] = 196;
@@ -68,7 +68,7 @@ public:
 
 		Pj_left = Mat(3, 4, DataType<double>::type, &Pjl);
 
-		pjx = 13683;
+		pjx = 24683;
 
 		Pjr[0][0] = 864.071360; Pjr[0][1] = 0; Pjr[0][2] = 271.838741; Pjr[0][3] = pjx;
 		Pjr[1][0] = 0; Pjr[1][1] = 864.071360; Pjr[1][2] = 235.457853; Pjr[1][3] = 0;
@@ -307,7 +307,7 @@ public:
 
 			out = out / out.at<double>(0,3);
 
-			x_pos = out.at<double>(0,0)/2.54 + 12;
+			x_pos = out.at<double>(0,0)/2.54 + 3;
 			y_pos = out.at<double>(0,1)/2.54;
 			depth = out.at<double>(0,2)/2.54;
 
@@ -332,7 +332,7 @@ public:
 
 			out = out / out.at<double>(0,3);
 
-			gx_pos = out.at<double>(0,0)/2.54 + 12;
+			gx_pos = out.at<double>(0,0)/2.54 + 3;
 			gy_pos = out.at<double>(0,1)/2.54;
 			gdepth = out.at<double>(0,2)/2.54;
 
@@ -368,7 +368,7 @@ public:
 		else if (gdepth > 0 && depth > 0 && depth < gdepth)
 			color = 1;
 		if (color == 1) {
-			cout << "Info about ball sent" << endl;
+			cout << "Info about Orange ball sent" << endl;
 			printf("%f %f %f\n", x_pos, y_pos, depth);
 			point.point.x = x_pos;
 			point.point.y = y_pos;

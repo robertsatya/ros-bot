@@ -57,8 +57,8 @@ int main(int argc, char *argv[])
 	// printf("Waiting for BroadSearchService\n");
 	// ros::service::waitForService("broad_search_service",-1);
 	// ros::ServiceClient broadSearchClient = n.serviceClient<control_node::BroadSearch>("broad_search_service", true);
-	ros::Subscriber sub = n.subscribe("/left_point", 10, locCallback);
-	ros::Subscriber gsub = n.subscribe("/buck_point", 10, buckCallback);
+	ros::Subscriber sub = n.subscribe("/left_point", 1, locCallback);
+	ros::Subscriber gsub = n.subscribe("/buck_point", 1, buckCallback);
 	control_node::BroadSearch searchsrv;
 	float pos[3] = {0};
 	MyNode motion_node;
@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
 	// R_PI socket related
 	tcp_client c;
 	string host="192.168.43.97";
-	c.conn(host , 9996);
+	c.conn(host , 9999);
 	string o_str = "";
 	string res = "";
 	int count_5 = 0;
@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
 				{
 					//spinner.start();
 					//cout << "waiting here" << endl;
-					sleep(5);
+					usleep(500000);
 					cout << isPointFound << endl;
 					int64 t = getTickCount();
 					if (isPointFound)
@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
 						if(pos[2] > 0) {
 							control_state = STATE_MOVE_TO_BALL;
 							broad_search_rotate_angle = 0;
-						} else if (broad_3 < 3) {
+						} else if (broad_3 < 5) {
 							control_state = STATE_BROAD_SEARCH;
 							broad_3++;
 						} else {
@@ -124,6 +124,7 @@ int main(int argc, char *argv[])
 							control_state = STATE_ROTATE_SEARCH;
 							broad_3 = 0;
 						}
+						isPointFound = false;
 					}
 				}
 				else
@@ -201,6 +202,7 @@ int main(int argc, char *argv[])
 					cout << control_state << endl;
 					exit(0);
 				}
+
 				if(m_success == 1)
 					control_state = STATE_REFINE_POSITION;
 				else
@@ -287,7 +289,7 @@ int main(int argc, char *argv[])
 
 				break;
 			case STATE_GRAB_BALL:
-/*				mode = 3;
+				mode = 3;
 				p.header.seq = frame_seq++;
 				p.header.stamp = ros::Time::now();
 				p.header.frame_id = "/robot";
@@ -305,8 +307,9 @@ int main(int argc, char *argv[])
 				{
 					cout << control_state << endl;
 					exit(0);
-				}*/
-				control_state = STATE_LOCATE_GOAL;
+				}
+				control_state = STATE_BROAD_SEARCH; //TODO: Just for testing
+			//	control_state = STATE_LOCATE_GOAL;
 			
 //				cin >> key;
 

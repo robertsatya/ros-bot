@@ -386,7 +386,7 @@ public:
 
 		double dist_step = 0, cur_diff = 0, angle_diff = 0, angle_diff_dist = 0, theta_diff_term = 0, theta_diff_final = 0, y_offset_final = 0, dist_crit = 370;
 		double angle_diff_final_init = angle_diff_final;
-		double dist_err = 150;
+		double dist_err = 250;
 		double angle1 = 0, angle2=0;
 //		double angle_diff_final = 0;
 		cout << "Dist target:" << dist << "Dist final" << dist_final << "Angle turned" << angle_turned << "X diff" << x_diff << "Y diff" << y_diff << "Angle diff final" << angle_diff_final << endl;
@@ -430,7 +430,7 @@ public:
 
 
   			ddiff += diff_l - diff_r;
-  			int vel_change = ddiff/100;
+  			int vel_change = ddiff/((200/vel_cur)*100);
 				vel_change = (vel_change>0)?vel_change:-vel_change;
 
 			if(vel_change >= 50)
