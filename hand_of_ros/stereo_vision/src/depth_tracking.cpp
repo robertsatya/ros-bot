@@ -48,7 +48,7 @@ class DisparityTrack
 	string host;
 	int port;
 	tcp_client pubber;
-	int pjx;
+	float pjx, fc, imgx, imgy;
 
 public:
 	DisparityTrack() {
@@ -57,7 +57,7 @@ public:
 		image_sub2 = n.subscribe("/right_cam/image_raw", 100, &DisparityTrack::right_cb, this);
 		lower_thresh[0] = 7; lower_thresh[1] = 58; lower_thresh[2] = 156;
 		upper_thresh[0] = 17; upper_thresh[1] = 255; upper_thresh[2] = 255;
-		glower_thresh[0] = 36; glower_thresh[1] = 92; glower_thresh[2] = 100;
+		glower_thresh[0] = 36; glower_thresh[1] = 117; glower_thresh[2] = 100;
 		gupper_thresh[0] = 57; gupper_thresh[1] = 255; gupper_thresh[2] = 255;
 		// glower_thresh[0] = 4; glower_thresh[1] = 75; glower_thresh[2] = 60;
 		// gupper_thresh[0] = 18; gupper_thresh[1] = 184; gupper_thresh[2] = 196;
@@ -66,16 +66,21 @@ public:
 		x_pos = 0; y_pos = 0; depth = 0;
 		gx_pos = 0; gy_pos = 0; gdepth = 0;
 
-		Pjl[0][0] = 896.544552; Pjl[0][1] = 0; Pjl[0][2] = 329.618134; Pjl[0][3] = 0;
-		Pjl[1][0] = 0; Pjl[1][1] = 896.544552; Pjl[1][2] = 283.202940; Pjl[1][3] = 0;
+		pjx = 118.559269;
+		fc = 896.544552;
+		imgx = 329.618134;
+		imgy = 283.202940;
+		// imgx = 320;
+		// imgy = 240;
+	
+		Pjl[0][0] = fc; Pjl[0][1] = 0; Pjl[0][2] = imgx; Pjl[0][3] = 0;
+		Pjl[1][0] = 0; Pjl[1][1] = fc; Pjl[1][2] = imgy; Pjl[1][3] = 0;
 		Pjl[2][0] =	0; Pjl[2][1] = 0; Pjl[2][2] = 1; Pjl[2][3] = 0;
 
 		Pj_left = Mat(3, 4, DataType<double>::type, &Pjl);
 
-		pjx = 158.559269;
-
-		Pjr[0][0] = 896.544552; Pjr[0][1] = 0; Pjr[0][2] = 329.618134; Pjr[0][3] = pjx;
-		Pjr[1][0] = 0; Pjr[1][1] = 896.544552; Pjr[1][2] = 283.202940; Pjr[1][3] = 0;
+		Pjr[0][0] = fc; Pjr[0][1] = 0; Pjr[0][2] = imgx; Pjr[0][3] = pjx;
+		Pjr[1][0] = 0; Pjr[1][1] = fc; Pjr[1][2] = imgy; Pjr[1][3] = 0;
 		Pjr[2][0] =	0; Pjr[2][1] = 0; Pjr[2][2] = 1; Pjr[2][3] = 0;
 
 		Pj_right = Mat(3, 4, DataType<double>::type, &Pjr);
@@ -95,7 +100,7 @@ public:
 		createTrackbar("H_max", "Control Window - Orange", &upper_thresh[0], 255);
 		createTrackbar("S_max", "Control Window - Orange", &upper_thresh[1], 255);
 		createTrackbar("V_max", "Control Window - Orange", &upper_thresh[2], 255);
-		createTrackbar("Pjx", "Control Window - Orange", &pjx, 25000);
+		// createTrackbar("Pjx", "Control Window - Orange", &pjx, 25000);
 
 		prev_left_pos[0] = 0; prev_left_pos[1] = 0;
 		prev_right_pos[0] = 0; prev_right_pos[1] = 0;
@@ -306,20 +311,24 @@ public:
 			right_pt.at<cv::Vec2d>(0,0)[0] = cx;
 			right_pt.at<cv::Vec2d>(0,0)[1] = cy;
 
-			Mat out = Mat(4, 1, DataType<double>::type);
-			cv::triangulatePoints(Pj_left, Pj_right, left_pt, right_pt, out);
-
-			out = out / out.at<double>(0,3);
-
-			x_pos = out.at<double>(0,0)/2.54 + 3;
-			y_pos = out.at<double>(0,1)/2.54;
-			depth = out.at<double>(0,2)/2.54;
 
 			// s_depth = std::make_shared<float> (depth);
 
 
 			// printf("Total: %f %f %f\n", x_pos, y_pos, depth);
+		} else {
+			right_pt.at<cv::Vec2d>(0,0)[0] = 0;
+			right_pt.at<cv::Vec2d>(0,0)[1] = 0;
 		}
+
+		Mat out = Mat(4, 1, DataType<double>::type);
+		cv::triangulatePoints(Pj_left, Pj_right, left_pt, right_pt, out);
+
+		out = out / out.at<double>(0,3);
+
+		x_pos = out.at<double>(0,0)*100 + 9;
+		y_pos = out.at<double>(0,1)*100;
+		depth = out.at<double>(0,2)*100;
 
 		if(gmoments.m00 > 0 && (gprev_left_pos[0] > 0 && gprev_left_pos[1] > 0)) {
 			double cx = gmoments.m10/gmoments.m00;
@@ -330,27 +339,30 @@ public:
 
 			gright_pt.at<cv::Vec2d>(0,0)[0] = cx;
 			gright_pt.at<cv::Vec2d>(0,0)[1] = cy;
-
-			Mat out = Mat(4, 1, DataType<double>::type);
-			cv::triangulatePoints(Pj_left, Pj_right, gleft_pt, gright_pt, out);
-
-			out = out / out.at<double>(0,3);
-
-			gx_pos = out.at<double>(0,0)*100 + 9; // + 12;
-			gy_pos = out.at<double>(0,1)*100;
-			gdepth = out.at<double>(0,2)*100;
-
 			// s_depth = std::make_shared<float> (depth);
 
 
 			// printf("Green Total: %f %f %f\n", gx_pos, gy_pos, gdepth);
+		} else {
+			gright_pt.at<cv::Vec2d>(0,0)[0] = 0;
+			gright_pt.at<cv::Vec2d>(0,0)[1] = 0;
 		}
+
+
+		Mat gout = Mat(4, 1, DataType<double>::type);
+		cv::triangulatePoints(Pj_left, Pj_right, gleft_pt, gright_pt, gout);
+
+		gout = gout / gout.at<double>(0,3);
+
+		gx_pos = gout.at<double>(0,0)*100 + 9; // + 12;
+		gy_pos = gout.at<double>(0,1)*100;
+		gdepth = gout.at<double>(0,2)*100;
 		postLeftPoint(0, 0, 0);
 
 		waitKey(3);
 	}
 
-	void postLeftPoint (double x, double y, double depth) {
+	void postLeftPoint (double x, double y, double z) {
 
 		geometry_msgs::PointStamped point;
 		point.header.stamp = ros::Time().now();
@@ -362,10 +374,11 @@ public:
 		// cout << "Info about Green ball" << endl;
 		// printf("%f %f %f\n", gx_pos, gy_pos, gdepth);
 
-		if (depth > 0 && gdepth == 0){
+		cout << "DepthOG:" << depth << " " << gdepth << endl;
+		if (depth > 0 && gdepth <= 0){
 			color = 1;
 		}
-		else if (gdepth > 0 && depth == 0)
+		else if (gdepth > 0 && depth <= 0)
 			color = 2;
 		else if (gdepth > 0 && depth > 0 && gdepth < depth)
 			color = 2;

@@ -18,8 +18,10 @@ class navigationAction
 protected:
 
   ros::NodeHandle nh_,n1,n2,n3,n4;
+  // NodeHandle instance must be created before this line. Otherwise strange error may occur.
   actionlib::SimpleActionServer<rob_nav::navigationAction> as_;
   std::string action_name_;
+  // create messages that are used to published feedback/result
   rob_nav::navigationFeedback feedback_;
   rob_nav::navigationResult result_;
   geometry_msgs::PoseStamped stationary_loc;
@@ -68,6 +70,7 @@ public:
   	stationary_loc.pose.orientation.w = 1;
 		success = 1;
     	as_.start();
+//		dist_per_enc = 0.4446; //72*PI/508.8;
 		dist_per_enc = 0.003451*56.5/100; //72*PI/65536;
 		dist_per_enc_ang_min = 0.003451*75.5/100;
 		dist_per_enc_ang_90 = 0.003451*58.5/100;
@@ -175,6 +178,7 @@ public:
 	void move_turn(uint16_t right_vel,uint16_t left_vel)
 	{
  		cout << "Turning at L:" << left_vel << " R:" << right_vel << " mm/s\n";
+//		uint16_t left_vel1 = (65535 - left_vel) + 1;
  		byte[0] = 145;
  		byte[1] = right_vel >> 8;
  		byte[2] = right_vel & 0x00ff;
@@ -227,6 +231,7 @@ public:
 
 			double cur_diff = diff_r - diff_l;
 			angle_diff = (diff_r - diff_l)*dist_per_enc/axle_length;
+//			angle_diff_dist = (cur_diff)*dist_per_enc/axle_length;
 			double R = (cur_diff!=0)?(diff_r+diff_l)*axle_length/(2*cur_diff):0;
 			R = (R>=0)?R:-R;
 			double sign_angle = (angle_diff>=0)?1:-1;
@@ -273,8 +278,10 @@ public:
 					theta_diff_final += sign*theta_diff_term;
 					dist_final += r_dist*cos(theta_diff_final);
 					y_offset_final += r_dist*sin(theta_diff_final);
-					x_diff += r_dist*cos(theta_diff_final+angle_turned+angle_diff_final_init);
-					y_diff += r_dist*sin(theta_diff_final+angle_turned+angle_diff_final_init);
+			/*		x_diff += r_dist*cos(theta_diff_final+angle_turned+angle_diff_final_init);
+					y_diff += r_dist*sin(theta_diff_final+angle_turned+angle_diff_final_init);*/
+					x_diff += dir*0.25;
+					y_diff += 0.15;
 
 				force_angle_range(angle_diff_final);
 				force_angle_range(theta_diff_final);
@@ -285,58 +292,6 @@ public:
 
 
 			usleep(4*time_burst_sleep);
-			int ultra_l=0, ultra_r=0, ultra_b=0, ultra_t=0; // Left 1 Right 2 Bottom 3 Top 4
-			double d=0;
-			cout << "Ultra in action " << ultra_sts1 << ultra_sts2 << ultra_sts3 << ultra_sts4  << endl;
-	   		ultra_l = boost::lexical_cast<int>(ultra_sts1);
-	   		ultra_r = boost::lexical_cast<int>(ultra_sts2);
-	   		ultra_b = boost::lexical_cast<int>(ultra_sts3);
-			ultra_t = boost::lexical_cast<int>(ultra_sts4);
-			double cur_ultra_angle = angle_diff_final;
-			if(ultra_l == 1 && mode!=3)
-			{
-				// Turn right
-				move_controlled_turn(-0.78,cur_ultra_angle,angle_diff_final,x_diff,y_diff);
-
-				move_controlled_straight(500, cur_ultra_angle, d, x_diff, y_diff, angle_diff_final);
-				success = 0;
-				move_straight(0,0);
-				return;
-			}
-			else
-			if(ultra_r == 1 && mode!=3)
-			{
-				// Turn left
-				move_controlled_turn(0.78,cur_ultra_angle,angle_diff_final,x_diff,y_diff);
-
-				move_controlled_straight(500, cur_ultra_angle, d, x_diff, y_diff, angle_diff_final);
-				success = 0;
-				move_straight(0,0);
-				return;
-			}
-			else
-			if(ultra_b == 1 && mode!=3)
-			{
-				// For bucket
-				move_controlled_turn(0.78,cur_ultra_angle,angle_diff_final,x_diff,y_diff);
-
-				move_controlled_straight(500, cur_ultra_angle, d, x_diff, y_diff, angle_diff_final);
-				success = 0;
-				move_straight(0,0);
-				return;
-			}
-			else
-			if(ultra_t == 1 && mode!=3)
-			{
-				// Turn left
-				move_controlled_turn(0.78,cur_ultra_angle,angle_diff_final,x_diff,y_diff);
-
-				move_controlled_straight(500, cur_ultra_angle, d, x_diff, y_diff, angle_diff_final);
-				success = 0;
-				move_straight(0,0);
-				return;
-
-			}
 		}
 		
 		
@@ -383,6 +338,7 @@ public:
 
 			double cur_diff = diff_r + diff_l;
 			angle_diff = (diff_r + diff_l)*dist_per_enc_ang/axle_length;
+//			angle_diff_dist = (cur_diff)*dist_per_enc/axle_length;
 			double R = (cur_diff!=0)?(diff_r-diff_l)*axle_length/(2*cur_diff):0;
 			R = (R>=0)?R:-R;
 
@@ -428,8 +384,8 @@ public:
 						theta_diff_final += theta_diff_term;
 						dist_final += r_dist*cos(theta_diff_final);
 						y_offset_final += r_dist*sin(theta_diff_final);
-					x_diff += r_dist*cos(theta_diff_final+angle_turned+angle_diff_final_init);
-					y_diff += r_dist*sin(theta_diff_final+angle_turned+angle_diff_final_init);
+			/*		x_diff += r_dist*cos(theta_diff_final+angle_turned+angle_diff_final_init);
+					y_diff += r_dist*sin(theta_diff_final+angle_turned+angle_diff_final_init);*/
 
 				force_angle_range(angle_diff_final);
 				force_angle_range(theta_diff_final);
@@ -438,9 +394,10 @@ public:
 				cout << "\nX:" << x_diff << " Dist step:" << x_diff_term << "Y:" << y_diff << "Offset step:" << y_diff_term << " rdist:" << r_dist << endl;
 			cout << "Angle diff total:" << angle_diff_final << " Angle diff step:" << angle_diff << " Theta diff final:" << theta_diff_final << " Theta diff term:" << theta_diff_term << endl;
 
-
 			usleep(4*time_burst_sleep);
 		}
+		x_diff = 0;
+		y_diff = 0;
 	}
 
 	void move_controlled_straight(double dist, double angle_turned, double &dist_final, double &x_diff, double &y_diff, double &angle_diff_final)
@@ -466,10 +423,14 @@ public:
 		double angle_diff_final_init = angle_diff_final;
 		double dist_err = 250;
 		double angle1 = 0, angle2=0;
+//		double angle_diff_final = 0;
 		cout << "Dist target:" << dist << "Dist final" << dist_final << "Angle turned" << angle_turned << "X diff" << x_diff << "Y diff" << y_diff << "Angle diff final" << angle_diff_final << endl;
 
+	//	return;
+		//dist_final = 0;
 		int j = 0;
 		//Coordinate in mm
+		// int
 		for(j=0; dist_final<=dist-dist_err; j++)
 		{
 
@@ -507,6 +468,13 @@ public:
   			int vel_change = ddiff/100;
 				vel_change = (vel_change>0)?vel_change:-vel_change;
 
+/*			if(vel_change >= 50)
+			{
+				success = 2;
+				move_straight(0,0);
+				cout << "DIFFERENCE BIG!!" << endl;
+//				return;
+			}*/
   			if(ddiff>50)
   			{
   				vel_r = vel_cur + vel_change;
@@ -526,17 +494,23 @@ public:
 			}
 			else
 			{
+//  			ddiff += diff_l - diff_r;
 				ddiff = 0;
 				vel_r = vel_step;
 				vel_l = vel_step;
 			}
 
+//		feedback_.cur_loc
+
+
+/* MODIFIED CODE */
 
 			double sign = (diff_r-diff_l>=0)?1:-1;
 			double sign1 = 1;
 
 			double cur_diff = diff_r - diff_l;
 			angle_diff = (diff_r - diff_l)*dist_per_enc/axle_length;
+//			angle_diff_dist = (cur_diff)*dist_per_enc/axle_length;
 			double R = (cur_diff!=0)?(diff_r+diff_l)*axle_length/(2*cur_diff):0;
 			R = (R>=0)?R:-R;
 			double sign_angle = (angle_diff>=0)?1:-1;
@@ -608,7 +582,9 @@ public:
 			{
 				// Turn right
 				move_controlled_turn(-0.78,cur_ultra_angle,angle_diff_final,x_diff,y_diff);
-				move_controlled_straight(500, cur_ultra_angle, d, x_diff, y_diff, angle_diff_final);
+//				move_timed_straight(-1,6,cur_ultra_angle,x_diff,y_diff,angle_diff_final);
+
+				move_controlled_straight(50, cur_ultra_angle, d, x_diff, y_diff, angle_diff_final);
 				success = 0;
 				move_straight(0,0);
 				return;
@@ -618,7 +594,9 @@ public:
 			{
 				// Turn left
 				move_controlled_turn(0.78,cur_ultra_angle,angle_diff_final,x_diff,y_diff);
-				move_controlled_straight(500, cur_ultra_angle, d, x_diff, y_diff, angle_diff_final);
+//				move_timed_straight(-1,6,cur_ultra_angle,x_diff,y_diff,angle_diff_final);
+
+				move_controlled_straight(50, cur_ultra_angle, d, x_diff, y_diff, angle_diff_final);
 				success = 0;
 				move_straight(0,0);
 				return;
@@ -628,7 +606,9 @@ public:
 			{
 				// For bucket
 				move_controlled_turn(0.78,cur_ultra_angle,angle_diff_final,x_diff,y_diff);
-				move_controlled_straight(500, cur_ultra_angle, d, x_diff, y_diff, angle_diff_final);
+//				move_timed_straight(-1,6,cur_ultra_angle,x_diff,y_diff,angle_diff_final);
+
+				move_controlled_straight(50, cur_ultra_angle, d, x_diff, y_diff, angle_diff_final);
 				success = 0;
 				move_straight(0,0);
 				return;
@@ -638,14 +618,18 @@ public:
 			{
 				// Turn left
 				move_controlled_turn(0.78,cur_ultra_angle,angle_diff_final,x_diff,y_diff);
-				move_controlled_straight(500, cur_ultra_angle, d, x_diff, y_diff, angle_diff_final);
+//				move_timed_straight(-1,6,cur_ultra_angle,x_diff,y_diff,angle_diff_final);
+
+				move_controlled_straight(50, cur_ultra_angle, d, x_diff, y_diff, angle_diff_final);
 				success = 0;
 				move_straight(0,0);
 				return;
+
 			}
 
 			move_straight(vel_r,vel_l);
 			
+//			sleep(1);
 			r.sleep();
 			if(vel_cur == 0)
 			{
@@ -701,7 +685,18 @@ public:
 
 		int j=0;
 		double lim_del = 0,vel_turn = 25;
-		
+		for(int al = 0; al < 2; al++)
+		{
+			if(al == 0)
+			{
+				lim_del = 0.05;
+				vel_turn = 25;
+			}
+			else
+			{
+				lim_del = 0.05;
+				vel_turn = 15;
+			}
 		for(; !((angle_diff_final<(angle_diff_est+lim_del)) && ((angle_diff_final) > (angle_diff_est-lim_del))); j++)
 		{
 
@@ -726,12 +721,51 @@ public:
 
 			double cur_diff = diff_r + diff_l;
 			double angle_diff_est_calc = 0;
+		/*	if(abs(angle_diff_est)>=90)
+			{
+				angle_diff_est_calc = dist_per_enc_ang_90 + (((abs(angle_diff_est)-PI/2)/(PI/2))*(dist_per_enc_ang_max-dist_per_enc_ang_90));
+			}
+			else
+			{
+				angle_diff_est_calc = dist_per_enc_ang_min + ((abs(angle_diff_est)/(PI/2))*(dist_per_enc_ang_90-dist_per_enc_ang_min));
+			}*/
+//			angle_diff_est_calc = dist_per_enc_ang_min + ((abs(angle_diff_est)/PI)*(dist_per_enc_ang_max-dist_per_enc_ang_90));
 			angle_diff_est_calc = dist_per_enc_ang_max;
 
 			angle_diff = (diff_r + diff_l)*(angle_diff_est_calc)/axle_length;
+//			angle_diff_dist = (cur_diff)*dist_per_enc/axle_length;
 			double R = (cur_diff!=0)?(diff_r-diff_l)*axle_length/(2*cur_diff):0;
 			R = (R>=0)?R:-R;
 
+/*			if(sign == -1)
+			{
+				if(sign1 == -1)
+				{
+					angle1 = angle_diff_final;
+					angle2 = angle1 + angle_diff;
+				}
+				else
+				{
+					angle1 = angle_diff_final;
+					angle2 = angle1 - angle_diff;
+//					R = -R;
+				}
+			}
+			else
+			{
+				if(sign1 == -1)
+				{
+					angle1 = angle_diff_final;
+					angle2 = angle1 - angle_diff;
+//					R = -R;
+				}
+				else
+				{
+					angle1 = angle_diff_final;
+					angle2 = angle1 + angle_diff;
+				}
+			}
+*/
 			if(sign1 == -1)
 			{
 				angle1 = angle_diff_final;
@@ -753,6 +787,38 @@ public:
 			{
 				theta_diff_term = (x_diff_term==0)?(y_diff_term>=0?(y_diff_term>0?PI/2:0):-PI/2):atan2(y_diff_term,x_diff_term) - angle_diff_final_init;
 
+/*				if(sign == -1)
+				{
+					if(sign1 == -1)
+					{
+						theta_diff_final += PI + theta_diff_term;
+						dist_final += r_dist*cos(-PI + theta_diff_final);
+						y_offset_final += r_dist*sin(-PI + theta_diff_final);
+					}
+					else
+					{
+						theta_diff_final += -theta_diff_term;
+						dist_final += r_dist*cos(-theta_diff_final);
+						y_offset_final += r_dist*sin(-theta_diff_final);
+					}
+				}
+				else
+				{
+					if(sign1 == -1)
+					{
+						theta_diff_final += -(-PI + theta_diff_term);
+						dist_final += r_dist*cos(PI - theta_diff_final);
+						y_offset_final += r_dist*sin(PI - theta_diff_final);
+					}
+					else
+					{
+						theta_diff_final += theta_diff_term;
+						dist_final += r_dist*cos(theta_diff_final);
+						y_offset_final += r_dist*sin(theta_diff_final);
+					}
+				}
+*/
+
 					angle_diff_final = angle2;
 
 						theta_diff_final += theta_diff_term;
@@ -767,15 +833,44 @@ public:
 
 			}
 
+//		feedback_.cur_loc
+				if(j>=3)
+			{
+/*  			ddiff += diff_l - diff_r;
+  			int vel_change = ddiff/100;
+				vel_change = (vel_change>0)?vel_change:-vel_change;
+  			if(ddiff>50)
+  			{
+  				vel_r = vel + vel_change;
+  				vel_l = -vel;
+  			}
+  			else if(ddiff<-50)
+  			{
+  				vel_l = -vel - vel_change;
+  				vel_r = vel;
+  			}
+  			else
+  			{*/
+
 			vel_r = sign1*vel_turn;
 			vel_l = -vel_r;
-		  	
+		  			/*}
+  			cout << "Diff L:" << diff_l << " R:" << diff_r << " Diff diff:" << ddiff << endl;*/
+			}
+			else
+			{
+//				ddiff = 0;
+ 			vel_r = sign1*vel_turn;
+			vel_l = -vel_r;
+		}
+
 			cout << "\nX:" << x_diff << " Dist step:" << x_diff_term << "Y:" << y_diff << "Offset step:" << y_diff_term << " rdist:" << r_dist << endl;
 			cout << "Angle diff total:" << angle_diff_final << " Angle diff step:" << angle_diff << " Theta diff final:" << theta_diff_final << " Theta diff term:" << theta_diff_term << endl;
 
-			
+
 			move_turn(vel_r,vel_l);
 			r.sleep();
+		}
 		}
 		cout << "Total Left: " << sum_l << "Total Right: " << sum_r << endl;
 		if(j!=0)
@@ -813,6 +908,40 @@ public:
 		if(angle < -(PI) )
 				angle += 2*PI;
 	}
+/*    // push_back the seeds for the fibonacci sequence
+    feedback_.sequence.clear();
+    feedback_.sequence.push_back(0);
+    feedback_.sequence.push_back(1);
+
+    // publish info to the console for the user
+    ROS_INFO("%s: Executing, creating fibonacci sequence of order %i with seeds %i, %i", action_name_.c_str(), goal->order, feedback_.sequence[0], feedback_.sequence[1]);
+
+    // start executing the action
+    for(int i=1; i<=goal->order; i++)
+    {
+      // check that preempt has not been requested by the client
+      if (as_.isPreemptRequested() || !ros::ok())
+      {
+        ROS_INFO("%s: Preempted", action_name_.c_str());
+        // set the action state to preempted
+        as_.setPreempted();
+        success = false;
+        break;
+      }
+      feedback_.sequence.push_back(feedback_.sequence[i] + feedback_.sequence[i-1]);
+      // publish the feedback
+      as_.publishFeedback(feedback_);
+      // this sleep is not necessary, the sequence is computed at 1 Hz for demonstration purposes
+      r.sleep();
+    }
+
+    if(success)
+    {
+      result_.sequence = feedback_.sequence;
+      ROS_INFO("%s: Succeeded", action_name_.c_str());
+      // set the action state to succeeded
+      as_.setSucceeded(result_);
+    }*/
 
   void executeCB_mod(const rob_nav::navigationGoalConstPtr &goal)
   {
@@ -850,14 +979,20 @@ public:
 		angle_diff_est = (x_del==0)?(y_del>=0?(y_del>0?PI/2:0):-PI/2):atan2(y_del,x_del);
 		dist_est = pow(pow(x_del,2) +	pow(y_del,2),0.5);
 
+//		cout << "x_del:" << x_del << " y_del:" << y_del << "Init angle:" << stationary_loc.pose.orientation.z << endl;
+
+		//		double angle_diff_est = (x_del==0)?(y_del>=0?PI/2:-PI/2):atan2(y_del,x_del) - stationary_loc.pose.orientation.z;
 		double cur_angle_rad = (PI/180)*stationary_loc.pose.orientation.z;
 		double angle_diff_est_rel = angle_diff_est - cur_angle_rad;
 
 
+//		cout << "Init calc D:" << dist_est << " A:" << angle_diff_est << endl;
 		force_angle_range(angle_diff_est_rel);
 		cout << "Init calc D:" << dist_est << " A:" << angle_diff_est <<  " A-rel:" << angle_diff_est_rel <<endl;
 
 			int freq = 1;
+//			int max = ((int)(abs(angle_diff_est_rel)*3/PI));
+				int max = 0;
 
 		// Set turn_dir from goal->turn_dir
 		if(goal->type == 0)
@@ -865,6 +1000,14 @@ public:
 			angle_diff_est_rel = (PI/180)*goal->angle;
 			force_angle_range(angle_diff_est_rel);
 			move_controlled_turn(angle_diff_est_rel,cur_angle_rad,angle_diff_final,x_diff,y_diff);
+			freq = 1;
+			for(int l=0;l<max;l++)
+			{
+				if(angle_diff_est_rel >= 0)
+					move_timed_turn(1,freq,cur_angle_rad,x_diff,y_diff,angle_diff_final);
+				else
+					move_timed_turn(-1,freq,cur_angle_rad,x_diff,y_diff,angle_diff_final);
+			}
 		}
 		else
 		if(goal->type == 1 || goal->type == 3)
@@ -875,6 +1018,14 @@ public:
 			x_del -= x_diff;
 			y_del -= y_diff;
 			dist_est = pow(pow(x_del,2) +	pow(y_del,2),0.5);
+			freq = 1;
+			for(int l=0;l<max;l++)
+			{
+				if(angle_diff_est_rel >= 0)
+					move_timed_turn(1,freq,cur_angle_rad,x_diff,y_diff,angle_diff_final);
+				else
+					move_timed_turn(-1,freq,cur_angle_rad,x_diff,y_diff,angle_diff_final);
+			}
 			rw.sleep();
 			move_controlled_straight(10*dist_est, cur_angle_rad, dist_final, x_diff, y_diff, angle_diff_final);
 		}
@@ -900,6 +1051,8 @@ public:
 		rw.sleep();
 
 		//Correct the expected goal position using calculated differences
+/*  	stationary_loc.pose.position.x += dist_final*cos(angle_diff_final)/10;
+		stationary_loc.pose.position.y += dist_final*sin(angle_diff_final)/10;*/
 		stationary_loc.pose.position.x += x_diff/10;
 		stationary_loc.pose.position.y += y_diff/10;
 		cout << "init angle" << stationary_loc.pose.orientation.z << "final angle diff:" << angle_diff_final << endl;
@@ -930,7 +1083,42 @@ public:
 		as_.setSucceeded(result_);
 
   }
+
+  void executeCB_square(const rob_nav::navigationGoalConstPtr &goal)
+  {
+    // helper variables
+
+		start();
+		safe();
+
+		int linear = 100, angular = 162.5;
+
+		for(int y=1;y<=1;y++)
+		{
+			for(int z=1;z<=4; z++)
+			{
+
+	/*		move_controlled_straight(); // Put next coordinates
+				rw.sleep();
+				move_controlled_turn(); // Turn left
+	*/
+			}
+
+			for(int z=1;z<=4; z++)
+			{
+	/*		move_controlled_straight(); // Put next coordinates
+				rw.sleep();
+				move_controlled_turn(); // Turn right
+	*/
+			}
+		}
+		result_.final_loc = goal->dest;
+		as_.setSucceeded(result_);
+
+  }
 };
+
+
 
 int main(int argc, char** argv)
 {

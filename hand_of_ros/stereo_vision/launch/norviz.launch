@@ -4,7 +4,7 @@
 	<!--	<param name="robot_description_1" textfile="$(find stereo_vision)/launch/ball.urdf" /> -->
 	<!-- Left Camera -->
 	<node name="left_cam" pkg="usb_cam" type="usb_cam_node">
-		<param name="video_device" value="/dev/video1" />
+		<param name="video_device" value="/dev/video0" />
 		<param name="camera_frame_id" value="left_camera" />
 		<param name="framerate" value="30" />
 		<param name="pixel_format" value="yuyv" />
@@ -17,7 +17,7 @@
 <!-- Right Camera -->
 
 	<node name="right_cam" pkg="usb_cam" type="usb_cam_node">
-		<param name="video_device" value="/dev/video0" />
+		<param name="video_device" value="/dev/video1" />
 		<param name="camera_frame_id" value="right_camera" />
 		<param name="framerate" value="30" />
 		<param name="pixel_format" value="yuyv" />
@@ -33,7 +33,10 @@
 	<!-- <node name="rviz" type="rviz" pkg="rviz" args="-d $(find stereo_vision)/launch/stereo.rviz" /> -->
 	<node name="depth_tracking" pkg="stereo_vision" type="depth_tracking" output="screen" /> 
 	<!--<node name="goal_search" pkg="stereo_vision" type="goal_search" output="screen" />-->
-<!--	<node name="central_control" pkg="control_node" type="central_control" output="screen" />-->
-<!--	<node name="ultra" pkg="rob_nav" type="nav_ultra" output="screen" />-->
+	<node name="central_control" pkg="control_node" type="central_control" output="screen" />
+	<node name="ultra1" pkg="rob_nav" type="nav_ultra1" output="screen" />
+	<node name="ultra2" pkg="rob_nav" type="nav_ultra2" output="screen" />
+	<node name="ultra3" pkg="rob_nav" type="nav_ultra3" output="screen" />
+	<node name="ultra4" pkg="rob_nav" type="nav_ultra4" output="screen" />
 
 </launch>
