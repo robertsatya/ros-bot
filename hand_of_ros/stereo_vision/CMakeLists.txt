@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
 	visualization_msgs
 	geometry_msgs
 	tf
+  rob_nav
 )
 
 # find_package(Boost)

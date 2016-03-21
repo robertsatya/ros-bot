@@ -93,6 +93,7 @@ int main(int argc, char *argv[])
 			case STATE_INIT:
 				control_state = STATE_BROAD_SEARCH;
 				cout << "State init" << endl;
+				sleep(5);
 //				cin >> key;
 				break;
 			case STATE_BROAD_SEARCH:
@@ -116,7 +117,7 @@ int main(int argc, char *argv[])
 						if(pos[2] > 0) {
 							control_state = STATE_MOVE_TO_BALL;
 							broad_search_rotate_angle = 0;
-						} else if (broad_3 < 5) {
+						} else if (broad_3 < 10) {
 							control_state = STATE_BROAD_SEARCH;
 							broad_3++;
 						} else {
@@ -134,22 +135,17 @@ int main(int argc, char *argv[])
 					printf("Moving to search again");
 				}
 
-//				cin >> key;
-
 				break;
 			case STATE_ROTATE_SEARCH:
 				broad_search_rotate_angle += angle_step;
 				mode = 0;
 				angle = 20;
 				m_success = 1;
-/*				cout << "Mode" << mode << "Angle" << angle << endl;
-				cin >> key;*/
 				motion_node.doStuff(p,mode,angle,dir,cmd_freq,m_success);
 				while(motion_node.fin < 3)
 				{
 				}
 				control_state = STATE_BROAD_SEARCH;
-				//cin >> key;
 
 				break;
 			case STATE_MOVE_TO_SEARCH:
@@ -164,22 +160,12 @@ int main(int argc, char *argv[])
 				p.point.z = -pos[1];
 				mode = 1;
 				m_success = 1;
-/*				cout << "Pos:" << p.point.x << " " << p.point.y << " Mode:" << mode << endl;  
-				cin >> key;*/
 				motion_node.doStuff(p,mode,angle,dir,cmd_freq,m_success);
 				while(motion_node.fin<3)
 				{
 				}
 				
-				if(m_success == 2)
-				{
-					cout << control_state << endl;
-					exit(0);
-				}
 				control_state = STATE_BROAD_SEARCH;
-
-//				cin >> key;
-
 				break;
 			case STATE_MOVE_TO_BALL:
 				m_success = 1;
@@ -191,8 +177,6 @@ int main(int argc, char *argv[])
 				p.point.y = -pos[0];
 				p.point.z = -pos[1];
 				mode = 1;
-/*				cout << "Pos:" << p.point.x << " " << p.point.y << " Mode:" << mode << endl;  
-				cin >> key;*/
 				motion_node.doStuff(p,mode,angle,dir,cmd_freq,m_success);
 				while(motion_node.fin<3)
 				{
@@ -208,13 +192,8 @@ int main(int argc, char *argv[])
 				else
 					control_state = STATE_BROAD_SEARCH;
 
-	//			cin >> key;
-
-//				control_state = STATE_ERROR; // TODO: Move to different states to block
 				break;
 			case STATE_REFINE_POSITION:
-/*				cout << "Mode: 5" << endl; 
-				cin >> key;*/
 			motion_node.doStuff(p,5,angle,dir,cmd_freq,m_success);
 							while(motion_node.fin<3)
 							{
@@ -223,12 +202,8 @@ int main(int argc, char *argv[])
 				o_str = "1";
 				mode = 2;
 				count_5 = 0;
-	//			cin >> key;
 				while(true)
 				{
-					// TODO: Ignore first 2-3 commands
-					// receive and echo reply
-					// cout << c.receive(1024);
 					c.send_data(o_str);
 					cout << "sent 1 to rpi" << endl;
 					res = c.receive(3);
@@ -236,7 +211,6 @@ int main(int argc, char *argv[])
 					dir = boost::lexical_cast<int>(res[0]);
 					cmd_freq = boost::lexical_cast<int>(res[2]);
 
-					// res.angle = boost::lexical_cast<float>(c.receive(1024));
 					cout << dir << endl;
 					if(dir==4 || (dir == 5 && count_5 == 1))
 						break;
@@ -247,8 +221,6 @@ int main(int argc, char *argv[])
 					else
 					{
 						m_success = 1;
-/*						cout << "Mode: " << mode << " Dir: " << dir << " Cmd_freq: " << cmd_freq << endl;
-						cin >> key;*/
 						motion_node.doStuff(p,mode,angle,dir,cmd_freq,m_success);
 						if(motion_node.fin<3)
 						{
@@ -259,17 +231,12 @@ int main(int argc, char *argv[])
 				if(dir == 4)
 				{
 					control_state = STATE_GRAB_BALL;
-					res = c.receive(3);
 				}
 				else
 				{
 					control_state = STATE_BROAD_SEARCH;
 				}
 
-//				exit(0);
-//				cin >> key;
-
-				//TODO: Turn around to see if ball in vicinity
 				break;
 			case STATE_BALL_READY_TO_PICK:
 /*				o_str = "2";
@@ -297,22 +264,11 @@ int main(int argc, char *argv[])
 				p.point.y = 0;
 				p.point.z = 0;
 				m_success = 1;
-//				cout << "Mode:" << mode << "Pos: 0 0" << endl;
-//				cin >> key;
 				motion_node.doStuff(p,mode,angle,dir,cmd_freq,m_success);
 				while(motion_node.fin<3)
 				{
 				}
-				if(m_success == 2)
-				{
-					cout << control_state << endl;
-					exit(0);
-				}
-				control_state = STATE_BROAD_SEARCH; //TODO: Just for testing
-			//	control_state = STATE_LOCATE_GOAL;
-			
-//				cin >> key;
-
+				control_state = STATE_LOCATE_GOAL;
 				break;
 			case STATE_LOCATE_GOAL:
 				/*spinner.start();
@@ -340,19 +296,16 @@ int main(int argc, char *argv[])
 				o_str = "3";
 				mode = 2;
 				count_5 = 0;
+				c.send_data(o_str);
+				cout << "sent 3 to rpi" << endl;
+
 				while(true)
 				{
-					// TODO: Ignore first 2-3 commands
-					// receive and echo reply
-					// cout << c.receive(1024);
-					c.send_data(o_str);
-					cout << "sent 3 to rpi" << endl;
 					res = c.receive(3);
 					cout << res << endl;
 					dir = boost::lexical_cast<int>(res[0]);
 					cmd_freq = boost::lexical_cast<int>(res[2]);
 
-					// res.angle = boost::lexical_cast<float>(c.receive(1024));
 					cout << dir << endl;
 					if(dir==4 || (dir == 5 && count_5 == 1))
 						break;
@@ -366,18 +319,19 @@ int main(int argc, char *argv[])
 						m_success = 1;
 						if(dir == 8)
 						{
-							/*cout << "Mode" << mode << "Angle" << angle << endl;
-							cin >> key;*/
-							motion_node.doStuff(p,0,30,dir,cmd_freq,m_success);
+							motion_node.doStuff(p,0,10,dir,cmd_freq,m_success);
 							while(motion_node.fin<3)
 							{
 							}
 							sleep(1);
 						}
 						else
+						if(dir == 6)
 						{
-						/*	cout << "Mode: " << mode << " Dir: " << dir << " Cmd_freq: " << cmd_freq << endl;
-							cin >> key;*/
+						//	sleep(3);
+						}
+						else
+						{
 							motion_node.doStuff(p,mode,angle,dir,cmd_freq,m_success);
 							while(motion_node.fin<3)
 							{
@@ -385,15 +339,18 @@ int main(int argc, char *argv[])
 						}
 					}
 				}
-							cout << "Mode: 4" << endl;
-							cin >> key;
+							motion_node.doStuff(p,0,180,dir,cmd_freq,m_success);
+							while(motion_node.fin<3)
+							{
+							}
+							sleep(1);
+
 							motion_node.doStuff(p,4,angle,dir,cmd_freq,m_success);
 							while(motion_node.fin<3)
 							{
 							}
 
 				control_state = STATE_BROAD_SEARCH;;
-//				cin >> key;
 
 				break;
 			case STATE_DROP_BALL_AT_GOAL:
